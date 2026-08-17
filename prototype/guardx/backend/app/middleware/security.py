@@ -1,7 +1,9 @@
+import os
 from time import time
 
 from fastapi import Request
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
 
 from app.middleware.state import rate_limit_state
@@ -51,3 +53,18 @@ async def require_web_access(raw_request: Request, call_next):
 def configure_middlewares(app: FastAPI) -> None:
     app.middleware("http")(guardx_rate_limit)
     app.middleware("http")(require_web_access)
+
+    allowed_origins = [
+        item.strip().rstrip("/")
+        for item in os.environ.get("GUARDX_CORS_ORIGINS", "").split(",")
+        if item.strip()
+    ]
+    if allowed_origins:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=allowed_origins,
+            allow_credentials=False,
+            allow_methods=["GET", "POST", "OPTIONS"],
+            allow_headers=["Accept", "Content-Type", "Authorization"],
+            expose_headers=["X-GuardX-RateLimit-Limit", "X-GuardX-RateLimit-Remaining"],
+        )

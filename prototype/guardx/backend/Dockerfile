@@ -10,8 +10,10 @@ COPY prototype/guardx/backend/requirements-ci.txt ./requirements-ci.txt
 RUN pip install --no-cache-dir -r requirements-ci.txt
 
 COPY configs /app/configs
+COPY reviewer_console /app/reviewer_console
+COPY sandbox /app/sandbox
 COPY prototype/guardx/backend /app/prototype/guardx/backend
 
 EXPOSE 8014
 
-CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8014"]
+CMD ["sh", "-c", "python -m uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8014}"]

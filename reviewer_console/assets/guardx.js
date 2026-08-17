@@ -1,16 +1,25 @@
 "use strict";
 
+const RUNTIME_CONFIG = Object.freeze({
+  apiBaseUrl: String(window.GUARDX_RUNTIME_CONFIG?.apiBaseUrl || "").trim().replace(/\/+$/, "")
+});
+
+function apiUrl(path) {
+  if (!RUNTIME_CONFIG.apiBaseUrl || !String(path).startsWith("/v1/")) return path;
+  return `${RUNTIME_CONFIG.apiBaseUrl}${path}`;
+}
+
 const PATHS = Object.freeze({
   claims: "data/final_claim_registry.snapshot.json",
   benchmarks: "data/benchmark_registry.snapshot.json",
   scenarios: "data/scenario_registry.snapshot.json",
-  legacyRagText: "/v1/guarded/rag_chat",
-  legacyVlmOcrText: "/v1/guarded/vlm_ocr_chat",
-  liveVlmImage: "/v1/guarded/vlm_image_analyze",
-  liveRag: "/v1/guarded/rag_demo_query",
-  liveAgent: "/v1/action_guard/request",
-  contextualEvaluate: "/v1/portal/contextual/evaluate",
-  providers: "/v1/providers/status"
+  legacyRagText: apiUrl("/v1/guarded/rag_chat"),
+  legacyVlmOcrText: apiUrl("/v1/guarded/vlm_ocr_chat"),
+  liveVlmImage: apiUrl("/v1/guarded/vlm_image_analyze"),
+  liveRag: apiUrl("/v1/guarded/rag_demo_query"),
+  liveAgent: apiUrl("/v1/action_guard/request"),
+  contextualEvaluate: apiUrl("/v1/portal/contextual/evaluate"),
+  providers: apiUrl("/v1/providers/status")
 });
 
 const VISIBLE_PROVIDER_IDS = new Set(["ollama", "deepseek", "kimi", "dashscope", "zhipu"]);
@@ -240,7 +249,7 @@ async function getJson(url, timeoutMs = 3000) {
   const controller = new AbortController();
   const timer = window.setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const response = await fetch(url, {
+    const response = await fetch(apiUrl(url), {
       headers: {accept: "application/json"},
       cache: "no-store",
       signal: controller.signal
@@ -1426,7 +1435,7 @@ async function runCustomGuarded(event) {
     renderCustomResult({}, new Error("图片超过 10 MiB 限制。"));
     return;
   }
-  const endpoint = surface === "rag" ? PATHS.liveRag : surface === "vlm" ? PATHS.liveVlmImage : surface === "agent" ? PATHS.liveAgent : "/v1/guarded/chat";
+  const endpoint = surface === "rag" ? PATHS.liveRag : surface === "vlm" ? PATHS.liveVlmImage : surface === "agent" ? PATHS.liveAgent : apiUrl("/v1/guarded/chat");
   let payload = {
     session_id: `reviewer-custom-${Date.now()}`,
     model: model?.name || null,
@@ -1599,7 +1608,7 @@ function setPortalField(id, value) {
 }
 
 async function portalJson(url, options = {}) {
-  const response = await fetch(url, {
+  const response = await fetch(apiUrl(url), {
     cache: "no-store",
     headers: {accept: "application/json", ...(options.body ? {"content-type": "application/json"} : {})},
     ...options
