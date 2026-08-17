@@ -1,0 +1,8 @@
+{
+  "schema_version": "guardx-authorization-runtime-v1",
+  "mode": "contextual_v2",
+  "legacy_mode": "max_risk_threshold",
+  "model_output_role": "semantic_evidence_only",
+  "invalid_model_output": "require_approval",
+  "continuation_hook": "default_no_execution_continuation"
+}

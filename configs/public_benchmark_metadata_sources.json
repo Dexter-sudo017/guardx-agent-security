@@ -1,0 +1,54 @@
+{
+  "schema_version": "guardx-public-benchmark-metadata-sources-v1",
+  "note": "Metadata-only mirror sources. Do not add raw prompt datasets, jailbreak artifact files, harmful behavior CSVs, or forbidden-prompt CSVs here.",
+  "sources": [
+    {
+      "id": "jailbreakbench_readme",
+      "family": "JailbreakBench",
+      "url": "https://raw.githubusercontent.com/JailbreakBench/jailbreakbench/main/README.md",
+      "output": "JailbreakBench_README.md",
+      "content_type": "readme",
+      "allowed": true
+    },
+    {
+      "id": "jailbreakbench_artifacts_readme",
+      "family": "JailbreakBench artifacts",
+      "url": "https://raw.githubusercontent.com/JailbreakBench/artifacts/main/README.md",
+      "output": "JailbreakBench_artifacts_README.md",
+      "content_type": "readme",
+      "allowed": true
+    },
+    {
+      "id": "harmbench_readme",
+      "family": "HarmBench",
+      "url": "https://raw.githubusercontent.com/centerforaisafety/HarmBench/main/README.md",
+      "output": "HarmBench_README.md",
+      "content_type": "readme",
+      "allowed": true
+    },
+    {
+      "id": "llm_attacks_readme",
+      "family": "GCG / llm-attacks",
+      "url": "https://raw.githubusercontent.com/llm-attacks/llm-attacks/main/README.md",
+      "output": "llm_attacks_README.md",
+      "content_type": "readme",
+      "allowed": true
+    },
+    {
+      "id": "strong_reject_readme",
+      "family": "StrongREJECT",
+      "url": "https://raw.githubusercontent.com/dsbowen/strong_reject/main/README.md",
+      "output": "StrongREJECT_README.md",
+      "content_type": "readme",
+      "allowed": true
+    },
+    {
+      "id": "xstest_dataset_card",
+      "family": "XSTest",
+      "url": "https://huggingface.co/datasets/paul-rottger/xstest/raw/main/README.md",
+      "output": "XSTest_HF_README.md",
+      "content_type": "dataset_card",
+      "allowed": true
+    }
+  ]
+}

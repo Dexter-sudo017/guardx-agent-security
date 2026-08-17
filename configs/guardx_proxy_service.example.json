@@ -1,0 +1,11 @@
+{
+  "schema_version": "guardx-proxy-service-config-v1",
+  "host": "127.0.0.1",
+  "port": 8014,
+  "anythingllm_base_url": "http://localhost:3001",
+  "context_file": "external_targets/anythingllm/rag_injection_override_sample.txt",
+  "proxy_token_env": "GUARDX_PROXY_TOKEN",
+  "log_dir": "evaluation/runs/services",
+  "max_log_sets": 20,
+  "notes": "Copy values into environment variables or pass them to scripts/start_guardx_proxy_server.ps1. Do not store real API keys or proxy tokens in this file."
+}

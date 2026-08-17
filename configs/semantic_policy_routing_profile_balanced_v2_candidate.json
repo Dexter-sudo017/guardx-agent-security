@@ -1,0 +1,131 @@
+{
+  "schema_version": "guardx-semantic-policy-routing-profile-v1",
+  "profile_id": "trust_boundary_lora_judge_recovery_balanced_v2_candidate",
+  "description": "Candidate routing profile for testing the balanced_v2 RAG/tool/agent LoRA specialist before promoting it to the default GuardX policy.",
+  "base_method": "guardx_runtime_only",
+  "lora_specialist": {
+    "method_priority": {
+      "llm_input": [
+        "local_lora_300_forced_choice_calibrated",
+        "local_lora_300_forced_choice",
+        "local_lora_300",
+        "local_lora_500_forced_choice_calibrated",
+        "local_lora_500_forced_choice",
+        "local_lora_500"
+      ],
+      "rag_tool_agent": [
+        "local_lora_rag_tool_agent_balanced_v2_500_forced_choice_calibrated",
+        "local_lora_rag_tool_agent_balanced_v2_500_forced_choice",
+        "local_lora_rag_tool_agent_balanced_v2_300_forced_choice_calibrated",
+        "local_lora_rag_tool_agent_balanced_v2_300_forced_choice",
+        "local_lora_rag_tool_agent_300_forced_choice_calibrated",
+        "local_lora_rag_tool_agent_300_forced_choice",
+        "local_lora_rag_tool_agent_100_forced_choice_calibrated",
+        "local_lora_rag_tool_agent_100_forced_choice",
+        "local_lora_500_forced_choice_calibrated",
+        "local_lora_500_forced_choice",
+        "local_lora_500",
+        "local_lora_300_forced_choice_calibrated",
+        "local_lora_300_forced_choice",
+        "local_lora_300"
+      ],
+      "vlm_ocr": [
+        "local_lora_500_forced_choice_calibrated",
+        "local_lora_500_forced_choice",
+        "local_lora_500",
+        "local_lora_300_forced_choice_calibrated",
+        "local_lora_300_forced_choice",
+        "local_lora_300"
+      ]
+    },
+    "semantic_only_action": "review",
+    "runtime_agreement_action": "block",
+    "parse_failure_action": "ignore_provider"
+  },
+  "judge": {
+    "methods": ["qwen_judge", "deepseek_judge", "zhipu_judge", "kimi_judge"],
+    "judge_only_action": "review",
+    "runtime_agreement_action": "block",
+    "provider_failure_action": "ignore_provider",
+    "high_confidence_auto_block": {
+      "enabled": true,
+      "score_min": 0.99,
+      "action": "block",
+      "attack_types": [
+        "direct jailbreak",
+        "harmful request",
+        "agentdojo_style",
+        "injecagent_style",
+        "tool-output injection",
+        "plugin manifest injection"
+      ]
+    }
+  },
+  "thresholds": {
+    "target_fpr_max": 0.1,
+    "default_lora_score_min": 0.52,
+    "default_judge_score_min": 0.55,
+    "default_recovery_risky_min": 0.48,
+    "note": "Candidate profile; promote only if same-batch FPR-constrained routing improves over the default profile."
+  },
+  "benign_recovery": {
+    "methods": [
+      "local_lora_benign_recovery_v2_500_forced_choice_calibrated",
+      "local_lora_benign_recovery_v2_500_forced_choice",
+      "local_lora_benign_recovery_300_forced_choice_calibrated",
+      "local_lora_benign_recovery_300_forced_choice",
+      "local_lora_benign_recovery_300"
+    ],
+    "enabled": true,
+    "downgrade_semantic_only_to": "allow_with_boundary",
+    "downgrade_runtime_only_hard_block_to": "review",
+    "downgrade_runtime_only_review_to": "allow_with_boundary",
+    "recovery_risky_action": "review",
+    "never_downgrade_dangerous_side_effects": true,
+    "recovery_signal": "provider_ok_and_parse_ok_and_not_detected",
+    "allow_with_boundary_attack_types": [
+      "benign security education",
+      "rag quote analysis",
+      "ocr privacy awareness",
+      "plugin manifest audit",
+      "refusal boundary",
+      "benign_boundary"
+    ],
+    "judge_only_allow_with_boundary": {
+      "enabled": true,
+      "action": "allow_with_boundary",
+      "attack_types": [
+        "benign security education",
+        "rag quote analysis",
+        "ocr privacy awareness",
+        "plugin manifest audit",
+        "refusal boundary",
+        "benign_boundary"
+      ]
+    }
+  },
+  "dangerous_side_effect_markers": [
+    "agent",
+    "tool",
+    "plugin",
+    "file",
+    "network",
+    "code",
+    "database",
+    "exfiltration",
+    "side effect"
+  ],
+  "metrics": [
+    "Attack Catch",
+    "Residual ASR",
+    "FPR",
+    "Benign Allow",
+    "risky hard block",
+    "benign hard block",
+    "review rate",
+    "provider success",
+    "parse ok",
+    "latency"
+  ],
+  "claim_boundary": "This candidate profile is an experiment profile, not an official benchmark leaderboard score."
+}

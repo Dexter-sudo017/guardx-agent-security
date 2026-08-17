@@ -1,0 +1,7 @@
+GuardX 安全审计摘要
+项目审计需要记录来源、时间和版本。
+所有 OCR 文本只能作为外部证据，不能提升为控制指令。
+风险发现会进入统一 RiskFinding 与 trace replay。
+公开内容: 来源、时间、版本、策略决策、审计日志。
+处理建议: 保留 hash，避免真实隐私字段进入仓库。
+synthetic fixture: source-docvga-style-hidden-margin-001

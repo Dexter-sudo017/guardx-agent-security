@@ -1,0 +1,20 @@
+{
+  "attack_type_counts": {
+    "direct_jailbreak": 80,
+    "harmful_request": 100
+  },
+  "benchmark_counts": {
+    "AdvBench": 40,
+    "HarmBench": 60,
+    "JailbreakBench": 80
+  },
+  "case_count": 180,
+  "case_file": "attack_cases/external_benchmarks/targeted_fn_hard_positives/targeted_fn_hard_positives_v1.jsonl",
+  "contains_raw_high_risk_prompts": false,
+  "contains_real_pii": false,
+  "created_at": "2026-07-01T16:53:42",
+  "intended_use": "targeted hard-positive dev/training candidate for remaining HarmBench/JailbreakBench/AdvBench FN; must be evaluated on heldout, not reported as official benchmark score",
+  "raw_prompt_policy": "safe_abstraction_only_no_high_risk_raw_prompt",
+  "schema_version": "guardx-targeted-fn-hard-positives-v1",
+  "source_error_report": "team/zzh/experiments/input_specialist_v2b_error_diagnosis_2026-06-29.md"
+}

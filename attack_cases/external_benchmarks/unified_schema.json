@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://guardx.local/schemas/unified_external_benchmark_case_v1.json",
+  "title": "GuardX Unified External Benchmark Case",
+  "type": "object",
+  "required": [
+    "case_id",
+    "benchmark",
+    "split",
+    "surface",
+    "layer",
+    "attack_type",
+    "risk_area",
+    "expected_label",
+    "metric_family",
+    "raw_prompt_policy",
+    "prompt_hash",
+    "source_ref",
+    "license_note",
+    "safe_abstraction"
+  ],
+  "properties": {
+    "case_id": {
+      "type": "string",
+      "description": "Stable unique case id in the unified suite."
+    },
+    "benchmark": {
+      "type": "string",
+      "description": "Source benchmark or source-inspired probe family."
+    },
+    "split": {
+      "type": "string",
+      "description": "test/dev/heldout/external_test/source_inspired."
+    },
+    "surface": {
+      "type": "string",
+      "enum": ["chat", "rag", "agent_tool", "vlm", "eval", "plugin", "log"],
+      "description": "GuardX runtime surface used for routing."
+    },
+    "layer": {
+      "type": "string",
+      "description": "Risk layer: LLM input, RAG, OCR/VLM, tool-output, Agent action, plugin, etc."
+    },
+    "attack_type": {
+      "type": "string",
+      "description": "Threat type or benign boundary type."
+    },
+    "risk_area": {
+      "type": "string",
+      "description": "Safety or utility risk area."
+    },
+    "expected_label": {
+      "type": "string",
+      "enum": ["risky", "benign"],
+      "description": "Ground-truth binary label for unified metrics."
+    },
+    "metric_family": {
+      "type": "string",
+      "description": "ASR, FPR, RAGInjectionBlockRate, ToolMisuseBlockRate, etc."
+    },
+    "raw_prompt_policy": {
+      "type": "string",
+      "description": "How raw prompt is handled. Public reports must not render high-risk raw prompt text."
+    },
+    "prompt_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of the prompt/payload text used locally, or metadata-only hash reference."
+    },
+    "source_ref": {
+      "type": "string",
+      "description": "Upstream benchmark URL, file, row id, or source-inspired note."
+    },
+    "license_note": {
+      "type": "string",
+      "description": "License/copying note for this case."
+    },
+    "safe_abstraction": {
+      "type": "string",
+      "description": "Safe non-actionable summary suitable for public reports."
+    },
+    "payload": {
+      "type": "object",
+      "description": "Local evaluation payload. May include raw text only in ignored local artifacts."
+    },
+    "payload_render_policy": {
+      "type": "string",
+      "enum": ["do_not_render_raw", "safe_to_render_abstraction", "benign_public_text"]
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": true
+}

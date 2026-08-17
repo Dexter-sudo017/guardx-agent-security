@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://guardx.local/schemas/official_benchmark_subset.schema.json",
+  "title": "GuardX Official Benchmark Subset",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "subset_id",
+    "subset_name",
+    "created_at",
+    "raw_payload_policy",
+    "cases"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "guardx-official-benchmark-subset-v1"
+    },
+    "subset_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_\\-]+$"
+    },
+    "subset_name": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date"
+    },
+    "raw_payload_policy": {
+      "const": "metadata_and_safe_abstractions_only"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "case_id",
+          "benchmark_name",
+          "official_source_url",
+          "official_case_ref",
+          "surface",
+          "risk_type",
+          "risk_area",
+          "input_policy",
+          "stored_payload_type",
+          "expected_route",
+          "metric",
+          "payload"
+        ],
+        "properties": {
+          "case_id": {
+            "type": "string",
+            "pattern": "^OFF-[A-Z]+-[0-9]{3}$"
+          },
+          "benchmark_name": {
+            "type": "string"
+          },
+          "official_source_url": {
+            "type": "string"
+          },
+          "official_case_ref": {
+            "type": "string"
+          },
+          "source_hash_ref": {
+            "type": "string"
+          },
+          "surface": {
+            "enum": ["chat", "rag", "vlm_ocr", "tool_call", "tool_sequence"]
+          },
+          "risk_type": {
+            "type": "string"
+          },
+          "risk_area": {
+            "type": "string"
+          },
+          "input_policy": {
+            "enum": ["safe_abstraction_only", "metadata_only", "benign_public_text"]
+          },
+          "stored_payload_type": {
+            "enum": ["safe_abstraction", "benign", "synthetic_fixture"]
+          },
+          "expected_route": {
+            "enum": ["allow", "not_allow", "allow_tool", "deny_tool"]
+          },
+          "metric": {
+            "type": "string"
+          },
+          "payload": {
+            "type": "object"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "limitations": {
+            "type": "string"
+          },
+          "license_note": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
+

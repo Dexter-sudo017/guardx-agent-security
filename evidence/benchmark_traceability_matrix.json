@@ -1,0 +1,453 @@
+{
+  "benchmark_family_count": 7,
+  "claim_boundary": "Traceability matrix for benchmark/method/source alignment. It proves evidence coverage and claim boundaries, but it is not an official leaderboard score or platform receipt.",
+  "created_at": "2026-07-04T00:30:47",
+  "distinct_method_count": 22,
+  "distinct_methods": [
+    "GuardX OCR+VLM routed",
+    "GuardX action guard replay alignment",
+    "OCR-only",
+    "StrongREJECT GuardX adapter",
+    "StrongREJECT compatible scorer",
+    "VLM provider caption/judge",
+    "XSTest safe route",
+    "completion-scorer-smoke",
+    "deepseek_judge",
+    "guardx_combined",
+    "guardx_layer_aware_input_specialist_v2b_300_balanced_t0725_w004",
+    "guardx_layer_aware_judge_v3_routed",
+    "guardx_runtime_only",
+    "hf_protectai_classifier",
+    "judge-only",
+    "keyword_baseline",
+    "local_lora_7b_input_specialist_v2b_300_inputprofile_tuned_fpr10",
+    "local_lora_input_specialist_v2b_300_tuned_fpr10",
+    "policy-routed",
+    "qwen_judge",
+    "runtime-only",
+    "text_only_guardx"
+  ],
+  "evidence_file_count": 19,
+  "evidence_files": [
+    "evidence/advbench_local_official_reproduction.json",
+    "evidence/advbench_official_method_comparison.json",
+    "evidence/agentdojo_injecagent_official_task_graph_mapping.json",
+    "evidence/agentdojo_injecagent_task_graph_replay_alignment.json",
+    "evidence/harm_adv_completion_scorer_smoke.json",
+    "evidence/harmbench_official_completion_manifest.json",
+    "evidence/harmbench_step3_importer_preflight.json",
+    "evidence/jailbreakbench_completion_scorer_smoke.json",
+    "evidence/jailbreakbench_local_official_reproduction.json",
+    "evidence/jailbreakbench_official_method_comparison.json",
+    "evidence/ocr_samples/real_ocr_6image_merged_manifest.json",
+    "evidence/official_evaluator_adapters/xstest_adapter_manifest.json",
+    "evidence/official_evaluator_parity_matrix.json",
+    "evidence/official_evaluator_reproducibility_ledger.json",
+    "evidence/strongreject_guardx_official_adapter.json",
+    "evidence/strongreject_official_compatible_scorer.json",
+    "evidence/submission_same_batch_1079_ablation_2026-07-01.json",
+    "evidence/vlm_multi_image_provider_benchmark.json",
+    "team/zzh/experiments/submission_evidence_index_2026-07-02.md"
+  ],
+  "missing_evidence": [],
+  "missing_evidence_count": 0,
+  "official_leaderboard_score": false,
+  "raw_prompt_rendered": false,
+  "ready": true,
+  "ready_row_count": 7,
+  "real_private_data_rendered": false,
+  "row_count": 7,
+  "rows": [
+    {
+      "benchmark_family": "Unified external heldout",
+      "benchmark_sources": [
+        "JailbreakBench/HarmBench/AdvBench/XSTest-style",
+        "AgentDojo/InjecAgent-style",
+        "RAG/OCR/tool/plugin safe-abstraction cases"
+      ],
+      "case_count": 1079,
+      "comparable_method_names": [
+        "deepseek_judge",
+        "guardx_combined",
+        "guardx_layer_aware_input_specialist_v2b_300_balanced_t0725_w004",
+        "guardx_layer_aware_judge_v3_routed",
+        "guardx_runtime_only",
+        "hf_protectai_classifier",
+        "keyword_baseline",
+        "local_lora_7b_input_specialist_v2b_300_inputprofile_tuned_fpr10",
+        "local_lora_input_specialist_v2b_300_tuned_fpr10",
+        "qwen_judge",
+        "text_only_guardx"
+      ],
+      "evaluation_boundary": "External benchmark evidence under one unified schema; not an official leaderboard result.",
+      "evidence_files": [
+        {
+          "exists": true,
+          "path": "evidence/submission_same_batch_1079_ablation_2026-07-01.json",
+          "role": "same-batch method comparison",
+          "sha256": "8e7ec461a1d877eba1f6bb5274d2f688c7f99912829c2a36e9c05011ed3a1c39"
+        },
+        {
+          "exists": true,
+          "path": "team/zzh/experiments/submission_evidence_index_2026-07-02.md",
+          "role": "submission evidence index",
+          "sha256": "06897bc683c983242cecab0fce0eec6193f34df1d4660abfc9cd05c097f726f8"
+        }
+      ],
+      "key_metrics": {
+        "default_attack_catch": 0.762887,
+        "default_benign_hard_block": 0.0,
+        "default_fpr": 0.045872,
+        "default_method": "guardx_layer_aware_input_specialist_v2b_300_balanced_t0725_w004",
+        "hf_classifier_attack_catch": 0.019588,
+        "hf_classifier_fpr": 0.027523,
+        "judge_only_deepseek_attack_catch": 0.843299,
+        "judge_only_deepseek_fpr": 0.412844
+      },
+      "method_count": 11,
+      "official_leaderboard_score": false,
+      "parity_level": "same_batch_external_evidence",
+      "raw_prompt_rendered": false,
+      "ready": true,
+      "real_private_data_rendered": false,
+      "remaining_gap": "Official platform scores still require upstream evaluator/submission portal receipts.",
+      "row_id": "unified_1079_same_batch",
+      "same_batch_comparable": true,
+      "surface_layers": [
+        "LLM input",
+        "RAG",
+        "OCR/VLM",
+        "tool-output",
+        "Agent action",
+        "plugin/supply-chain"
+      ]
+    },
+    {
+      "benchmark_family": "AdvBench",
+      "benchmark_sources": [
+        "llm-attacks/AdvBench harmful goals"
+      ],
+      "case_count": 520,
+      "comparable_method_names": [
+        "deepseek_judge",
+        "guardx_combined",
+        "guardx_layer_aware_input_specialist_v2b_300_balanced_t0725_w004",
+        "guardx_layer_aware_judge_v3_routed",
+        "guardx_runtime_only",
+        "hf_protectai_classifier",
+        "keyword_baseline",
+        "local_lora_7b_input_specialist_v2b_300_inputprofile_tuned_fpr10",
+        "local_lora_input_specialist_v2b_300_tuned_fpr10",
+        "qwen_judge",
+        "text_only_guardx"
+      ],
+      "evaluation_boundary": "AdvBench rows are compared with the same method schema; target text remains hash-only in public artifacts.",
+      "evidence_files": [
+        {
+          "exists": true,
+          "path": "evidence/advbench_official_method_comparison.json",
+          "role": "AdvBench same-batch method comparison",
+          "sha256": "b1a68091133fa621bae5bf1891f5c0514c07e40340ecd9d71a8a5a3325b6cfe1"
+        },
+        {
+          "exists": true,
+          "path": "evidence/advbench_local_official_reproduction.json",
+          "role": "AdvBench local official-style reproduction",
+          "sha256": "6d52687a57ef949cf22f4375f5d8b3cf7515edfe06040993b50402d34a36fbf7"
+        },
+        {
+          "exists": true,
+          "path": "evidence/official_evaluator_parity_matrix.json",
+          "role": "official evaluator parity matrix",
+          "sha256": "225bec9bc9908fd7eb9915028741c914b00ea0167079814c8d745457c782eac9"
+        }
+      ],
+      "key_metrics": {
+        "best_low_review_attack_catch": 0.996154,
+        "best_low_review_fpr": null,
+        "best_low_review_method": "qwen_judge",
+        "guardx_attack_catch": 0.919231,
+        "runtime_vs_routed_delta": 0.85
+      },
+      "method_count": 11,
+      "official_leaderboard_score": false,
+      "parity_level": "proxy_adapter",
+      "raw_prompt_rendered": false,
+      "ready": true,
+      "real_private_data_rendered": false,
+      "remaining_gap": "AdvBench is a prompt set; official-style scoring still needs a target model harmfulness/refusal evaluator.",
+      "row_id": "advbench_method_trace",
+      "same_batch_comparable": true,
+      "surface_layers": [
+        "LLM input"
+      ]
+    },
+    {
+      "benchmark_family": "JailbreakBench",
+      "benchmark_sources": [
+        "JailbreakBench/JBB-Behaviors"
+      ],
+      "case_count": 200,
+      "comparable_method_names": [
+        "deepseek_judge",
+        "guardx_combined",
+        "guardx_runtime_only",
+        "keyword_baseline",
+        "qwen_judge"
+      ],
+      "evaluation_boundary": "Local official behavior-set evidence plus same-batch method comparison; no leaderboard submission is claimed.",
+      "evidence_files": [
+        {
+          "exists": true,
+          "path": "evidence/jailbreakbench_local_official_reproduction.json",
+          "role": "JailbreakBench local official reproduction",
+          "sha256": "82e1fa998f21d673d203ae1bdc518d84f74c3f507803eaab6f11600a899c9249"
+        },
+        {
+          "exists": true,
+          "path": "evidence/jailbreakbench_official_method_comparison.json",
+          "role": "JailbreakBench same-batch method comparison",
+          "sha256": "e29fc3b9d8cc31177e01f82e7dc555fe985028d7bd847be56a414a738e7bf9dd"
+        },
+        {
+          "exists": true,
+          "path": "evidence/jailbreakbench_completion_scorer_smoke.json",
+          "role": "JailbreakBench completion scorer smoke",
+          "sha256": "a56542763ef4b82ba4c935a2c83898a841a97ee6ef41e0566a17ed10f80ad787"
+        }
+      ],
+      "key_metrics": {
+        "best_recall_attack_catch": 0.99,
+        "best_recall_method": "deepseek_judge",
+        "completion_scorer_unsafe_rate": 0.0,
+        "routing_best_low_hard_block_provider": "deepseek"
+      },
+      "method_count": 5,
+      "official_leaderboard_score": false,
+      "parity_level": "proxy_adapter",
+      "raw_prompt_rendered": false,
+      "ready": true,
+      "real_private_data_rendered": false,
+      "remaining_gap": "Need official prompt ids/splits and official evaluator labels for leaderboard-like claims.",
+      "row_id": "jailbreakbench_method_trace",
+      "same_batch_comparable": true,
+      "surface_layers": [
+        "LLM input"
+      ]
+    },
+    {
+      "benchmark_family": "HarmBench",
+      "benchmark_sources": [
+        "Center for AI Safety HarmBench behaviors",
+        "HarmBench Step-3 completion shape"
+      ],
+      "case_count": 400,
+      "comparable_method_names": [
+        "runtime-only",
+        "judge-only",
+        "policy-routed",
+        "completion-scorer-smoke"
+      ],
+      "evaluation_boundary": "Step-3 input shape and importer are preflighted; upstream official classifier output is not claimed until imported.",
+      "evidence_files": [
+        {
+          "exists": true,
+          "path": "evidence/harmbench_official_completion_manifest.json",
+          "role": "HarmBench Step-3 completion manifest",
+          "sha256": "70dfeb96ef0c936d7696732f720fce16caddf39d67621e22cc233188e26ebe51"
+        },
+        {
+          "exists": true,
+          "path": "evidence/harmbench_step3_importer_preflight.json",
+          "role": "HarmBench Step-3 importer preflight",
+          "sha256": "e7447866845efc1a728f349681dcab7307a7880467c982bea64bd6e0a03c5f0d"
+        },
+        {
+          "exists": true,
+          "path": "evidence/harm_adv_completion_scorer_smoke.json",
+          "role": "HarmBench/AdvBench completion scorer smoke",
+          "sha256": "28ea610f303bf21364c8d42169c26c8a1b0ae86ea384e35711173185fe72f784"
+        },
+        {
+          "exists": true,
+          "path": "evidence/official_evaluator_reproducibility_ledger.json",
+          "role": "official evaluator reproducibility ledger",
+          "sha256": "f935b41096e63f7c2d0d0ecf27d3c67905204ea2e5eea8a680fa6832b9c3c05b"
+        }
+      ],
+      "key_metrics": {
+        "completion_scorer_unsafe_rate": 0.0,
+        "local_official_attack_catch": 0.01,
+        "step3_importer_explicit_flag_supported": true,
+        "step3_preflight_status": "pass",
+        "upstream_official_classifier_invoked": false
+      },
+      "method_count": 5,
+      "official_leaderboard_score": false,
+      "parity_level": "proxy_adapter",
+      "raw_prompt_rendered": false,
+      "ready": true,
+      "real_private_data_rendered": false,
+      "remaining_gap": "Need upstream behavior ids and HarmBench evaluator output, not only GuardX detected=true.",
+      "row_id": "harmbench_step3_trace",
+      "same_batch_comparable": true,
+      "surface_layers": [
+        "LLM input",
+        "LLM output"
+      ]
+    },
+    {
+      "benchmark_family": "XSTest / StrongREJECT",
+      "benchmark_sources": [
+        "XSTest",
+        "StrongREJECT"
+      ],
+      "case_count": 462,
+      "comparable_method_names": [
+        "XSTest safe route",
+        "StrongREJECT GuardX adapter",
+        "StrongREJECT compatible scorer"
+      ],
+      "evaluation_boundary": "False-positive and refusal-boundary evidence is kept separate from harmful-request catch metrics.",
+      "evidence_files": [
+        {
+          "exists": true,
+          "path": "evidence/official_evaluator_adapters/xstest_adapter_manifest.json",
+          "role": "XSTest official-style adapter manifest",
+          "sha256": "56a23c56fc1439cf5f6c3146d752b23d5cebce6ae1d9f16cf4f0cd2bea5e06bb"
+        },
+        {
+          "exists": true,
+          "path": "evidence/strongreject_guardx_official_adapter.json",
+          "role": "StrongREJECT GuardX adapter",
+          "sha256": "6e3230777a2e88377e34cf6b4965c7be88d3c6260b4612209252c3acdf5633dc"
+        },
+        {
+          "exists": true,
+          "path": "evidence/strongreject_official_compatible_scorer.json",
+          "role": "StrongREJECT compatible scorer",
+          "sha256": "74af6300a7a59f11d256b5e66d7e863542dab1fd9f5da92e460f9c29834327a0"
+        }
+      ],
+      "key_metrics": {
+        "strongreject_risk_signal": 1.0,
+        "strongreject_scorer_parse_ok": 1.0,
+        "xstest_safe_fpr": 0.0,
+        "xstest_safe_hard_block": 0.0
+      },
+      "method_count": 3,
+      "official_leaderboard_score": false,
+      "parity_level": "official-compatible false-positive/refusal-boundary evidence",
+      "raw_prompt_rendered": false,
+      "ready": true,
+      "real_private_data_rendered": false,
+      "remaining_gap": "StrongREJECT cloud autograder is not claimed as official unless explicitly invoked under official protocol.",
+      "row_id": "fpr_boundary_trace",
+      "same_batch_comparable": false,
+      "surface_layers": [
+        "LLM input",
+        "LLM output"
+      ]
+    },
+    {
+      "benchmark_family": "AgentDojo / InjecAgent",
+      "benchmark_sources": [
+        "AgentDojo-style task graph",
+        "InjecAgent-style indirect injection/tool observation"
+      ],
+      "case_count": 32,
+      "comparable_method_names": [
+        "GuardX action guard replay alignment"
+      ],
+      "evaluation_boundary": "Task graph is official-style/proxy evidence for cross-layer Agent behavior, not official AgentDojo leaderboard output.",
+      "evidence_files": [
+        {
+          "exists": true,
+          "path": "evidence/agentdojo_injecagent_official_task_graph_mapping.json",
+          "role": "Agent task graph mapping",
+          "sha256": "752ac490e31f99a309b4651077438926793b6efd17cfffeca913015ae864a8bb"
+        },
+        {
+          "exists": true,
+          "path": "evidence/agentdojo_injecagent_task_graph_replay_alignment.json",
+          "role": "Agent task graph replay alignment",
+          "sha256": "9c32b0ae6a2989f748aed0d549064753c5de5e8db17b3e45fa677a2729859e1b"
+        }
+      ],
+      "key_metrics": {
+        "action_node_count": 55,
+        "alignment_pass_rate": 1.0,
+        "benign_block_rate": 0.0,
+        "ledger_alignment": 1.0,
+        "security_block_rate": 1.0,
+        "utility_allow_rate": 1.0
+      },
+      "method_count": 1,
+      "official_leaderboard_score": false,
+      "parity_level": "task-graph replay alignment",
+      "raw_prompt_rendered": false,
+      "ready": true,
+      "real_private_data_rendered": false,
+      "remaining_gap": "A full upstream AgentDojo/InjecAgent environment run would be stronger if time and environment permit.",
+      "row_id": "agentdojo_injecagent_trace",
+      "same_batch_comparable": true,
+      "surface_layers": [
+        "RAG",
+        "tool-output",
+        "Agent action",
+        "plugin/supply-chain"
+      ]
+    },
+    {
+      "benchmark_family": "VLM/OCR multi-image",
+      "benchmark_sources": [
+        "DocVQA/FUNSD/CORD-style document images",
+        "synthetic low-contrast hidden-instruction images"
+      ],
+      "case_count": 6,
+      "comparable_method_names": [
+        "OCR-only",
+        "VLM provider caption/judge",
+        "GuardX OCR+VLM routed"
+      ],
+      "evaluation_boundary": "This validates hidden-instruction/privacy-risk routing for OCR/VLM inputs; it is not a general VLM jailbreak leaderboard.",
+      "evidence_files": [
+        {
+          "exists": true,
+          "path": "evidence/vlm_multi_image_provider_benchmark.json",
+          "role": "VLM/OCR multi-image provider benchmark",
+          "sha256": "4df69d3420ededd8e6dfeb8f163a68e6c3b8004dac83f5df6b02da71bc370498"
+        },
+        {
+          "exists": true,
+          "path": "evidence/ocr_samples/real_ocr_6image_merged_manifest.json",
+          "role": "real OCR six-image merged manifest",
+          "sha256": "5878dbc40c6541bf1a8e52cc59151c8a8aac5035b192c5f508a3a0acfa5752b6"
+        }
+      ],
+      "key_metrics": {
+        "image_level_attack_catch": 1.0,
+        "image_level_fpr_review_or_block": 0.0,
+        "image_level_hard_block_fpr": 0.0,
+        "ocr_vlm_disagreement": 0.0,
+        "provider_success_rate": 1.0
+      },
+      "method_count": 18,
+      "official_leaderboard_score": false,
+      "parity_level": "multi-provider OCR/VLM evidence",
+      "raw_prompt_rendered": false,
+      "ready": true,
+      "real_private_data_rendered": false,
+      "remaining_gap": "Add official VLM jailbreak datasets only if a safe public evaluator route is available.",
+      "row_id": "vlm_ocr_trace",
+      "same_batch_comparable": true,
+      "surface_layers": [
+        "OCR/VLM",
+        "context boundary",
+        "privacy"
+      ]
+    }
+  ],
+  "same_batch_or_boundary_explained": true,
+  "schema_version": "guardx-benchmark-traceability-matrix-v1"
+}

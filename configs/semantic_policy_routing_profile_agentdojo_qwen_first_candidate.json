@@ -1,0 +1,81 @@
+{
+  "schema_version": "guardx-semantic-policy-routing-profile-v1",
+  "profile_id": "agentdojo_injecagent_qwen_first_candidate",
+  "description": "Scoped candidate profile for AgentDojo/InjecAgent-style RAG/tool/agent heldout. It keeps the global judge_v2 safeguards but tests Qwen-first judge ordering because Qwen has higher attack catch and zero FPR on this heldout.",
+  "base_method": "guardx_runtime_only",
+  "lora_specialist": {
+    "method_priority": {
+      "llm_input": ["local_lora_300_forced_choice_calibrated", "local_lora_300_forced_choice", "local_lora_300", "local_lora_500_forced_choice_calibrated", "local_lora_500_forced_choice", "local_lora_500"],
+      "rag_tool_agent": ["local_lora_rag_tool_agent_300_forced_choice_calibrated", "local_lora_rag_tool_agent_300_forced_choice", "local_lora_rag_tool_agent_balanced_v2_500_forced_choice_calibrated", "local_lora_rag_tool_agent_balanced_v2_500_forced_choice", "local_lora_rag_tool_agent_balanced_v2_300_forced_choice_calibrated", "local_lora_rag_tool_agent_balanced_v2_300_forced_choice", "local_lora_rag_tool_agent_100_forced_choice_calibrated", "local_lora_rag_tool_agent_100_forced_choice", "local_lora_500_forced_choice_calibrated", "local_lora_500_forced_choice", "local_lora_500", "local_lora_300_forced_choice_calibrated", "local_lora_300_forced_choice", "local_lora_300"],
+      "vlm_ocr": ["local_lora_500_forced_choice_calibrated", "local_lora_500_forced_choice", "local_lora_500", "local_lora_300_forced_choice_calibrated", "local_lora_300_forced_choice", "local_lora_300"]
+    },
+    "semantic_only_action": "review",
+    "runtime_agreement_action": "block",
+    "parse_failure_action": "ignore_provider"
+  },
+  "judge": {
+    "methods": ["qwen_judge", "deepseek_judge", "kimi_judge", "zhipu_judge"],
+    "judge_only_action": "review",
+    "runtime_agreement_action": "block",
+    "provider_failure_action": "ignore_provider",
+    "high_confidence_auto_block": {
+      "enabled": true,
+      "score_min": 0.99,
+      "action": "block",
+      "attack_types": [
+        "agentdojo_style",
+        "injecagent_style",
+        "tool_output_hijack",
+        "plugin_supply_chain",
+        "rag_poisoning"
+      ]
+    },
+    "selection_note": "Do not promote this profile to the global benchmark profile unless it also satisfies FPR constraints on 1079-case full heldout."
+  },
+  "thresholds": {
+    "target_fpr_max": 0.1,
+    "default_lora_score_min": 0.52,
+    "default_judge_score_min": 0.55,
+    "default_recovery_risky_min": 0.52,
+    "note": "Scoped AgentDojo/InjecAgent-style candidate only."
+  },
+  "benign_recovery": {
+    "methods": ["local_lora_benign_recovery_v2_500_forced_choice_calibrated", "local_lora_benign_recovery_v2_500_forced_choice", "local_lora_benign_recovery_300_forced_choice_calibrated", "local_lora_benign_recovery_300_forced_choice", "local_lora_benign_recovery_300"],
+    "enabled": true,
+    "downgrade_runtime_only_hard_block_to": "review",
+    "downgrade_runtime_only_review_to": "allow_with_boundary",
+    "recovery_risky_action": "review",
+    "never_downgrade_dangerous_side_effects": true,
+    "recovery_signal": "provider_ok_and_parse_ok_and_not_detected",
+    "judge_only_allow_with_boundary": {
+      "enabled": true,
+      "action": "allow_with_boundary",
+      "attack_types": [
+        "benign_recovery",
+        "benign_boundary",
+        "plugin_manifest_audit",
+        "rag_quoted_attack_analysis",
+        "safe_education"
+      ]
+    },
+    "allow_with_boundary_attack_types": [
+      "benign_recovery",
+      "benign_boundary",
+      "plugin_manifest_audit",
+      "rag_quoted_attack_analysis",
+      "safe_education"
+    ]
+  },
+  "dangerous_side_effect_markers": [
+    "agent",
+    "tool",
+    "plugin",
+    "file",
+    "network",
+    "code",
+    "database",
+    "exfiltration",
+    "side effect"
+  ],
+  "claim_boundary": "This is a scoped routing experiment for source-inspired AgentDojo/InjecAgent-style heldout, not an official benchmark leaderboard score."
+}

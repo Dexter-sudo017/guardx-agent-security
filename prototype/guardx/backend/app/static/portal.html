@@ -1,0 +1,1390 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GuardX Portal</title>
+  <link rel="icon" href="data:,">
+  <style>
+    :root {
+      --bg: #f5f7fa;
+      --panel: #ffffff;
+      --ink: #18212f;
+      --muted: #5f6d7e;
+      --line: #d9e0e8;
+      --accent: #155e75;
+      --accent-soft: #e8f3f6;
+      --good: #0f7a4f;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font: 14px/1.45 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    header {
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      padding: 12px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .brand { display: flex; flex-direction: column; gap: 2px; }
+    h1 { margin: 0; font-size: 18px; letter-spacing: 0; }
+    .sub { color: var(--muted); font-size: 12px; }
+    nav, .tools { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    a, button {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--ink);
+      padding: 8px 10px;
+      text-decoration: none;
+      font: inherit;
+      cursor: pointer;
+    }
+    a.active { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+    button.lang.active { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+    main {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 20px;
+      display: grid;
+      gap: 16px;
+    }
+    .overview {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+    h2 { margin: 0 0 8px; font-size: 16px; letter-spacing: 0; }
+    p { margin: 0; color: var(--muted); }
+    .status {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      min-height: 76px;
+      background: #fbfcfe;
+    }
+    .metric strong { display: block; font-size: 20px; margin-bottom: 4px; color: var(--good); }
+    .metric span { color: var(--muted); font-size: 12px; }
+    .gate-panel {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+    }
+    .gate-groups {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .gate-box {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfe;
+      padding: 10px;
+      min-height: 72px;
+    }
+    .gate-box strong { display: block; margin-bottom: 6px; font-size: 12px; color: var(--muted); }
+    .pill {
+      display: inline-block;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 2px 7px;
+      margin: 2px 3px 2px 0;
+      background: #fff;
+      color: var(--ink);
+      font-size: 12px;
+    }
+    .reason-list {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+    }
+    .gate-detail {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--muted);
+      word-break: break-word;
+    }
+    .privacy-panel {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+    }
+    .story-panel {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+    }
+    .story-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .story-step {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfe;
+      padding: 12px;
+      min-height: 132px;
+      display: grid;
+      gap: 7px;
+      align-content: start;
+    }
+    .story-step strong { color: var(--accent); font-size: 13px; }
+    .story-step span { color: var(--muted); font-size: 12px; }
+    .story-evidence {
+      border-top: 1px solid var(--line);
+      padding-top: 8px;
+      color: var(--ok) !important;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+    .privacy-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .privacy-metric {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfe;
+      min-height: 78px;
+      padding: 12px;
+    }
+    .privacy-metric strong { display: block; font-size: 19px; color: var(--accent); margin-bottom: 4px; }
+    .privacy-metric span { color: var(--muted); font-size: 12px; }
+    .privacy-demo {
+      border-top: 1px solid var(--line);
+      padding-top: 12px;
+      display: grid;
+      gap: 10px;
+    }
+    .privacy-demo textarea, .privacy-demo select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--ink);
+      padding: 9px 10px;
+      font: inherit;
+    }
+    .privacy-demo textarea { min-height: 86px; resize: vertical; }
+    .privacy-demo-controls {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+    }
+    .privacy-reconstruction {
+      min-height: 72px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfe;
+      padding: 12px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .privacy-token-row { display: flex; flex-wrap: wrap; gap: 6px; }
+    .privacy-token {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--ink);
+      padding: 3px 8px;
+      font-size: 12px;
+    }
+    .privacy-guess summary {
+      cursor: pointer;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .privacy-guess[open] summary { margin-bottom: 8px; }
+    .gate-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .artifact-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+    .artifact-actions select {
+      width: auto;
+      min-width: 180px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--ink);
+      padding: 7px 9px;
+      font: inherit;
+    }
+    .artifact-panel {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+    }
+    .artifact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+    }
+    .artifact-box {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfe;
+      padding: 10px;
+      min-height: 72px;
+      word-break: break-word;
+    }
+    .artifact-box strong { display: block; margin-bottom: 6px; font-size: 12px; color: var(--muted); }
+    .artifact-chain {
+      margin-top: 8px;
+      border-top: 1px solid var(--line);
+      padding-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .artifact-chain b { color: var(--ink); font-weight: 600; }
+    .insight-panel {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+    }
+    .insight-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .insight-detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .insight-box {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfe;
+      min-height: 144px;
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+      align-content: start;
+      word-break: break-word;
+    }
+    .insight-box strong { display: block; font-size: 12px; color: var(--muted); }
+    .insight-value { font-size: 20px; color: var(--accent); font-weight: 700; }
+    .insight-list {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .insight-list summary {
+      cursor: pointer;
+      color: var(--ink);
+    }
+    .insight-list .plugin-detail {
+      margin-top: 4px;
+      line-height: 1.45;
+      word-break: break-all;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .tile {
+      min-height: 168px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 15px;
+      display: grid;
+      align-content: space-between;
+      gap: 12px;
+    }
+    .tile a { width: fit-content; }
+    @media (max-width: 860px) {
+      .overview { grid-template-columns: 1fr; }
+      .grid, .status, .gate-groups, .artifact-grid, .privacy-grid, .privacy-demo-controls, .insight-grid, .insight-detail-grid, .story-grid { grid-template-columns: 1fr; }
+      main { padding: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <h1>GuardX</h1>
+      <div class="sub" data-i18n="subtitle">实验控制台与安全网关</div>
+    </div>
+    <nav aria-label="Primary">
+      <a class="active" href="/portal" data-i18n="portal">主页</a>
+      <a href="/" data-i18n="console">控制台</a>
+      <a href="/dashboard" data-i18n="dashboard">仪表盘</a>
+      <a href="/experiment-dashboard" data-i18n="experiments">实验结果</a>
+      <a href="/matrix-dashboard" data-i18n="matrix">矩阵看板</a>
+      <a href="/gateway" data-i18n="gateway">网关</a>
+    </nav>
+    <div class="tools">
+      <button class="lang" data-lang="zh">中文</button>
+      <button class="lang" data-lang="en">EN</button>
+      <button id="logout" data-i18n="logout">退出</button>
+    </div>
+  </header>
+  <main>
+    <section class="overview">
+      <div>
+        <h2 data-i18n="workspaceTitle">工作区状态</h2>
+        <p data-i18n="workspaceText">当前入口统一保护 Console、Dashboard、Experiment Dashboard 和 Gateway。请求可通过 GuardX 决策后再触达 AnythingLLM 或自研 RAG。</p>
+      </div>
+      <div class="status">
+        <div class="metric"><strong>89</strong><span data-i18n="metricSafe">SAFE 覆盖用例</span></div>
+        <div class="metric"><strong>0%</strong><span data-i18n="metricResidual">当前残余 ASR</span></div>
+        <div class="metric"><strong>0%</strong><span data-i18n="metricFpr">当前 FPR</span></div>
+      </div>
+    </section>
+    <section class="story-panel">
+      <div>
+        <h2>比赛演示故事线</h2>
+        <p>现场只讲这 4 条，从输入风险到防御动作再到 replay 证据，避免面板信息过散。</p>
+      </div>
+      <div class="story-grid">
+        <div class="story-step">
+          <strong>1. RAG 文档夹带指令</strong>
+          <span>不可信 retrieved_context 被标记为 trust-boundary 风险。</span>
+          <span>DefenseAction: context quarantine / cite-only summary。</span>
+          <span class="story-evidence" id="storyRagEvidence">Evidence: loading</span>
+        </div>
+        <div class="story-step">
+          <strong>2. OCR 隐藏文字</strong>
+          <span>真实 OCR engine/hash 记录图片证据和文本差异。</span>
+          <span>DefenseAction: OCR instruction quarantine。</span>
+          <span class="story-evidence" id="storyOcrEvidence">Evidence: loading</span>
+        </div>
+        <div class="story-step">
+          <strong>3. Tool-output 劫持</strong>
+          <span>工具返回结果中的 FOLLOWUP_INSTRUCTION 不再被当作用户命令。</span>
+          <span>DefenseAction: observation sanitization。</span>
+          <span class="story-evidence" id="storyToolEvidence">Evidence: loading</span>
+        </div>
+        <div class="story-step">
+          <strong>4. 插件/文件/网络行为</strong>
+          <span>executor precheck 拦截 read_file / network_export / code execution。</span>
+          <span>Replay: phase、hash、provenance、rollback。</span>
+          <span class="story-evidence" id="storyAgentEvidence">Evidence: loading</span>
+        </div>
+      </div>
+    </section>
+    <section class="privacy-panel" aria-live="polite">
+      <div>
+        <h2 data-i18n="privacyTitle">文本级隐私保护</h2>
+        <p id="privacyMeta" data-i18n="privacyLoading">读取 decoder probe 文本重构评估...</p>
+      </div>
+      <div class="privacy-grid">
+        <div class="privacy-metric"><strong id="privacyProtectionValue">-</strong><span data-i18n="privacyProtectionLabel">文本保护率</span></div>
+        <div class="privacy-metric"><strong id="privacyTokenF1Value">-</strong><span data-i18n="privacyTokenF1Label">重构 Token F1</span></div>
+        <div class="privacy-metric"><strong id="privacyRiskValue">-</strong><span data-i18n="privacyRiskLabel">最大重构风险</span></div>
+        <div class="privacy-metric"><strong id="privacyContractValue">-</strong><span data-i18n="privacyContractLabel">路由边界</span></div>
+      </div>
+      <p id="privacyDetails" class="gate-detail">-</p>
+      <div class="privacy-demo">
+        <textarea id="privacyDemoInput" data-i18n-placeholder="privacyDemoPlaceholder" placeholder="The customer profile contains private purchase notes and a support complaint."></textarea>
+        <div class="privacy-demo-controls">
+          <select id="privacyDemoVariant" aria-label="Decoder demo variant">
+            <option value="noisy_cls" data-i18n="privacyDemoVariantNoisy">SRTP noisy CLS</option>
+            <option value="gaussian_cls" data-i18n="privacyDemoVariantGaussian">Post-CLS gaussian</option>
+          </select>
+          <button id="privacyDemoRun" data-i18n="privacyDemoRun">运行重构演示</button>
+        </div>
+        <p id="privacyDemoStatus" class="gate-detail" data-i18n="privacyDemoReady">等待输入</p>
+        <div class="privacy-grid">
+          <div class="privacy-metric"><strong id="privacyDemoProtection">-</strong><span data-i18n="privacyProtectionLabel">文本保护率</span></div>
+          <div class="privacy-metric"><strong id="privacyDemoTokenF1">-</strong><span data-i18n="privacyTokenF1Label">重构 Token F1</span></div>
+          <div class="privacy-metric"><strong id="privacyDemoRisk">-</strong><span data-i18n="privacyRiskLabel">最大重构风险</span></div>
+          <div class="privacy-metric"><strong id="privacyDemoRoute">-</strong><span data-i18n="privacyContractLabel">路由边界</span></div>
+        </div>
+        <div>
+          <h2 data-i18n="privacyDemoReconstructionTitle">Decoder 重构文本</h2>
+          <div id="privacyDemoReconstruction" class="privacy-reconstruction">-</div>
+        </div>
+        <div>
+          <h2 data-i18n="privacyDemoRecoveredTitle">命中的输入 token</h2>
+          <div id="privacyDemoRecovered" class="privacy-token-row">-</div>
+        </div>
+        <details class="privacy-guess">
+          <summary data-i18n="privacyDemoGuessTitle">Decoder 原始猜测</summary>
+          <div id="privacyDemoGuess" class="privacy-reconstruction">-</div>
+        </details>
+      </div>
+    </section>
+    <section class="gate-panel" aria-live="polite">
+      <div>
+        <h2 data-i18n="gateTitle">推荐模型 Gate</h2>
+        <p id="gateMeta" data-i18n="gateLoading">读取当前推荐模型状态...</p>
+        <p id="gateDetails" class="gate-detail">-</p>
+        <p id="gateThresholds" class="gate-detail">-</p>
+        <div class="gate-actions">
+          <button id="gatePlanRefresh" data-i18n="gatePlanRefresh">预检真实矩阵</button>
+          <p id="gatePlan" class="gate-detail">-</p>
+        </div>
+      </div>
+      <div class="gate-groups">
+        <div class="gate-box"><strong data-i18n="gateRecommended">推荐</strong><div id="gateRecommended">-</div></div>
+        <div class="gate-box"><strong data-i18n="gatePromoted">晋级</strong><div id="gatePromoted">-</div></div>
+        <div class="gate-box"><strong data-i18n="gateStable">稳定</strong><div id="gateStable">-</div></div>
+        <div class="gate-box"><strong data-i18n="gateDemoted">降级</strong><div id="gateDemoted">-</div></div>
+      </div>
+      <div>
+        <h2 data-i18n="gateReasons">降级原因</h2>
+        <ul id="gateReasons" class="reason-list"><li>-</li></ul>
+      </div>
+    </section>
+    <section class="insight-panel" aria-live="polite">
+      <div>
+        <h2 data-i18n="insightsTitle">跨命题安全洞察</h2>
+        <p id="insightsMeta" data-i18n="insightsLoading">读取日志风险、序列审计和供应链审计...</p>
+        <div class="gate-actions">
+          <button id="seedDemoReplay" data-i18n="insightSeedDemo">写入演示 replay</button>
+          <p id="seedDemoStatus" class="gate-detail">-</p>
+        </div>
+      </div>
+      <div class="insight-grid">
+        <div class="insight-box">
+          <strong data-i18n="insightLogTitle">命题 6：日志风险识别</strong>
+          <div class="insight-value" id="insightLogValue">-</div>
+          <div class="gate-detail" id="insightLogDetail">-</div>
+          <ul class="insight-list" id="insightLogFindings"><li>-</li></ul>
+        </div>
+        <div class="insight-box">
+          <strong data-i18n="insightSequenceTitle">命题 8：应用安全审计</strong>
+          <div class="insight-value" id="insightSequenceValue">-</div>
+          <div class="gate-detail" id="insightSequenceDetail">-</div>
+          <ul class="insight-list" id="insightSequenceFindings"><li>-</li></ul>
+        </div>
+        <div class="insight-box">
+          <strong data-i18n="insightSupplyTitle">命题 9：供应链审计</strong>
+          <div class="insight-value" id="insightSupplyValue">-</div>
+          <div class="gate-detail" id="insightSupplyDetail">-</div>
+          <ul class="insight-list" id="insightSupplyFindings"><li>-</li></ul>
+        </div>
+      </div>
+      <div class="insight-detail-grid">
+        <div class="insight-box">
+          <strong data-i18n="insightExecutorTitle">最近 executor replay</strong>
+          <ul class="insight-list" id="insightExecutorReplay"><li>-</li></ul>
+          <p id="insightExecutorReplayDetail" class="gate-detail">-</p>
+        </div>
+        <div class="insight-box">
+          <strong data-i18n="insightPluginTitle">插件 session replay</strong>
+          <ul class="insight-list" id="insightPluginSessions"><li>-</li></ul>
+        </div>
+        <div class="insight-box">
+          <strong data-i18n="insightOcrTitle">OCR engine/hash 证据</strong>
+          <ul class="insight-list" id="insightOcrEvidence"><li>-</li></ul>
+        </div>
+      </div>
+    </section>
+    <section class="artifact-panel" aria-live="polite">
+      <div>
+        <h2 data-i18n="artifactsTitle">最新实验产物</h2>
+        <p id="artifactsMeta" data-i18n="artifactsLoading">读取实验产物索引...</p>
+        <div class="artifact-actions">
+          <label for="artifactHealthProfile" data-i18n="artifactStage">实验阶段</label>
+          <select id="artifactHealthProfile" aria-label="Artifact health profile">
+            <option value="local_dev">local_dev</option>
+            <option value="preflight">preflight</option>
+            <option value="nightly">nightly</option>
+            <option value="competition_demo">competition_demo</option>
+          </select>
+        </div>
+      </div>
+      <div class="artifact-grid">
+        <div class="artifact-box"><strong data-i18n="artifactGate">推荐 Gate</strong><div id="artifactGate">-</div></div>
+        <div class="artifact-box"><strong data-i18n="artifactPlan">预检 Plan</strong><div id="artifactPlan">-</div></div>
+        <div class="artifact-box"><strong data-i18n="artifactMatrix">模型 Matrix</strong><div id="artifactMatrix">-</div></div>
+        <div class="artifact-box"><strong data-i18n="artifactCompetition">作品 Gate</strong><div id="artifactCompetition">-</div></div>
+        <div class="artifact-box"><strong>Demo Flow Summary</strong><div id="artifactDemoFlowSummary">-</div></div>
+        <div class="artifact-box"><strong>Submission Audit</strong><div id="artifactSubmissionAudit">-</div></div>
+        <div class="artifact-box"><strong>Final Gate</strong><div id="artifactFinalGate">-</div></div>
+        <div class="artifact-box"><strong>Evidence Readiness</strong><div id="artifactEvidenceReadiness">-</div></div>
+        <div class="artifact-box"><strong>Defense Cue Card</strong><div id="artifactFinalDefenseCueCard">-</div></div>
+        <div class="artifact-box"><strong>Presentation Freshness</strong><div id="artifactPresentationFreshness">-</div></div>
+        <div class="artifact-box"><strong>Portal Rehearsal</strong><div id="artifactPortalRehearsal">-</div></div>
+        <div class="artifact-box"><strong>Submission Package</strong><div id="artifactSubmissionPackage">-</div></div>
+        <div class="artifact-box"><strong data-i18n="artifactPublicBenchmark">公开 Benchmark Gate</strong><div id="artifactPublicBenchmark">-</div></div>
+        <div class="artifact-box"><strong data-i18n="artifactGapRadar">差距雷达</strong><div id="artifactGapRadar">-</div></div>
+        <div class="artifact-box"><strong data-i18n="artifactFeedbackLoop">反馈闭环</strong><div id="artifactFeedbackLoop">-</div></div>
+        <div class="artifact-box"><strong data-i18n="artifactLivePreflight">Live 预检</strong><div id="artifactLivePreflight">-</div></div>
+        <div class="artifact-box"><strong data-i18n="artifactLiveReadiness">Live 就绪</strong><div id="artifactLiveReadiness">-</div></div>
+        <div class="artifact-box"><strong data-i18n="artifactLiveTarget">Live Target</strong><div id="artifactLiveTarget">-</div></div>
+        <div class="artifact-box"><strong data-i18n="artifactDecoderProbe">Decoder Probe</strong><div id="artifactDecoderProbe">-</div></div>
+        <div class="artifact-box"><strong>Adaptive Comparison</strong><div id="artifactAdaptiveBaseline">-</div></div>
+        <div class="artifact-box"><strong>External Baselines</strong><div id="artifactAdaptiveExternal">-</div></div>
+        <div class="artifact-box"><strong>Semantic Matrix</strong><div id="artifactSemanticMatrix">-</div><div id="artifactSemanticChain" class="artifact-chain">-</div></div>
+        <div class="artifact-box"><strong>LoRA Eval</strong><div id="artifactLocalLoraEval">-</div></div>
+        <div class="artifact-box"><strong>Benign Recovery</strong><div id="artifactLoraBenignRecovery">-</div></div>
+        <div class="artifact-box"><strong>LoRA Routing Delta</strong><div id="artifactLoraRoutingDelta">-</div></div>
+        <div class="artifact-box"><strong>Defense Ablation</strong><div id="artifactDefenseAblation">-</div></div>
+        <div class="artifact-box"><strong>Judge-aware Policy</strong><div id="artifactJudgeAwarePolicy">-</div></div>
+        <div class="artifact-box"><strong>Unified Defense Ablation</strong><div id="artifactUnifiedDefenseAblation">-</div></div>
+        <div class="artifact-box"><strong>1079 Comparison</strong><div id="artifactSameBatchAblation">-</div></div>
+        <div class="artifact-box"><strong>Agent/VLM Realism</strong><div id="artifactAgentVlmRealism">-</div></div>
+        <div class="artifact-box"><strong>VLM Multi-image</strong><div id="artifactVlmMultiImage">-</div></div>
+        <div class="artifact-box"><strong>Agent Task Graph</strong><div id="artifactAgentTaskGraph">-</div></div>
+        <div class="artifact-box"><strong>Agent Graph Replay</strong><div id="artifactAgentGraphReplay">-</div></div>
+        <div class="artifact-box"><strong>Official XSTest</strong><div id="artifactXSTest">-</div></div>
+        <div class="artifact-box"><strong>Official HarmBench</strong><div id="artifactHarmBench">-</div></div>
+        <div class="artifact-box"><strong>HarmBench Step-3</strong><div id="artifactHarmBenchStep3">-</div></div>
+        <div class="artifact-box"><strong>HarmBench Step-3 Preflight</strong><div id="artifactHarmBenchStep3Preflight">-</div></div>
+        <div class="artifact-box"><strong>HarmBench Step-3 Result</strong><div id="artifactHarmBenchStep3Result">-</div></div>
+        <div class="artifact-box"><strong>Official JailbreakBench</strong><div id="artifactJailbreakBench">-</div></div>
+        <div class="artifact-box"><strong>JBB Method Compare</strong><div id="artifactJailbreakBenchMethods">-</div></div>
+        <div class="artifact-box"><strong>JBB Judge Routing</strong><div id="artifactJailbreakBenchRouting">-</div></div>
+        <div class="artifact-box"><strong>JBB Threshold Sweep</strong><div id="artifactJailbreakBenchThreshold">-</div></div>
+        <div class="artifact-box"><strong>JBB Completion Scorer</strong><div id="artifactJailbreakBenchCompletion">-</div></div>
+        <div class="artifact-box"><strong>Judge Tradeoff</strong><div id="artifactJudgeTradeoff">-</div></div>
+        <div class="artifact-box"><strong>Judge Routing</strong><div id="artifactJudgeRouting">-</div></div>
+        <div class="artifact-box"><strong>Evaluator Ledger</strong><div id="artifactEvaluatorLedger">-</div></div>
+        <div class="artifact-box"><strong>Upstream Eval</strong><div id="artifactUpstreamEvaluator">-</div></div>
+        <div class="artifact-box"><strong>Upstream Smoke</strong><div id="artifactUpstreamSmoke">-</div></div>
+        <div class="artifact-box"><strong>StrongREJECT Preflight</strong><div id="artifactStrongReject">-</div></div>
+        <div class="artifact-box"><strong>StrongREJECT Adapter</strong><div id="artifactStrongRejectAdapter">-</div></div>
+        <div class="artifact-box"><strong>StrongREJECT Scorer</strong><div id="artifactStrongRejectScorer">-</div></div>
+        <div class="artifact-box"><strong>Official Evaluator Parity</strong><div id="artifactOfficialParity">-</div></div>
+        <div class="artifact-box"><strong>Agent E2E</strong><div id="artifactAgentE2E">-</div></div>
+        <div class="artifact-box"><strong>Leaderboard Readiness</strong><div id="artifactLeaderboardReadiness">-</div></div>
+        <div class="artifact-box"><strong>Judge Provider</strong><div id="artifactJudgeProvider">-</div></div>
+        <div class="artifact-box"><strong>VLM Probe</strong><div id="artifactVlmProbe">-</div></div>
+        <div class="artifact-box"><strong>Real Executor</strong><div id="artifactRealExecutor">-</div></div>
+      </div>
+    </section>
+    <div class="grid">
+      <section class="tile">
+        <div>
+          <h2 data-i18n="consoleTitle">交互控制台</h2>
+          <p data-i18n="consoleText">运行 guarded chat、RAG、工具调用和 demo presets。</p>
+        </div>
+        <a href="/" data-i18n="openConsole">打开控制台</a>
+      </section>
+      <section class="tile">
+        <div>
+          <h2 data-i18n="dashboardTitle">运行仪表盘</h2>
+          <p data-i18n="dashboardText">查看 SAFE 覆盖、ASR/FPR、重复验证与服务证据。</p>
+        </div>
+        <a href="/dashboard" data-i18n="openDashboard">打开仪表盘</a>
+      </section>
+      <section class="tile">
+        <div>
+          <h2 data-i18n="experimentsTitle">实验汇总</h2>
+          <p data-i18n="experimentsText">展示延迟、调用抑制、成本和可用性指标。</p>
+        </div>
+        <a href="/experiment-dashboard" data-i18n="openExperiments">打开实验页</a>
+      </section>
+      <section class="tile">
+        <div>
+          <h2 data-i18n="matrixTitle">模型矩阵</h2>
+          <p data-i18n="matrixText">查看模型、case、route、risk、空输出和失败原因。</p>
+        </div>
+        <a href="/matrix-dashboard" data-i18n="openMatrix">打开矩阵</a>
+      </section>
+      <section class="tile">
+        <div>
+          <h2 data-i18n="gatewayTitle">安全网关</h2>
+          <p data-i18n="gatewayText">将 AnythingLLM 或通用 RAG 请求先交给 GuardX，再转发目标。</p>
+        </div>
+        <a href="/gateway" data-i18n="openGateway">打开网关</a>
+      </section>
+    </div>
+  </main>
+  <script>
+    const dict = {
+      zh: {
+        subtitle: "实验控制台与安全网关", portal: "主页", console: "控制台", dashboard: "仪表盘", experiments: "实验结果", matrix: "矩阵看板", gateway: "网关", logout: "退出",
+        workspaceTitle: "工作区状态", workspaceText: "当前入口统一保护 Console、Dashboard、Experiment Dashboard 和 Gateway。请求可通过 GuardX 决策后再触达 AnythingLLM 或自研 RAG。",
+        metricSafe: "SAFE 覆盖用例", metricResidual: "当前残余 ASR", metricFpr: "当前 FPR",
+        privacyTitle: "文本级隐私保护", privacyLoading: "读取 decoder probe 文本重构评估...", privacyMissing: "暂无文本重构评估产物", privacyProtectionLabel: "文本保护率", privacyTokenF1Label: "重构 Token F1", privacyRiskLabel: "最大重构风险", privacyContractLabel: "路由边界", privacyEvalOnly: "Eval-only", privacyRoutingBlocked: "未进入生产路由", privacyRoutingEnabled: "检查路由", privacyRawOmitted: "原文与重构默认不落盘", privacyRawPresent: "检测到原文字段", privacySource: "来源", privacyBestDecoder: "最佳攻击", privacySamples: "训练/评估样本", privacyTask: "任务", privacyEpochs: "epochs", privacyVocab: "vocab", privacyPipeline: "流程", privacyDemoPlaceholder: "输入一段英文文本，查看加噪 CLS 经 decoder 后会泄漏哪些 token。", privacyDemoVariantNoisy: "SRTP noisy CLS", privacyDemoVariantGaussian: "Post-CLS gaussian", privacyDemoRun: "运行重构演示", privacyDemoReady: "等待输入", privacyDemoRunning: "重构中...", privacyDemoEmpty: "请输入文本", privacyDemoUnavailable: "演示不可用", privacyDemoReconstructionTitle: "可信重构结果", privacyDemoRecoveredTitle: "命中的输入 token", privacyDemoGuessTitle: "Decoder 原始猜测", privacyDemoNotPersisted: "未写入产物", privacyDemoNoneRecovered: "无命中", privacyDemoNoTrusted: "未恢复出输入内容",
+        consoleTitle: "交互控制台", consoleText: "运行 guarded chat、RAG、工具调用和 demo presets。", openConsole: "打开控制台",
+        dashboardTitle: "运行仪表盘", dashboardText: "查看 SAFE 覆盖、ASR/FPR、重复验证与服务证据。", openDashboard: "打开仪表盘",
+        experimentsTitle: "实验汇总", experimentsText: "展示延迟、调用抑制、成本和可用性指标。", openExperiments: "打开实验页",
+        matrixTitle: "模型矩阵", matrixText: "查看模型、case、route、risk、空输出和失败原因。", openMatrix: "打开矩阵",
+        gatewayTitle: "安全网关", gatewayText: "将 AnythingLLM 或通用 RAG 请求先交给 GuardX，再转发目标。", openGateway: "打开网关",
+        gateTitle: "推荐模型 Gate", gateLoading: "读取当前推荐模型状态...", gateUnavailable: "暂无可用推荐模型 Gate", gateRun: "运行", gateState: "状态", gateStateReady: "可用", gateStateNoRecommendation: "无推荐", gateRecommended: "推荐", gatePromoted: "晋级", gateStable: "稳定", gateDemoted: "降级", gateReasons: "降级原因", gateNone: "无", gateCreated: "生成", gateModified: "更新", gateSource: "来源", gateThresholds: "阈值", gateExpectedPath: "期望路径", gateError: "错误", gatePlanRefresh: "预检真实矩阵", gatePlanLoading: "预检中...", gatePlanConfigured: "可跑模型", gatePlanMissing: "缺失配置",
+        insightsTitle: "跨命题安全洞察", insightsLoading: "读取日志风险、序列审计和供应链审计...", insightsReady: "洞察已更新", insightsUnavailable: "洞察暂不可用", insightFindings: "发现", insightLogTitle: "命题 6：日志风险识别", insightSequenceTitle: "命题 8：应用安全审计", insightSupplyTitle: "命题 9：供应链审计", insightRecords: "决策记录", insightSuspicious: "可疑会话", insightRoutes: "路由", insightExecutions: "执行事件", insightSequences: "序列", insightCapabilities: "工具能力", insightProviders: "风险提供器", insightSeverity: "严重度", insightProvenance: "溯源", insightHash: "hash", insightSeedDemo: "写入演示 replay", insightSeedRunning: "正在写入 replay...", insightSeedDone: "已写入", insightExecutorTitle: "最近 executor replay", insightPluginTitle: "插件 session replay", insightOcrTitle: "OCR engine/hash 证据", insightRunner: "runner", insightSideEffects: "side effects", insightEngine: "engine", insightRollback: "rollback", insightTrace: "trace", insightPhases: "phases", insightRefs: "refs", insightRuntimePlugins: "运行时插件", insightManifest: "manifest", insightSource: "来源", insightSourceUri: "来源 URI", insightRiskFlags: "风险标记",
+        artifactsTitle: "最新实验产物", artifactsLoading: "读取实验产物索引...", artifactsReady: "索引已更新", artifactGate: "推荐 Gate", artifactPlan: "预检 Plan", artifactMatrix: "模型 Matrix", artifactCompetition: "作品 Gate", artifactPublicBenchmark: "公开 Benchmark Gate", artifactGapRadar: "差距雷达", artifactFeedbackLoop: "反馈闭环", artifactLivePreflight: "Live 预检", artifactLiveReadiness: "Live 就绪", artifactLiveTarget: "Live Target", artifactDecoderProbe: "Decoder Probe", artifactHealth: "素材状态", artifactProfile: "策略", artifactStage: "实验阶段", artifactMissing: "缺失", artifactStale: "过期", artifactFailed: "失败"
+      },
+      en: {
+        subtitle: "Experiment console and security gateway", portal: "Portal", console: "Console", dashboard: "Dashboard", experiments: "Experiments", matrix: "Matrix", gateway: "Gateway", logout: "Logout",
+        workspaceTitle: "Workspace Status", workspaceText: "This entry point protects Console, Dashboard, Experiment Dashboard and Gateway. Requests can be decided by GuardX before they reach AnythingLLM or a custom RAG target.",
+        metricSafe: "SAFE cases covered", metricResidual: "Current residual ASR", metricFpr: "Current FPR",
+        privacyTitle: "Text-Level Privacy", privacyLoading: "Loading decoder-probe text reconstruction evidence...", privacyMissing: "No text reconstruction evidence is available", privacyProtectionLabel: "Text protection rate", privacyTokenF1Label: "Reconstruction Token F1", privacyRiskLabel: "Max reconstruction risk", privacyContractLabel: "Routing boundary", privacyEvalOnly: "Eval-only", privacyRoutingBlocked: "Not routed to production", privacyRoutingEnabled: "Check routing", privacyRawOmitted: "Raw text and reconstructions omitted by default", privacyRawPresent: "Raw text fields detected", privacySource: "Source", privacyBestDecoder: "Best attack", privacySamples: "Train/eval samples", privacyTask: "Task", privacyEpochs: "epochs", privacyVocab: "vocab", privacyPipeline: "Pipeline", privacyDemoPlaceholder: "Enter English text to inspect what tokens the decoder can recover from protected CLS.", privacyDemoVariantNoisy: "SRTP noisy CLS", privacyDemoVariantGaussian: "Post-CLS gaussian", privacyDemoRun: "Run reconstruction demo", privacyDemoReady: "Ready", privacyDemoRunning: "Reconstructing...", privacyDemoEmpty: "Enter text first", privacyDemoUnavailable: "Demo unavailable", privacyDemoReconstructionTitle: "Trusted Reconstruction", privacyDemoRecoveredTitle: "Recovered source tokens", privacyDemoGuessTitle: "Raw decoder guess", privacyDemoNotPersisted: "Not persisted", privacyDemoNoneRecovered: "None recovered", privacyDemoNoTrusted: "No input content recovered",
+        consoleTitle: "Interactive Console", consoleText: "Run guarded chat, RAG, tool-call and demo presets.", openConsole: "Open Console",
+        dashboardTitle: "Run Dashboard", dashboardText: "Inspect SAFE coverage, ASR/FPR, repeated validation and service evidence.", openDashboard: "Open Dashboard",
+        experimentsTitle: "Experiment Summary", experimentsText: "Review latency, call suppression, cost and utility metrics.", openExperiments: "Open Experiments",
+        matrixTitle: "Model Matrix", matrixText: "Inspect model, case, route, risk, empty outputs and failure reasons.", openMatrix: "Open Matrix",
+        gatewayTitle: "Security Gateway", gatewayText: "Route AnythingLLM or generic RAG requests through GuardX before forwarding.", openGateway: "Open Gateway",
+        gateTitle: "Recommendation Gate", gateLoading: "Loading current model recommendation state...", gateUnavailable: "No model recommendation gate is available", gateRun: "Run", gateState: "State", gateStateReady: "Ready", gateStateNoRecommendation: "No recommendation", gateRecommended: "Recommended", gatePromoted: "Promoted", gateStable: "Stable", gateDemoted: "Demoted", gateReasons: "Demotion Reasons", gateNone: "None", gateCreated: "Created", gateModified: "Updated", gateSource: "Source", gateThresholds: "Thresholds", gateExpectedPath: "Expected path", gateError: "Error", gatePlanRefresh: "Preflight Matrix", gatePlanLoading: "Checking...", gatePlanConfigured: "Runnable models", gatePlanMissing: "Missing config",
+        insightsTitle: "Cross-Topic Security Insights", insightsLoading: "Loading log-risk, sequence-audit and supply-chain views...", insightsReady: "Insights updated", insightsUnavailable: "Insights unavailable", insightFindings: "findings", insightLogTitle: "Topic 6: Log Risk", insightSequenceTitle: "Topic 8: App Audit", insightSupplyTitle: "Topic 9: Supply Chain", insightRecords: "decision records", insightSuspicious: "suspicious sessions", insightRoutes: "routes", insightExecutions: "executions", insightSequences: "sequences", insightCapabilities: "capabilities", insightProviders: "risk providers", insightSeverity: "severity", insightProvenance: "provenance", insightHash: "hash", insightSeedDemo: "Seed demo replay", insightSeedRunning: "Seeding replay...", insightSeedDone: "Seeded", insightExecutorTitle: "Latest executor replay", insightPluginTitle: "Plugin session replay", insightOcrTitle: "OCR engine/hash evidence", insightRunner: "runner", insightSideEffects: "side effects", insightEngine: "engine", insightRollback: "rollback", insightTrace: "trace", insightPhases: "phases", insightRefs: "refs", insightRuntimePlugins: "runtime plugins", insightManifest: "manifest", insightSource: "source", insightSourceUri: "source URI", insightRiskFlags: "risk flags",
+        artifactsTitle: "Latest Artifacts", artifactsLoading: "Loading artifact index...", artifactsReady: "Index updated", artifactGate: "Recommendation Gate", artifactPlan: "Preflight Plan", artifactMatrix: "Model Matrix", artifactCompetition: "Competition Gate", artifactPublicBenchmark: "Public Benchmark Gate", artifactGapRadar: "Gap Radar", artifactFeedbackLoop: "Feedback Loop", artifactLivePreflight: "Live Preflight", artifactLiveReadiness: "Live Readiness", artifactLiveTarget: "Live Target", artifactDecoderProbe: "Decoder Probe", artifactHealth: "Artifact health", artifactProfile: "Policy", artifactStage: "Experiment Stage", artifactMissing: "Missing", artifactStale: "Stale", artifactFailed: "Failed"
+      }
+    };
+    let currentLang = localStorage.getItem("guardx_lang") || "zh";
+    let gateState = null;
+    let gatePlanState = null;
+    let artifactState = {};
+    let artifactHealthState = null;
+    let artifactHealthProfile = localStorage.getItem("guardx_artifact_health_profile") || "local_dev";
+    let artifactsLoaded = false;
+    let insightState = {log: null, sequence: null, supply: null, executor: null, plugin: null, ocr: null};
+    let insightsLoaded = false;
+    let privacyDemoState = null;
+    const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[char]));
+    function renderPills(values) {
+      const pack = dict[currentLang] || dict.zh;
+      if (!values || !values.length) return `<span class="pill">${pack.gateNone}</span>`;
+      return values.map((item) => `<span class="pill">${escapeHtml(item)}</span>`).join("");
+    }
+    function formatTime(value) {
+      if (!value) return "-";
+      const parsed = Date.parse(value);
+      if (Number.isNaN(parsed)) return String(value);
+      return new Date(parsed).toLocaleString(currentLang === "en" ? "en-US" : "zh-CN");
+    }
+    function gateStateLabel(state) {
+      const pack = dict[currentLang] || dict.zh;
+      if (state === "ready") return pack.gateStateReady;
+      if (state === "no_recommendation") return pack.gateStateNoRecommendation;
+      return state || "-";
+    }
+    function formatPercent(value) {
+      const number = Number(value);
+      if (!Number.isFinite(number)) return "-";
+      return `${(number * 100).toFixed(1)}%`;
+    }
+    function formatScore(value) {
+      const number = Number(value);
+      if (!Number.isFinite(number)) return "-";
+      return number.toFixed(3);
+    }
+    function renderTokens(values) {
+      const pack = dict[currentLang] || dict.zh;
+      const tokens = Array.isArray(values) ? values : [];
+      if (!tokens.length) return pack.privacyDemoNoneRecovered;
+      return tokens.map((token) => `<span class="privacy-token">${escapeHtml(token)}</span>`).join("");
+    }
+    function thresholdText(thresholds) {
+      const pack = dict[currentLang] || dict.zh;
+      if (!thresholds || !Object.keys(thresholds).length) return `${pack.gateThresholds}: -`;
+      const parts = Object.entries(thresholds).map(([key, value]) => `${key}=${value}`);
+      return `${pack.gateThresholds}: ${parts.join(", ")}`;
+    }
+    function renderGatePlan() {
+      const pack = dict[currentLang] || dict.zh;
+      const plan = document.getElementById("gatePlan");
+      if (!gatePlanState) {
+        plan.textContent = "-";
+        return;
+      }
+      const configured = gatePlanState.configured_models || [];
+      const missing = Object.entries(gatePlanState.missing_env || {}).map(([model, envs]) => `${model}: ${(envs || []).join(", ")}`);
+      plan.textContent = `${pack.gatePlanConfigured}: ${configured.join(", ") || pack.gateNone} | ${pack.gatePlanMissing}: ${missing.join(" ; ") || pack.gateNone}`;
+    }
+    function renderArtifactSummary() {
+      const pack = dict[currentLang] || dict.zh;
+      const targets = {model_recommendation_gate: "artifactGate", real_model_matrix_plan: "artifactPlan", model_matrix: "artifactMatrix", competition_readiness: "artifactCompetition", demo_flow_summary: "artifactDemoFlowSummary", competition_submission_readiness_audit: "artifactSubmissionAudit", final_submission_gate: "artifactFinalGate", evidence_readiness_board: "artifactEvidenceReadiness", defense_evidence_notes: "artifactFinalDefenseCueCard", presentation_freshness_check: "artifactPresentationFreshness", portal_rehearsal: "artifactPortalRehearsal", submission_package_manifest: "artifactSubmissionPackage", public_benchmark_gate: "artifactPublicBenchmark", competition_gap_radar: "artifactGapRadar", model_feedback_loop: "artifactFeedbackLoop", live_target_preflight: "artifactLivePreflight", live_target_readiness: "artifactLiveReadiness", live_target_rehearsal: "artifactLiveTarget", decoder_probe: "artifactDecoderProbe", adaptive_baseline_comparison: "artifactAdaptiveBaseline", adaptive_external_baselines: "artifactAdaptiveExternal", semantic_method_matrix: "artifactSemanticMatrix", local_lora_semantic_eval: "artifactLocalLoraEval", lora_benign_recovery_dataset: "artifactLoraBenignRecovery", lora_routing_delta: "artifactLoraRoutingDelta", defense_action_ablation: "artifactDefenseAblation", judge_aware_policy_profile: "artifactJudgeAwarePolicy", unified_defense_ablation: "artifactUnifiedDefenseAblation", same_batch_unified_ablation: "artifactSameBatchAblation", agent_vlm_realism: "artifactAgentVlmRealism", vlm_multi_image_provider_benchmark: "artifactVlmMultiImage", agent_task_graph_mapping: "artifactAgentTaskGraph", agent_task_graph_replay_alignment: "artifactAgentGraphReplay", xstest_local_official_reproduction: "artifactXSTest", harmbench_official_method_comparison: "artifactHarmBench", harmbench_official_completion_manifest: "artifactHarmBenchStep3", harmbench_step3_importer_preflight: "artifactHarmBenchStep3Preflight", harmbench_official_step3_result_summary: "artifactHarmBenchStep3Result", jailbreakbench_local_official_reproduction: "artifactJailbreakBench", jailbreakbench_official_method_comparison: "artifactJailbreakBenchMethods", jailbreakbench_judge_routing_ablation: "artifactJailbreakBenchRouting", jailbreakbench_judge_routing_threshold_sweep: "artifactJailbreakBenchThreshold", jailbreakbench_completion_scorer_smoke: "artifactJailbreakBenchCompletion", official_judge_tradeoff: "artifactJudgeTradeoff", official_judge_routing_ablation: "artifactJudgeRouting", official_evaluator_reproducibility_ledger: "artifactEvaluatorLedger", upstream_evaluator_runnable_checklist: "artifactUpstreamEvaluator", upstream_evaluator_smoke_readiness: "artifactUpstreamSmoke", strongreject_official_autograder_preflight: "artifactStrongReject", strongreject_guardx_official_adapter: "artifactStrongRejectAdapter", strongreject_official_compatible_scorer: "artifactStrongRejectScorer", official_evaluator_parity: "artifactOfficialParity", agent_end_to_end_replay: "artifactAgentE2E", official_leaderboard_readiness: "artifactLeaderboardReadiness", judge_provider_healthcheck: "artifactJudgeProvider", vlm_provider_probe: "artifactVlmProbe", real_executor_replay: "artifactRealExecutor"};
+      Object.entries(targets).forEach(([kind, id]) => {
+        const item = artifactState[kind];
+        const metadata = item && item.metadata ? item.metadata : {};
+        let detail = metadata.recommended_models && metadata.recommended_models.length
+          ? metadata.recommended_models.join(", ")
+          : metadata.run_id || metadata.policy_profile || "-";
+        if (kind === "decoder_probe" && item) {
+          detail = `Token F1=${formatPercent(metadata.max_token_f1)} | risk=${formatScore(metadata.max_risk_score)} | ${metadata.eval_only ? pack.privacyEvalOnly : "-"}`;
+        }
+        if (kind === "final_submission_gate" && item) {
+          detail = `status=${metadata.final_gate_status || "-"} | checks=${metadata.final_gate_check_count || 0} | failed=${metadata.final_gate_failed_count || 0} | ${metadata.final_gate_claim_boundary || "-"}`;
+        }
+        if (kind === "evidence_readiness_board" && item) {
+          detail = `ready=${metadata.evidence_readiness_ready ? "true" : "false"} | score=${metadata.evidence_readiness_score || 0}/${metadata.evidence_readiness_total_weight || 0} | dimensions=${metadata.evidence_readiness_passed_dimension_count || 0}/${metadata.evidence_readiness_dimension_count || 0} | watch=${metadata.evidence_readiness_watch_count || 0} | critical=${metadata.evidence_readiness_critical_open_count || 0} | catch=${formatPercent(metadata.evidence_readiness_attack_catch)} | FPR=${formatPercent(metadata.evidence_readiness_fpr)} | award=${metadata.evidence_readiness_award_claimed ? "claimed" : "not claimed"}`;
+        }
+        if (kind === "defense_evidence_notes" && item) {
+          detail = `ready=${metadata.defense_evidence_notes_ready ? "true" : "false"} | stories=${metadata.defense_evidence_notes_story_count || 0} | numbers=${metadata.defense_evidence_notes_number_count || 0} | qna=${metadata.defense_evidence_notes_qna_count || 0} | do-not-say=${metadata.defense_evidence_notes_do_not_say_count || 0} | fallback=${metadata.defense_evidence_notes_fallback_count || 0} | award=${metadata.defense_evidence_notes_award_claimed ? "claimed" : "not claimed"}`;
+        }
+        if (kind === "presentation_freshness_check" && item) {
+          detail = `ready=${metadata.presentation_freshness_ready ? "true" : "false"} | decks=${metadata.presentation_freshness_deck_count || 0} | slides=${metadata.presentation_freshness_slide_count || 0} | stale=${metadata.presentation_freshness_stale_hit_count || 0} | missing=${metadata.presentation_freshness_missing_required_count || 0} | secret=${metadata.presentation_freshness_secret_like_count || 0} | gate=${metadata.presentation_freshness_gate_checks || "-"} | portal=${metadata.presentation_freshness_portal_cards || "-"} cards`;
+        }
+        if (kind === "demo_flow_summary" && item) {
+          detail = `ready=${metadata.demo_flow_summary_ready ? "true" : "false"} | stories=${metadata.final_demo_story_count || 0} | ids=${(metadata.final_demo_story_ids || []).join(", ")}`;
+        }
+        if (kind === "competition_submission_readiness_audit" && item) {
+          detail = `ready=${metadata.competition_submission_audit_ready ? "true" : "false"} | checks=${metadata.competition_submission_audit_check_count || 0} | failed=${metadata.competition_submission_audit_failed_count || 0}`;
+        }
+        if (kind === "portal_rehearsal" && item) {
+          detail = `page=${metadata.portal_rehearsal_page_status || "-"} | health=${metadata.portal_rehearsal_health_state || "-"} | gate=${metadata.portal_rehearsal_final_gate_status || "-"} ${metadata.portal_rehearsal_final_gate_checks || 0}/${metadata.portal_rehearsal_final_gate_failed || 0} | cards=${metadata.portal_rehearsal_rendered_card_count || 0} | screenshot=${metadata.portal_rehearsal_screenshot_committed ? "committed" : "hash-only"}`;
+        }
+        if (kind === "submission_package_manifest" && item) {
+          detail = `status=${metadata.submission_package_status || "-"} | files=${metadata.submission_package_tracked_file_count || 0} | size=${metadata.submission_package_tracked_size_mb || 0}MB | forbidden=${metadata.submission_package_forbidden_count || 0} | missing=${metadata.submission_package_required_missing_count || 0} | secret=${metadata.submission_package_secret_hit_count || 0}`;
+        }
+        if (kind === "live_target_preflight" && item) {
+          detail = `${metadata.run_id || "-"} | blockers=${metadata.blocker_count || 0} | required_fail=${metadata.required_failure_count || 0}`;
+        }
+        if (kind === "live_target_readiness" && item) {
+          detail = `${metadata.run_id || "-"} | cases=${metadata.validated_case_count || 0} | blockers=${metadata.external_blocker_count || 0}`;
+        }
+        if (kind === "adaptive_baseline_comparison" && item) {
+          detail = `${metadata.run_id || "-"} | GuardX=${formatPercent(metadata.guardx_full_accuracy)} | catch=${formatPercent(metadata.guardx_full_attack_catch_rate)}`;
+        }
+        if (kind === "adaptive_external_baselines" && item) {
+          detail = `${metadata.run_id || "-"} | ok=${(metadata.ok_baselines || []).join(", ") || "-"} | failed=${(metadata.failed_baselines || []).join(", ") || "-"}`;
+        }
+        if (kind === "semantic_method_matrix" && item) {
+          const actions = (metadata.semantic_chain_defense_actions || []).join(", ") || "-";
+          detail = `${metadata.run_id || "-"} | local catch=${formatPercent(metadata.local_semantic_attack_catch_rate)} FPR=${formatPercent(metadata.local_semantic_false_positive_rate)} | HF catch=${formatPercent(metadata.hf_semantic_attack_catch_rate)} FPR=${formatPercent(metadata.hf_semantic_false_positive_rate)} | chain=${metadata.semantic_chain_case_id || "-"} -> ${metadata.semantic_chain_route || "-"} -> ${actions}`;
+          const methods = (metadata.semantic_chain_methods || []).join(", ") || "-";
+          const judge = metadata.semantic_judge_ready ? `${metadata.semantic_judge_provider || "-"} ready` : `judge skipped: ${(metadata.semantic_judge_missing_env || []).join(", ") || "-"}`;
+          document.getElementById("artifactSemanticChain").innerHTML = [
+            `<b>case_id</b>: ${escapeHtml(metadata.semantic_chain_case_id || "-")}`,
+            `<b>detected_methods</b>: ${escapeHtml(methods)}`,
+            `<b>RiskFinding</b>: ${escapeHtml(metadata.semantic_chain_risk_type || "-")} / ${formatScore(metadata.semantic_chain_risk_score)} / ${escapeHtml(metadata.semantic_chain_risk_severity || "-")}`,
+            `<b>PolicyDecision</b>: ${escapeHtml(metadata.semantic_chain_route || "-")} / ${escapeHtml(metadata.semantic_chain_policy_action || "-")} / ${formatScore(metadata.semantic_chain_policy_score)}`,
+            `<b>DefenseAction</b>: ${escapeHtml(actions)}`,
+            `<b>replay_evidence</b>: ${escapeHtml(metadata.semantic_chain_replay_ref || "-")}`,
+            `<b>LLM judge</b>: ${escapeHtml(judge)}`
+          ].join("<br>");
+        }
+        if (kind === "local_lora_semantic_eval" && item) {
+          detail = `${metadata.lora_device || "-"} | heldout catch=${formatPercent(metadata.lora_heldout_attack_catch_rate)} FPR=${formatPercent(metadata.lora_heldout_false_positive_rate)} | official catch=${formatPercent(metadata.lora_official_attack_catch_rate)} FPR=${formatPercent(metadata.lora_official_false_positive_rate)} | parse=${formatPercent(metadata.lora_official_parse_ok_rate)}`;
+        }
+        if (kind === "lora_benign_recovery_dataset" && item) {
+          detail = `train=${metadata.benign_recovery_train_total || 0} | eval=${metadata.benign_recovery_eval_total || 0} | raw=${metadata.benign_recovery_raw_prompt_policy || "-"} | PII=${metadata.benign_recovery_contains_real_pii}`;
+        }
+        if (kind === "lora_routing_delta" && item) {
+          detail = `standalone catch=${formatPercent(metadata.lora_routing_standalone_attack_catch)} FPR=${formatPercent(metadata.lora_routing_standalone_fpr)} | routed catch=${formatPercent(metadata.lora_routing_routed_attack_catch)} | layer-aware catch=${formatPercent(metadata.lora_routing_layer_attack_catch)} | delta=${formatPercent(metadata.lora_routing_delta_layer_vs_routed)} | ${metadata.lora_routing_claim_boundary || "-"}`;
+        }
+        if (kind === "defense_action_ablation" && item) {
+          detail = `detect=${formatPercent(metadata.defense_detect_only_attack_mitigation_rate)} | policy=${formatPercent(metadata.defense_policy_gate_attack_mitigation_rate)} | action=${formatPercent(metadata.defense_orchestrated_attack_mitigation_rate)} | benign block=${formatPercent(metadata.defense_orchestrated_benign_block_rate)}`;
+        }
+        if (kind === "judge_aware_policy_profile" && item) {
+          detail = `${metadata.judge_policy_profile_id || "-"} | judge-only=${metadata.judge_policy_default_judge_only_route || "-"} | runtime+judge=${metadata.judge_policy_default_agreement_route || "-"}`;
+        }
+        if (kind === "unified_defense_ablation" && item) {
+          detail = `${metadata.unified_defense_scope || "-"} | best=${metadata.unified_defense_best_profile || "-"} | catch=${formatPercent(metadata.unified_defense_best_attack_catch)} | FPR=${formatPercent(metadata.unified_defense_best_fpr)} | benign hard block=${formatPercent(metadata.unified_defense_best_benign_hard_block)}`;
+        }
+        if (kind === "same_batch_unified_ablation" && item) {
+          detail = `methods=${metadata.same_batch_method_count || 0} | cases=${metadata.same_batch_max_case_count || 0} | full catch=${formatPercent(metadata.same_batch_full_attack_catch)} FPR=${formatPercent(metadata.same_batch_full_fpr)} review=${formatPercent(metadata.same_batch_full_review_rate)} | hard block=${formatPercent(metadata.same_batch_full_benign_hard_block)} | judge FPR=${formatPercent(metadata.same_batch_judge_fpr)}`;
+        }
+        if (kind === "agent_vlm_realism" && item) {
+          detail = `cases=${metadata.agent_vlm_case_count || 0} | pass=${formatPercent(metadata.agent_vlm_case_pass_rate)} | catch=${formatPercent(metadata.agent_vlm_attack_catch)} | FPR=${formatPercent(metadata.agent_vlm_fpr)} | hard FPR=${formatPercent(metadata.agent_vlm_hard_block_fpr)} | benign allow=${formatPercent(metadata.agent_vlm_benign_allow)} | p95=${metadata.agent_vlm_latency_p95_ms || "-"}ms`;
+        }
+        if (kind === "vlm_multi_image_provider_benchmark" && item) {
+          detail = `images=${metadata.vlm_multi_image_count || 0} | provider rows=${metadata.vlm_multi_provider_row_count || 0} | success=${formatPercent(metadata.vlm_multi_provider_success_rate)} | catch=${formatPercent(metadata.vlm_multi_attack_catch)} | FPR=${formatPercent(metadata.vlm_multi_fpr)} | hard FPR=${formatPercent(metadata.vlm_multi_hard_block_fpr)}`;
+        }
+        if (kind === "agent_task_graph_mapping" && item) {
+          detail = `scenarios=${metadata.agent_task_graph_scenario_count || 0} | nodes=${metadata.agent_task_graph_node_count || 0} | edges=${metadata.agent_task_graph_edge_count || 0} | private assets=${metadata.agent_task_graph_private_asset_cases || 0}`;
+        }
+        if (kind === "agent_task_graph_replay_alignment" && item) {
+          detail = `cases=${metadata.agent_graph_alignment_case_count || 0} | actions=${metadata.agent_graph_alignment_action_count || 0} | aligned=${formatPercent(metadata.agent_graph_alignment_pass_rate)} | security=${formatPercent(metadata.agent_graph_alignment_security_block)} | utility=${formatPercent(metadata.agent_graph_alignment_utility_allow)} | benign block=${formatPercent(metadata.agent_graph_alignment_benign_block)}`;
+        }
+        if (kind === "xstest_local_official_reproduction" && item) {
+          detail = `cases=${metadata.xstest_case_count || 0} | safe=${metadata.xstest_safe_count || 0} | FPR=${formatPercent(metadata.xstest_safe_fpr)} | safe hard block=${formatPercent(metadata.xstest_safe_hard_block_rate)} | unsafe contrast=${formatPercent(metadata.xstest_unsafe_contrast_catch)}`;
+        }
+        if (kind === "harmbench_official_method_comparison" && item) {
+          detail = `cases=${metadata.harmbench_case_count || 0} | best=${metadata.harmbench_best_method || "-"} catch=${formatPercent(metadata.harmbench_best_attack_catch)} | runtime catch=${formatPercent(metadata.harmbench_runtime_attack_catch)} | Qwen delta=${formatPercent(metadata.harmbench_qwen_vs_runtime_delta)} | p95=${metadata.harmbench_qwen_latency_p95_ms || "-"}ms`;
+        }
+        if (kind === "harmbench_official_completion_manifest" && item) {
+          const deps = [
+            metadata.harmbench_step3_transformers_available ? "transformers" : "",
+            metadata.harmbench_step3_vllm_available ? "vllm" : "",
+            metadata.harmbench_step3_spacy_available ? "spacy" : "",
+            metadata.harmbench_step3_spacy_model_available ? "en_core_web_sm" : "",
+            metadata.harmbench_step3_datasketch_available ? "datasketch" : ""
+          ].filter(Boolean).join(", ") || "deps missing";
+          detail = `behaviors=${metadata.harmbench_step3_selected_behavior_count || 0} | evaluator=${metadata.harmbench_step3_evaluator_exists ? "ready" : "missing"} | classifier=${metadata.harmbench_step3_classifier_invoked ? "invoked" : "not invoked"} | blockers=${(metadata.harmbench_step3_blockers || []).length || 0} | leaderboard=${metadata.harmbench_step3_leaderboard_score ? "claimed" : "not claimed"} | raw=${metadata.harmbench_step3_raw_behavior_rendered || metadata.harmbench_step3_behavior_id_rendered || metadata.harmbench_step3_candidate_generation_rendered ? "check" : "hash-only"} | deps=${deps}`;
+        }
+        if (kind === "harmbench_step3_importer_preflight" && item) {
+          detail = `status=${metadata.harmbench_step3_importer_preflight_status || "-"} | failed=${metadata.harmbench_step3_importer_preflight_failed_count || 0} | default classifier=${metadata.harmbench_step3_importer_default_classifier_false ? "false" : "check"} | official flag=${metadata.harmbench_step3_importer_runbook_official_flag ? "yes" : "no"} | hash=${metadata.harmbench_step3_importer_private_hash_match ? "match" : "check"}`;
+        }
+        if (kind === "harmbench_official_step3_result_summary" && item) {
+          detail = `cases=${metadata.harmbench_step3_result_case_count || 0} | valid=${metadata.harmbench_step3_result_valid_label_count || 0} | official ASR=${formatPercent(metadata.harmbench_step3_result_official_asr)} | safe/refusal=${formatPercent(metadata.harmbench_step3_result_safe_refusal_rate)} | classifier=${metadata.harmbench_step3_result_classifier_invoked ? "invoked" : "not invoked"} | raw=${metadata.harmbench_step3_result_raw_behavior_id_rendered || metadata.harmbench_step3_result_generation_rendered ? "check" : "hash-only"}`;
+        }
+        if (kind === "jailbreakbench_local_official_reproduction" && item) {
+          detail = `cases=${metadata.jailbreakbench_case_count || 0} | harmful=${metadata.jailbreakbench_harmful_count || 0} | catch=${formatPercent(metadata.jailbreakbench_harmful_signal_catch)} | residual=${formatPercent(metadata.jailbreakbench_harmful_residual_asr)} | benign FPR=${formatPercent(metadata.jailbreakbench_benign_fpr)} | raw=${metadata.jailbreakbench_raw_prompt_rendered ? "check" : "hash-only"}`;
+        }
+        if (kind === "jailbreakbench_official_method_comparison" && item) {
+          detail = `best=${metadata.jailbreakbench_best_recall_method || "-"} catch=${formatPercent(metadata.jailbreakbench_best_recall_attack_catch)} FPR=${formatPercent(metadata.jailbreakbench_best_recall_fpr)} | low-FPR=${metadata.jailbreakbench_best_low_fpr_method || "-"} catch=${formatPercent(metadata.jailbreakbench_best_low_fpr_attack_catch)} | DeepSeek delta=${formatPercent(metadata.jailbreakbench_deepseek_vs_runtime_delta)}`;
+        }
+        if (kind === "jailbreakbench_judge_routing_ablation" && item) {
+          detail = `best=${metadata.jbb_routing_best_low_hard_block_provider || "-"} | DeepSeek catch=${formatPercent(metadata.jbb_routing_deepseek_attack_catch)} hardFPR ${formatPercent(metadata.jbb_routing_deepseek_direct_hard_fpr)}->${formatPercent(metadata.jbb_routing_deepseek_routed_hard_fpr)} review=${formatPercent(metadata.jbb_routing_deepseek_review_rate)} | Qwen hardFPR ${formatPercent(metadata.jbb_routing_qwen_direct_hard_fpr)}->${formatPercent(metadata.jbb_routing_qwen_routed_hard_fpr)}`;
+        }
+        if (kind === "jailbreakbench_judge_routing_threshold_sweep" && item) {
+          detail = `low=${metadata.jbb_threshold_low_provider || "-"}@${metadata.jbb_threshold_low_threshold || "-"} catch=${formatPercent(metadata.jbb_threshold_low_attack_catch)} FPR=${formatPercent(metadata.jbb_threshold_low_fpr)} review=${formatPercent(metadata.jbb_threshold_low_review_rate)} | high=${metadata.jbb_threshold_high_provider || "-"}@${metadata.jbb_threshold_high_threshold || "-"} catch=${formatPercent(metadata.jbb_threshold_high_attack_catch)} review=${formatPercent(metadata.jbb_threshold_high_review_rate)}`;
+        }
+        if (kind === "jailbreakbench_completion_scorer_smoke" && item) {
+          detail = `cases=${metadata.jbb_completion_case_count || 0} | ${metadata.jbb_completion_provider || "-"} live=${metadata.jbb_completion_live_model_invoked ? "yes" : "no"} | profile=${metadata.jbb_completion_candidate_profile || "-"} | success=${formatPercent(metadata.jbb_completion_provider_success_rate)} parse=${formatPercent(metadata.jbb_completion_parse_ok_rate)} | unsafe=${formatPercent(metadata.jbb_completion_unsafe_rate)} | benign refusal=${formatPercent(metadata.jbb_completion_refusal_rate_on_benign)} | recovery=${metadata.jbb_completion_recovery_applied_count || 0}/${metadata.jbb_completion_recovery_attempt_count || 0}`;
+        }
+        if (kind === "official_judge_tradeoff" && item) {
+          detail = `balanced=${metadata.judge_tradeoff_balanced_provider || "-"} | DeepSeek HB=${formatPercent(metadata.judge_tradeoff_deepseek_harmbench_attack_catch)} XS-FPR=${formatPercent(metadata.judge_tradeoff_deepseek_xstest_fpr)} | Qwen HB=${formatPercent(metadata.judge_tradeoff_qwen_harmbench_attack_catch)} XS-FPR=${formatPercent(metadata.judge_tradeoff_qwen_xstest_fpr)}`;
+        }
+        if (kind === "official_judge_routing_ablation" && item) {
+          detail = `best=${metadata.judge_routing_best_low_hard_block_provider || "-"} | DeepSeek HB=${formatPercent(metadata.judge_routing_deepseek_harmbench_attack_catch)} hardFPR ${formatPercent(metadata.judge_routing_deepseek_direct_hard_fpr)}->${formatPercent(metadata.judge_routing_deepseek_xstest_hard_fpr)} | Qwen hardFPR ${formatPercent(metadata.judge_routing_qwen_direct_hard_fpr)}->${formatPercent(metadata.judge_routing_qwen_xstest_hard_fpr)}`;
+        }
+        if (kind === "official_evaluator_reproducibility_ledger" && item) {
+          detail = `rows=${metadata.official_ledger_row_count || 0} | families=${metadata.official_ledger_family_count || 0} | files=${metadata.official_ledger_required_files_ok ? "ok" : "missing"} | raw=${metadata.official_ledger_no_raw_prompt_rendered ? "hash-only" : "check"} | leaderboard=${metadata.official_ledger_leaderboard_score ? "claimed" : "not claimed"} | XSTest FPR=${formatPercent(metadata.official_ledger_xstest_safe_fpr)} | Agent align=${formatPercent(metadata.official_ledger_agent_alignment)}`;
+        }
+        if (kind === "upstream_evaluator_runnable_checklist" && item) {
+          detail = `benchmarks=${metadata.upstream_check_benchmark_count || 0} | upstream=${metadata.upstream_check_upstream_ready_count || 0} | data-only=${metadata.upstream_check_local_data_only_count || 0} | repo-like=${metadata.upstream_check_repo_like_count || 0} | proxy/missing=${metadata.upstream_check_proxy_missing_count || 0} | raw=${metadata.upstream_check_raw_prompt_rendered ? "check" : "hash-only"}`;
+        }
+        if (kind === "upstream_evaluator_smoke_readiness" && item) {
+          detail = `smoke=${metadata.upstream_smoke_ready_count || 0}/${metadata.upstream_smoke_benchmark_count || 0} | data=${metadata.upstream_smoke_data_ready_count || 0} | compile=${metadata.upstream_smoke_compile_ready_count || 0} | raw=${metadata.upstream_smoke_raw_prompt_rendered ? "check" : "hash-only"} | leaderboard=${metadata.upstream_smoke_leaderboard_score ? "claimed" : "not claimed"}`;
+        }
+        if (kind === "strongreject_official_autograder_preflight" && item) {
+          detail = `full=${metadata.strongreject_full_dataset_rows || 0} | small=${metadata.strongreject_small_dataset_rows || 0} | parser=${metadata.strongreject_refusal_parse_ok && metadata.strongreject_non_refusal_parse_ok ? "ok" : "check"} | cloud=${metadata.strongreject_cloud_ready ? "ready" : "not ready"} | invoked=${metadata.strongreject_autograder_invoked}`;
+        }
+        if (kind === "strongreject_guardx_official_adapter" && item) {
+          detail = `cases=${metadata.strongreject_adapter_case_count || 0} | signal=${formatPercent(metadata.strongreject_adapter_risk_signal_rate)} | review=${formatPercent(metadata.strongreject_adapter_review_rate)} | hard=${formatPercent(metadata.strongreject_adapter_hard_block_rate)} | route-gap=${formatPercent(metadata.strongreject_adapter_route_gap_rate)} | live=${metadata.strongreject_adapter_live_autograder_invoked ? "on" : "off"}`;
+        }
+        if (kind === "strongreject_official_compatible_scorer" && item) {
+          detail = `cases=${metadata.strongreject_scorer_case_count || 0} | provider=${metadata.strongreject_scorer_provider || "-"} | live=${metadata.strongreject_scorer_live_model_invoked ? "on" : "off"} | success=${formatPercent(metadata.strongreject_scorer_provider_success_rate)} | parse=${formatPercent(metadata.strongreject_scorer_parse_ok_rate)} | score=${metadata.strongreject_scorer_mean_score ?? "-"}`;
+        }
+        if (kind === "official_evaluator_parity" && item) {
+          detail = `benchmarks=${metadata.official_parity_benchmark_count || 0} | local-ready=${metadata.official_parity_ready_count || 0} | local-evidence=${metadata.official_parity_local_evidence_count || 0} | missing=${metadata.official_parity_missing_expected_files_count || 0} | leaderboard=${metadata.official_parity_leaderboard_score ? "claimed" : "not claimed"} | ready=${(metadata.official_parity_ready_benchmarks || []).join(", ") || "-"}`;
+        }
+        if (kind === "agent_end_to_end_replay" && item) {
+          detail = `${metadata.agent_e2e_session_id || "-"} | stages=${metadata.agent_e2e_stage_count || 0} | routes=${(metadata.agent_e2e_routes || []).join(" -> ") || "-"}`;
+        }
+        if (kind === "official_leaderboard_readiness" && item) {
+          detail = `leaderboard=${metadata.official_leaderboard_status || "-"} | claim policy: external evidence only`;
+        }
+        if (kind === "judge_provider_healthcheck" && item) {
+          detail = `ok=${metadata.judge_provider_ok_count || 0} | failed=${metadata.judge_provider_failed_count || 0} | skipped=${(metadata.judge_provider_skipped_profiles || []).length || 0}`;
+        }
+        if (kind === "vlm_provider_probe" && item) {
+          detail = `ok=${metadata.vlm_probe_ok} | status=${metadata.vlm_probe_status || "-"} | model=${metadata.vlm_probe_model || "-"}`;
+        }
+        if (kind === "real_executor_replay" && item) {
+          detail = `${metadata.real_executor_session_id || "-"} | real=${metadata.real_executor_real_execution_count || 0} | blocked=${metadata.real_executor_blocked_count || 0} | raw=${metadata.real_executor_raw_output_rendered}`;
+        }
+        const liveDetail = kind === "live_target_rehearsal"
+          ? `${metadata.run_id || "-"} | skipped=${metadata.skipped_profile_count || 0} | required_fail=${metadata.required_profile_failure_count || 0}`
+          : detail;
+        document.getElementById(id).textContent = item
+          ? `${item.name} | ${liveDetail}`
+          : pack.gateNone;
+      });
+      if (!artifactState.semantic_method_matrix) {
+        document.getElementById("artifactSemanticChain").textContent = pack.gateNone;
+      }
+      if (!artifactsLoaded) {
+        document.getElementById("artifactsMeta").textContent = pack.artifactsLoading;
+      } else if (artifactHealthState) {
+        document.getElementById("artifactsMeta").textContent = `${pack.artifactHealth}: ${artifactHealthState.state || "-"} | ${pack.artifactProfile}: ${artifactHealthState.policy_profile || "-"} / ${artifactHealthState.stage || "-"} | ${pack.artifactMissing}: ${(artifactHealthState.missing_kinds || []).join(", ") || pack.gateNone} | ${pack.artifactStale}: ${(artifactHealthState.stale_kinds || []).join(", ") || pack.gateNone} | ${pack.artifactFailed}: ${(artifactHealthState.failed_kinds || []).join(", ") || pack.gateNone}`;
+      } else {
+        document.getElementById("artifactsMeta").textContent = pack.artifactsReady;
+      }
+      renderStoryEvidence();
+    }
+    function renderStoryEvidence() {
+      const write = (id, text) => {
+        const node = document.getElementById(id);
+        if (node) node.textContent = text || "Evidence: pending";
+      };
+      const meta = (kind) => (artifactState[kind] && artifactState[kind].metadata) || {};
+      const realism = meta("agent_vlm_realism");
+      const graph = meta("agent_task_graph_replay_alignment");
+      const vlm = meta("vlm_multi_image_provider_benchmark");
+      const jbbCompletion = meta("jailbreakbench_completion_scorer_smoke");
+      const harmAdvCompletion = meta("harm_adv_completion_scorer_smoke");
+      const ledger = meta("official_evaluator_reproducibility_ledger");
+      const executorSummary = executorProvenanceSummary(insightState.executor);
+      const replayEvidenceCount = executorSummary.count || graph.agent_graph_alignment_action_count || "-";
+      const ocrRuns = Array.isArray(insightState.ocr && insightState.ocr.samples)
+        ? insightState.ocr.samples.reduce((total, sample) => total + ((sample.ocr_runs || []).length || 0), 0)
+        : 0;
+      write(
+        "storyRagEvidence",
+        `Evidence: realism cases=${realism.agent_vlm_case_count || "-"} catch=${formatPercent(realism.agent_vlm_attack_catch)} FPR=${formatPercent(realism.agent_vlm_fpr)}`
+      );
+      write(
+        "storyOcrEvidence",
+        `Evidence: images=${vlm.vlm_multi_image_count || "-"} provider rows=${vlm.vlm_multi_provider_row_count || "-"} OCR runs=${ocrRuns || "-"} hardFPR=${formatPercent(vlm.vlm_multi_hard_block_fpr)}`
+      );
+      write(
+        "storyToolEvidence",
+        `Evidence: graph actions=${graph.agent_graph_alignment_action_count || "-"} aligned=${formatPercent(graph.agent_graph_alignment_pass_rate)} security=${formatPercent(graph.agent_graph_alignment_security_block)}`
+      );
+      write(
+        "storyAgentEvidence",
+        `Evidence: replay/provenance=${replayEvidenceCount} | JBB unsafe=${formatPercent(jbbCompletion.jbb_completion_unsafe_rate)} benign refusal=${formatPercent(jbbCompletion.jbb_completion_refusal_rate_on_benign)} recovery=${jbbCompletion.jbb_completion_recovery_applied_count || 0}/${jbbCompletion.jbb_completion_recovery_attempt_count || 0} | Harm/Adv unsafe=${formatPercent(harmAdvCompletion.harm_adv_completion_unsafe_rate)} cases=${harmAdvCompletion.harm_adv_completion_case_count || "-"} | ledger rows=${ledger.official_ledger_row_count || "-"}`
+      );
+    }
+    function formatCounts(counts) {
+      const entries = Object.entries(counts || {}).filter(([, value]) => Number(value) !== 0);
+      if (!entries.length) return "-";
+      return entries.map(([key, value]) => `${key}:${value}`).join(", ");
+    }
+    function shortHash(value) {
+      const text = String(value || "");
+      return text ? text.slice(0, 12) : "-";
+    }
+    function formatProvenance(provenance) {
+      const pack = dict[currentLang] || dict.zh;
+      if (!provenance || typeof provenance !== "object") return "";
+      const executor = provenance.executor || {};
+      const component = provenance.component || {};
+      const artifactRefs = provenance.artifact_refs || {};
+      if (executor.tool_name) {
+        return `${pack.insightProvenance}: ${executor.tool_name}/${executor.side_effects || "-"} ${pack.insightHash}:${shortHash(artifactRefs.observation_sha256)}`;
+      }
+      if (component.component_name) {
+        return `${pack.insightProvenance}: ${component.component_name}/${component.component_type || "-"} ${provenance.integrity_status || "-"}`;
+      }
+      if (provenance.tool_name || provenance.runner_id) {
+        return `${pack.insightProvenance}: ${provenance.tool_name || provenance.runner_id}/${provenance.side_effects || "-"} ${pack.insightHash}:${shortHash(provenance.phase_chain_sha256 || provenance.observation_sha256)}`;
+      }
+      return `${pack.insightProvenance}: ${provenance.schema_version || "-"}`;
+    }
+    function firstSequenceProvenance(data) {
+      const sequences = Array.isArray(data && data.sequences) ? data.sequences : [];
+      for (const sequence of sequences) {
+        const events = Array.isArray(sequence.events) ? sequence.events : [];
+        for (const event of events) {
+          const line = formatProvenance(event.provenance);
+          if (line) return line;
+        }
+      }
+      return "";
+    }
+    function executorProvenanceSummary(data) {
+      const executions = Array.isArray(data && data.executions) ? data.executions : [];
+      const withProvenance = executions.filter((item) => item.provenance);
+      return {
+        count: withProvenance.length,
+        first: withProvenance.length ? formatProvenance(withProvenance[0].provenance) : ""
+      };
+    }
+    function firstFindingProvenance(data) {
+      const findings = Array.isArray(data && data.findings) ? data.findings : [];
+      for (const finding of findings) {
+        const line = formatProvenance(finding.provenance);
+        if (line) return line;
+      }
+      return "";
+    }
+    function renderFindingList(id, findings) {
+      const pack = dict[currentLang] || dict.zh;
+      const items = Array.isArray(findings) ? findings.slice(0, 3) : [];
+      document.getElementById(id).innerHTML = items.length
+        ? items.map((item) => {
+            const provenance = formatProvenance(item.provenance);
+            const suffix = provenance ? ` · ${escapeHtml(provenance)}` : "";
+            return `<li>${escapeHtml(item.risk_type || item.finding_id || "-")} · ${escapeHtml(item.severity || "-")}${suffix}</li>`;
+          }).join("")
+        : `<li>${pack.gateNone}</li>`;
+    }
+    function renderExecutorReplayList() {
+      const pack = dict[currentLang] || dict.zh;
+      const allExecutions = Array.isArray(insightState.executor && insightState.executor.executions)
+        ? insightState.executor.executions
+        : [];
+      const priority = (item) => {
+        const provenance = item.provenance || {};
+        const sideEffects = String(provenance.side_effects || "");
+        let score = 0;
+        if (item.rollback_completed || item.rollback_required) score += 5;
+        if (sideEffects === "registration") score += 4;
+        if (item.status === "failed" || item.status === "blocked") score += 3;
+        if (String(item.trace_id || "").includes("plugin-registration-execute")) score += 2;
+        return score;
+      };
+      const executions = allExecutions.slice().sort((a, b) => priority(b) - priority(a)).slice(0, 4);
+      document.getElementById("insightExecutorReplay").innerHTML = executions.length
+        ? executions.map((item) => {
+            const provenance = item.provenance || {};
+            const tool = provenance.tool_name || (item.capability || {}).tool_name || "-";
+            const rollback = item.rollback_completed ? ` · ${pack.insightRollback}:true` : "";
+            return `<li>${escapeHtml(tool)} · ${escapeHtml(item.status || "-")}${rollback} · ${pack.insightRunner}:${escapeHtml(provenance.runner_id || item.runner_id || "-")} · ${pack.insightSideEffects}:${escapeHtml(provenance.side_effects || "-")} · ${pack.insightHash}:${escapeHtml(shortHash(provenance.phase_chain_sha256 || provenance.observation_sha256))}</li>`;
+          }).join("")
+        : `<li>${pack.gateNone}</li>`;
+      if (!executions.length) {
+        document.getElementById("insightExecutorReplayDetail").textContent = pack.gateNone;
+        return;
+      }
+      const focused = executions[0];
+      const provenance = focused.provenance || {};
+      const phaseStatuses = focused.phase_statuses || {};
+      const phases = Object.keys(phaseStatuses)
+        .map((phase) => `${phase}:${(phaseStatuses[phase] || []).join("/")}`)
+        .join(" > ");
+      const refs = []
+        .concat(focused.input_refs || [])
+        .concat(focused.output_refs || [])
+        .slice(0, 3)
+        .join(" | ");
+      document.getElementById("insightExecutorReplayDetail").textContent =
+        `${pack.insightTrace}: ${focused.trace_id || "-"} | ${pack.insightPhases}: ${phases || "-"} | ` +
+        `${pack.insightRefs}: ${refs || "-"} | ${pack.insightHash}: ` +
+        `${shortHash(provenance.phase_chain_sha256 || provenance.observation_sha256)}`;
+    }
+    function renderPluginSessionList() {
+      const pack = dict[currentLang] || dict.zh;
+      const sessions = Array.isArray(insightState.plugin && insightState.plugin.sessions)
+        ? insightState.plugin.sessions
+        : [];
+      document.getElementById("insightPluginSessions").innerHTML = sessions.slice(0, 4).length
+        ? sessions.slice(0, 4).map((item) => {
+            const routes = item.stage_routes || {};
+            const routeText = Object.keys(routes).map((key) => `${key}:${routes[key]}`).join("/");
+            const effects = Array.isArray(item.side_effects) ? item.side_effects.join(", ") : "-";
+            const flags = Array.isArray(item.risk_flags) ? item.risk_flags.join(", ") : "-";
+            const summary = `${escapeHtml(item.plugin_name || "-")} · ${pack.insightSource}:${escapeHtml(item.source_scheme || "-")} · ${pack.insightRoutes}:${escapeHtml(routeText || "-")} · ${pack.insightManifest}:${escapeHtml(shortHash(item.manifest_sha256))}`;
+            const detail = `${pack.insightTrace}: ${escapeHtml(item.trace_id || "-")}<br>${pack.insightSourceUri}: ${escapeHtml(item.source_uri || "-")}<br>${pack.insightSideEffects}: ${escapeHtml(effects || "-")}<br>${pack.insightRiskFlags}: ${escapeHtml(flags || "-")}`;
+            return `<li><details><summary>${summary}</summary><div class="plugin-detail">${detail}</div></details></li>`;
+          }).join("")
+        : `<li>${pack.gateNone}</li>`;
+    }
+    function renderOcrEvidenceList() {
+      const pack = dict[currentLang] || dict.zh;
+      const samples = Array.isArray(insightState.ocr && insightState.ocr.samples) ? insightState.ocr.samples : [];
+      const runs = [];
+      samples.forEach((sample) => (sample.ocr_runs || []).forEach((run) => runs.push({sample, run})));
+      document.getElementById("insightOcrEvidence").innerHTML = runs.slice(0, 4).length
+        ? runs.slice(0, 4).map(({sample, run}) => `<li>${escapeHtml(sample.image_id || "-")} · ${pack.insightEngine}:${escapeHtml(run.engine || "-")} · ${pack.insightHash}:${escapeHtml(shortHash(run.ocr_output_sha256))}</li>`).join("")
+        : `<li>${pack.gateNone}</li>`;
+    }
+    function renderInsights() {
+      const pack = dict[currentLang] || dict.zh;
+      if (!insightsLoaded) {
+        document.getElementById("insightsMeta").textContent = pack.insightsLoading;
+      } else if (!insightState.log && !insightState.sequence && !insightState.supply) {
+        document.getElementById("insightsMeta").textContent = pack.insightsUnavailable;
+      } else {
+        document.getElementById("insightsMeta").textContent = pack.insightsReady;
+      }
+      const logSummary = (insightState.log && insightState.log.summary) || {};
+      document.getElementById("insightLogValue").textContent = `${logSummary.finding_count || 0} ${pack.insightFindings}`;
+      document.getElementById("insightLogDetail").textContent = `${pack.insightRecords}: ${logSummary.decision_record_count || 0} | ${pack.insightSuspicious}: ${logSummary.suspicious_session_count || 0} | ${pack.insightRoutes}: ${formatCounts(logSummary.route_counts)}`;
+      renderFindingList("insightLogFindings", insightState.log && insightState.log.findings);
+
+      const sequenceSummary = (insightState.sequence && insightState.sequence.summary) || {};
+      const executorSummary = executorProvenanceSummary(insightState.executor);
+      const sequenceProvenanceCount = sequenceSummary.provenance_record_count || executorSummary.count || 0;
+      const sequenceProvenance = firstSequenceProvenance(insightState.sequence) || executorSummary.first;
+      document.getElementById("insightSequenceValue").textContent = `${sequenceSummary.finding_count || 0} ${pack.insightFindings}`;
+      document.getElementById("insightSequenceDetail").textContent = `${pack.insightExecutions}: ${sequenceSummary.execution_count || 0} | ${pack.insightSequences}: ${sequenceSummary.sequence_count || 0} | ${pack.insightProvenance}: ${sequenceProvenanceCount}${sequenceProvenance ? ` | ${sequenceProvenance}` : ""}`;
+      renderFindingList("insightSequenceFindings", insightState.sequence && insightState.sequence.findings);
+
+      const supplySummary = (insightState.supply && insightState.supply.summary) || {};
+      const supplyProvenance = firstFindingProvenance(insightState.supply);
+      document.getElementById("insightSupplyValue").textContent = `${supplySummary.finding_count || 0} ${pack.insightFindings}`;
+      document.getElementById("insightSupplyDetail").textContent = `${pack.insightCapabilities}: ${supplySummary.capability_count || 0} | SBOM: ${supplySummary.component_count || 0} | ${pack.insightRuntimePlugins}: ${supplySummary.runtime_plugin_component_count || 0} | ${pack.insightProviders}: ${supplySummary.risk_provider_count || 0} | ${pack.insightSeverity}: ${formatCounts(supplySummary.severity_counts)} | ${pack.insightProvenance}: ${supplySummary.provenance_record_count || 0}${supplyProvenance ? ` | ${supplyProvenance}` : ""}`;
+      renderFindingList("insightSupplyFindings", insightState.supply && insightState.supply.findings);
+      renderExecutorReplayList();
+      renderPluginSessionList();
+      renderOcrEvidenceList();
+      renderStoryEvidence();
+    }
+    function renderPrivacyProbe() {
+      const pack = dict[currentLang] || dict.zh;
+      const item = artifactState.decoder_probe;
+      const metadata = item && item.metadata ? item.metadata : {};
+      const hasTokenF1 = Number.isFinite(Number(metadata.max_token_f1));
+      if (!item || !hasTokenF1) {
+        document.getElementById("privacyMeta").textContent = artifactsLoaded ? pack.privacyMissing : pack.privacyLoading;
+        document.getElementById("privacyProtectionValue").textContent = "-";
+        document.getElementById("privacyTokenF1Value").textContent = "-";
+        document.getElementById("privacyRiskValue").textContent = "-";
+        document.getElementById("privacyContractValue").textContent = "-";
+        document.getElementById("privacyDetails").textContent = "-";
+        return;
+      }
+      const tokenF1 = Number(metadata.max_token_f1);
+      const protectionRate = Math.max(0, 1 - tokenF1);
+      const attack = metadata.best_decoder_attack || (metadata.attacks || []).join(", ") || "-";
+      const variant = metadata.best_decoder_variant || (metadata.variants || []).join(", ") || "-";
+      const rawPolicy = metadata.contains_raw_text ? pack.privacyRawPresent : pack.privacyRawOmitted;
+      const routing = metadata.eval_only === true && metadata.production_routing === false ? pack.privacyRoutingBlocked : pack.privacyRoutingEnabled;
+      document.getElementById("privacyMeta").textContent = `${pack.privacySource}: ${metadata.run_id || item.name} | ${pack.privacyTask}: ${metadata.glue_task || "-"}`;
+      document.getElementById("privacyProtectionValue").textContent = formatPercent(protectionRate);
+      document.getElementById("privacyTokenF1Value").textContent = formatPercent(tokenF1);
+      document.getElementById("privacyRiskValue").textContent = formatScore(metadata.max_risk_score);
+      document.getElementById("privacyContractValue").textContent = metadata.eval_only ? pack.privacyEvalOnly : routing;
+      document.getElementById("privacyDetails").textContent = `${pack.privacyBestDecoder}: ${attack} / ${variant} | ${pack.privacySamples}: ${metadata.train_size || "-"} / ${metadata.eval_size || "-"} | ${pack.privacyEpochs}: ${metadata.best_decoder_epochs || "-"} | ${pack.privacyVocab}: ${metadata.best_decoder_vocab_size || "-"} | ${routing} | ${rawPolicy}`;
+    }
+    function renderPrivacyDemoResult() {
+      const pack = dict[currentLang] || dict.zh;
+      const data = privacyDemoState;
+      const metrics = data && data.metrics ? data.metrics : {};
+      if (!data) {
+        document.getElementById("privacyDemoStatus").textContent = pack.privacyDemoReady;
+        document.getElementById("privacyDemoReconstruction").textContent = "-";
+        document.getElementById("privacyDemoRecovered").textContent = "-";
+        document.getElementById("privacyDemoGuess").textContent = "-";
+        ["privacyDemoProtection", "privacyDemoTokenF1", "privacyDemoRisk", "privacyDemoRoute"].forEach((id) => document.getElementById(id).textContent = "-");
+        return;
+      }
+      if (!data.available) {
+        document.getElementById("privacyDemoStatus").textContent = `${pack.privacyDemoUnavailable}: ${data.missing_reason || data.error || "-"}`;
+        document.getElementById("privacyDemoReconstruction").textContent = "-";
+        document.getElementById("privacyDemoRecovered").textContent = "-";
+        document.getElementById("privacyDemoGuess").textContent = "-";
+        ["privacyDemoProtection", "privacyDemoTokenF1", "privacyDemoRisk", "privacyDemoRoute"].forEach((id) => document.getElementById(id).textContent = "-");
+        return;
+      }
+      document.getElementById("privacyDemoStatus").textContent = `${pack.privacyEvalOnly} | ${pack.privacyRoutingBlocked} | ${pack.privacyDemoNotPersisted} | ${pack.privacyPipeline}: ${data.pipeline || data.embedding_variant || "-"}`;
+      document.getElementById("privacyDemoProtection").textContent = formatPercent(metrics.text_protection_rate);
+      document.getElementById("privacyDemoTokenF1").textContent = formatPercent(metrics.token_f1);
+      document.getElementById("privacyDemoRisk").textContent = formatScore(metrics.risk_score);
+      document.getElementById("privacyDemoRoute").textContent = pack.privacyEvalOnly;
+      document.getElementById("privacyDemoReconstruction").textContent = data.reconstruction_accepted ? data.reconstruction_text || "-" : pack.privacyDemoNoTrusted;
+      document.getElementById("privacyDemoGuess").textContent = data.decoder_guess_text || data.reconstruction_text || "-";
+      const meaningful = metrics.recovered_meaningful_tokens || [];
+      document.getElementById("privacyDemoRecovered").innerHTML = renderTokens(meaningful.length ? meaningful : metrics.recovered_source_tokens || []);
+    }
+    function renderGate() {
+      const pack = dict[currentLang] || dict.zh;
+      const meta = document.getElementById("gateMeta");
+      const details = document.getElementById("gateDetails");
+      const thresholds = document.getElementById("gateThresholds");
+      if (!gateState || !gateState.available || !gateState.gate) {
+        meta.textContent = pack.gateUnavailable;
+        const status = gateState && gateState.status ? gateState.status : {};
+        details.textContent = gateState && gateState.error
+          ? `${pack.gateError}: ${gateState.error}`
+          : `${pack.gateExpectedPath}: ${status.expected_path || (gateState && gateState.path) || "-"}`;
+        thresholds.textContent = "";
+        ["gateRecommended", "gatePromoted", "gateStable", "gateDemoted"].forEach((id) => document.getElementById(id).innerHTML = renderPills([]));
+        document.getElementById("gateReasons").innerHTML = `<li>${pack.gateNone}</li>`;
+        return;
+      }
+      const gate = gateState.gate;
+      const status = gateState.status || {};
+      meta.textContent = `${pack.gateRun}: ${status.run_id || gate.run_id || "-"} | ${pack.gateState}: ${gateStateLabel(status.state)}`;
+      details.textContent = `${pack.gateCreated}: ${formatTime(status.created_at || gate.created_at)} | ${pack.gateModified}: ${formatTime(status.modified_at)} | ${pack.gateSource}: ${status.source_summary_artifact || gate.summary_artifact || "-"}`;
+      thresholds.textContent = thresholdText(status.thresholds || gate.thresholds || {});
+      document.getElementById("gateRecommended").innerHTML = renderPills(gate.recommended_models || []);
+      document.getElementById("gatePromoted").innerHTML = renderPills(gate.promoted_models || []);
+      document.getElementById("gateStable").innerHTML = renderPills(gate.stable_models || []);
+      document.getElementById("gateDemoted").innerHTML = renderPills(gate.demoted_models || []);
+      const excluded = gate.excluded_models || [];
+      document.getElementById("gateReasons").innerHTML = excluded.length
+        ? excluded.map((item) => `<li><strong>${escapeHtml(item.model)}</strong>: ${escapeHtml((item.reasons || []).join(", ") || item.status || "-")}</li>`).join("")
+        : `<li>${pack.gateNone}</li>`;
+    }
+    function applyLang(lang) {
+      currentLang = lang;
+      const pack = dict[lang] || dict.zh;
+      document.documentElement.lang = lang === "en" ? "en" : "zh-CN";
+      document.querySelectorAll("[data-i18n]").forEach((node) => node.textContent = pack[node.dataset.i18n] || node.textContent);
+      document.querySelectorAll("[data-i18n-placeholder]").forEach((node) => node.placeholder = pack[node.dataset.i18nPlaceholder] || node.placeholder);
+      document.querySelectorAll(".lang").forEach((button) => button.classList.toggle("active", button.dataset.lang === lang));
+      localStorage.setItem("guardx_lang", lang);
+      renderGate();
+      renderGatePlan();
+      renderArtifactSummary();
+      renderInsights();
+      renderPrivacyProbe();
+      renderPrivacyDemoResult();
+    }
+    async function loadArtifactHealth(profile) {
+      artifactHealthProfile = profile || "local_dev";
+      localStorage.setItem("guardx_artifact_health_profile", artifactHealthProfile);
+      document.getElementById("artifactHealthProfile").value = artifactHealthProfile;
+      artifactHealthState = null;
+      renderArtifactSummary();
+      try {
+        const response = await fetch(`/v1/audit/experiment_artifact_health?profile=${encodeURIComponent(artifactHealthProfile)}`);
+        artifactHealthState = await response.json();
+      } catch (error) {
+        artifactHealthState = null;
+      }
+      renderArtifactSummary();
+    }
+    async function loadInsights() {
+      insightState = {log: null, sequence: null, supply: null, executor: null, plugin: null, ocr: null};
+      insightsLoaded = false;
+      renderInsights();
+      try {
+        await Promise.all([
+          ["log", fetch("/v1/audit/security_log_insights?limit=200")],
+          ["sequence", fetch("/v1/audit/api_sequence_audit?limit=200")],
+          ["supply", fetch("/v1/runtime/supply_chain_audit")],
+          ["executor", fetch("/v1/audit/executor_replay?limit=200")],
+          ["plugin", fetch("/v1/audit/plugin_session_replay?limit=2000")],
+          ["ocr", fetch("/v1/audit/ocr_evidence_summary")]
+        ].map(async ([kind, request]) => {
+          insightState[kind] = await (await request).json();
+        }));
+      } catch (error) {
+        insightState = {log: null, sequence: null, supply: null, executor: null, plugin: null, ocr: null};
+      }
+      insightsLoaded = true;
+      renderInsights();
+    }
+    document.querySelectorAll(".lang").forEach((button) => button.addEventListener("click", () => applyLang(button.dataset.lang)));
+    document.getElementById("artifactHealthProfile").value = artifactHealthProfile;
+    document.getElementById("artifactHealthProfile").addEventListener("change", (event) => loadArtifactHealth(event.target.value));
+    document.querySelectorAll("[data-i18n-placeholder]").forEach((node) => {
+      const pack = dict[currentLang] || dict.zh;
+      node.placeholder = pack[node.dataset.i18nPlaceholder] || node.placeholder;
+    });
+    document.getElementById("privacyDemoRun").addEventListener("click", async () => {
+      const pack = dict[currentLang] || dict.zh;
+      const button = document.getElementById("privacyDemoRun");
+      const sourceText = document.getElementById("privacyDemoInput").value.trim();
+      if (!sourceText) {
+        privacyDemoState = {available: false, missing_reason: pack.privacyDemoEmpty};
+        renderPrivacyDemoResult();
+        return;
+      }
+      button.disabled = true;
+      document.getElementById("privacyDemoStatus").textContent = pack.privacyDemoRunning;
+      try {
+        const response = await fetch("/v1/eval/text_privacy_decoder_demo", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({source_text: sourceText, variant: document.getElementById("privacyDemoVariant").value, show_reconstruction: true})
+        });
+        privacyDemoState = await response.json();
+      } catch (error) {
+        privacyDemoState = {available: false, error: String(error)};
+      }
+      button.disabled = false;
+      renderPrivacyDemoResult();
+    });
+    applyLang(currentLang);
+    document.getElementById("logout").addEventListener("click", async () => {
+      await fetch("/v1/web_logout", {method: "POST"});
+      location.href = "/login";
+    });
+    fetch("/v1/audit/model_recommendation_gate")
+      .then((response) => response.json())
+      .then((data) => { gateState = data; renderGate(); })
+      .catch(() => { gateState = {available: false}; renderGate(); });
+    document.getElementById("gatePlanRefresh").addEventListener("click", async () => {
+      const pack = dict[currentLang] || dict.zh;
+      document.getElementById("gatePlan").textContent = pack.gatePlanLoading;
+      try {
+        const response = await fetch("/v1/audit/real_model_matrix_plan?models=auto&run_id=portal-preflight");
+        gatePlanState = await response.json();
+      } catch (error) {
+        gatePlanState = {configured_models: [], missing_env: {request: [String(error)]}};
+      }
+      renderGatePlan();
+    });
+    document.getElementById("seedDemoReplay").addEventListener("click", async () => {
+      const pack = dict[currentLang] || dict.zh;
+      const button = document.getElementById("seedDemoReplay");
+      button.disabled = true;
+      document.getElementById("seedDemoStatus").textContent = pack.insightSeedRunning;
+      try {
+        const response = await fetch("/v1/audit/seed_demo_replay", {method: "POST"});
+        const data = await response.json();
+        document.getElementById("seedDemoStatus").textContent = `${pack.insightSeedDone}: ${data.session_id || "-"}`;
+        await loadInsights();
+      } catch (error) {
+        document.getElementById("seedDemoStatus").textContent = String(error);
+      }
+      button.disabled = false;
+    });
+    Promise.all([
+      ["model_recommendation_gate", fetch("/v1/audit/experiment_artifacts?kind=model_recommendation_gate&limit=1")],
+      ["real_model_matrix_plan", fetch("/v1/audit/experiment_artifacts?kind=real_model_matrix_plan&limit=1")],
+      ["model_matrix", fetch("/v1/audit/experiment_artifacts?kind=model_matrix&limit=1")],
+      ["competition_readiness", fetch("/v1/audit/experiment_artifacts?kind=competition_readiness&limit=1")],
+      ["demo_flow_summary", fetch("/v1/audit/experiment_artifacts?kind=demo_flow_summary&limit=1")],
+      ["competition_submission_readiness_audit", fetch("/v1/audit/experiment_artifacts?kind=competition_submission_readiness_audit&limit=1")],
+      ["final_submission_gate", fetch("/v1/audit/experiment_artifacts?kind=final_submission_gate&limit=1")],
+      ["evidence_readiness_board", fetch("/v1/audit/experiment_artifacts?kind=evidence_readiness_board&limit=1")],
+      ["defense_evidence_notes", fetch("/v1/audit/experiment_artifacts?kind=defense_evidence_notes&limit=1")],
+      ["presentation_freshness_check", fetch("/v1/audit/experiment_artifacts?kind=presentation_freshness_check&limit=1")],
+      ["portal_rehearsal", fetch("/v1/audit/experiment_artifacts?kind=portal_rehearsal&limit=1")],
+      ["submission_package_manifest", fetch("/v1/audit/experiment_artifacts?kind=submission_package_manifest&limit=1")],
+      ["public_benchmark_gate", fetch("/v1/audit/experiment_artifacts?kind=public_benchmark_gate&limit=1")],
+      ["competition_gap_radar", fetch("/v1/audit/experiment_artifacts?kind=competition_gap_radar&limit=1")],
+      ["model_feedback_loop", fetch("/v1/audit/experiment_artifacts?kind=model_feedback_loop&limit=1")],
+      ["live_target_preflight", fetch("/v1/audit/experiment_artifacts?kind=live_target_preflight&limit=1")],
+      ["live_target_readiness", fetch("/v1/audit/experiment_artifacts?kind=live_target_readiness&limit=1")],
+      ["live_target_rehearsal", fetch("/v1/audit/experiment_artifacts?kind=live_target_rehearsal&limit=1")],
+      ["decoder_probe", fetch("/v1/audit/experiment_artifacts?kind=decoder_probe&limit=1")],
+      ["adaptive_baseline_comparison", fetch("/v1/audit/experiment_artifacts?kind=adaptive_baseline_comparison&limit=1")],
+      ["adaptive_external_baselines", fetch("/v1/audit/experiment_artifacts?kind=adaptive_external_baselines&limit=1")],
+      ["semantic_method_matrix", fetch("/v1/audit/experiment_artifacts?kind=semantic_method_matrix&limit=1")],
+      ["local_lora_semantic_eval", fetch("/v1/audit/experiment_artifacts?kind=local_lora_semantic_eval&limit=1")],
+      ["lora_benign_recovery_dataset", fetch("/v1/audit/experiment_artifacts?kind=lora_benign_recovery_dataset&limit=1")],
+      ["lora_routing_delta", fetch("/v1/audit/experiment_artifacts?kind=lora_routing_delta&limit=1")],
+      ["defense_action_ablation", fetch("/v1/audit/experiment_artifacts?kind=defense_action_ablation&limit=1")],
+      ["judge_aware_policy_profile", fetch("/v1/audit/experiment_artifacts?kind=judge_aware_policy_profile&limit=1")],
+      ["unified_defense_ablation", fetch("/v1/audit/experiment_artifacts?kind=unified_defense_ablation&limit=1")],
+      ["same_batch_unified_ablation", fetch("/v1/audit/experiment_artifacts?kind=same_batch_unified_ablation&limit=1")],
+      ["agent_vlm_realism", fetch("/v1/audit/experiment_artifacts?kind=agent_vlm_realism&limit=1")],
+      ["vlm_multi_image_provider_benchmark", fetch("/v1/audit/experiment_artifacts?kind=vlm_multi_image_provider_benchmark&limit=1")],
+      ["agent_task_graph_mapping", fetch("/v1/audit/experiment_artifacts?kind=agent_task_graph_mapping&limit=1")],
+      ["agent_task_graph_replay_alignment", fetch("/v1/audit/experiment_artifacts?kind=agent_task_graph_replay_alignment&limit=1")],
+      ["xstest_local_official_reproduction", fetch("/v1/audit/experiment_artifacts?kind=xstest_local_official_reproduction&limit=1")],
+      ["harmbench_official_method_comparison", fetch("/v1/audit/experiment_artifacts?kind=harmbench_official_method_comparison&limit=1")],
+      ["harmbench_official_completion_manifest", fetch("/v1/audit/experiment_artifacts?kind=harmbench_official_completion_manifest&limit=1")],
+      ["harmbench_step3_importer_preflight", fetch("/v1/audit/experiment_artifacts?kind=harmbench_step3_importer_preflight&limit=1")],
+      ["harmbench_official_step3_result_summary", fetch("/v1/audit/experiment_artifacts?kind=harmbench_official_step3_result_summary&limit=1")],
+      ["jailbreakbench_local_official_reproduction", fetch("/v1/audit/experiment_artifacts?kind=jailbreakbench_local_official_reproduction&limit=1")],
+      ["jailbreakbench_official_method_comparison", fetch("/v1/audit/experiment_artifacts?kind=jailbreakbench_official_method_comparison&limit=1")],
+      ["jailbreakbench_judge_routing_ablation", fetch("/v1/audit/experiment_artifacts?kind=jailbreakbench_judge_routing_ablation&limit=1")],
+      ["jailbreakbench_judge_routing_threshold_sweep", fetch("/v1/audit/experiment_artifacts?kind=jailbreakbench_judge_routing_threshold_sweep&limit=1")],
+      ["jailbreakbench_completion_scorer_smoke", fetch("/v1/audit/experiment_artifacts?kind=jailbreakbench_completion_scorer_smoke&limit=1")],
+      ["harm_adv_completion_scorer_smoke", fetch("/v1/audit/experiment_artifacts?kind=harm_adv_completion_scorer_smoke&limit=1")],
+      ["official_judge_tradeoff", fetch("/v1/audit/experiment_artifacts?kind=official_judge_tradeoff&limit=1")],
+      ["official_judge_routing_ablation", fetch("/v1/audit/experiment_artifacts?kind=official_judge_routing_ablation&limit=1")],
+      ["official_evaluator_reproducibility_ledger", fetch("/v1/audit/experiment_artifacts?kind=official_evaluator_reproducibility_ledger&limit=1")],
+      ["upstream_evaluator_runnable_checklist", fetch("/v1/audit/experiment_artifacts?kind=upstream_evaluator_runnable_checklist&limit=1")],
+      ["upstream_evaluator_smoke_readiness", fetch("/v1/audit/experiment_artifacts?kind=upstream_evaluator_smoke_readiness&limit=1")],
+      ["strongreject_official_autograder_preflight", fetch("/v1/audit/experiment_artifacts?kind=strongreject_official_autograder_preflight&limit=1")],
+      ["strongreject_guardx_official_adapter", fetch("/v1/audit/experiment_artifacts?kind=strongreject_guardx_official_adapter&limit=1")],
+      ["strongreject_official_compatible_scorer", fetch("/v1/audit/experiment_artifacts?kind=strongreject_official_compatible_scorer&limit=1")],
+      ["official_evaluator_parity", fetch("/v1/audit/experiment_artifacts?kind=official_evaluator_parity&limit=1")],
+      ["agent_end_to_end_replay", fetch("/v1/audit/experiment_artifacts?kind=agent_end_to_end_replay&limit=1")],
+      ["official_leaderboard_readiness", fetch("/v1/audit/experiment_artifacts?kind=official_leaderboard_readiness&limit=1")],
+      ["judge_provider_healthcheck", fetch("/v1/audit/experiment_artifacts?kind=judge_provider_healthcheck&limit=1")],
+      ["vlm_provider_probe", fetch("/v1/audit/experiment_artifacts?kind=vlm_provider_probe&limit=1")],
+      ["real_executor_replay", fetch("/v1/audit/experiment_artifacts?kind=real_executor_replay&limit=1")]
+    ].map(async ([kind, request]) => {
+      const data = await (await request).json();
+      artifactState[kind] = (data.artifacts || [])[0] || null;
+    })).then(() => {
+      artifactsLoaded = true;
+      renderArtifactSummary();
+      renderPrivacyProbe();
+    }).catch(() => {
+      artifactState = {};
+      artifactsLoaded = true;
+      renderArtifactSummary();
+      renderPrivacyProbe();
+    });
+    loadInsights();
+    loadArtifactHealth(artifactHealthProfile);
+  </script>
+</body>
+</html>

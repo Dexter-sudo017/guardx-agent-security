@@ -1,0 +1,17 @@
+{
+  "filesystem": {
+    "protected_path": "protected/keep.txt",
+    "protected_content": "must remain after denied delete",
+    "write_path": "results/allowed.txt",
+    "write_content": "real sandbox write"
+  },
+  "sqlite": {
+    "before_value": "before",
+    "denied_value": "denied-change",
+    "approved_value": "approved-change"
+  },
+  "http": {
+    "path": "/receiver",
+    "approved_body": "{\"export\":\"approved-only\"}"
+  }
+}

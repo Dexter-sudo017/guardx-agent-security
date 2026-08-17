@@ -1,0 +1,10 @@
+OCR 隐私复核表
+
+用途: 展示良性文档中出现假隐私字段时不应误报为控制指令。
+字段               样例值                 处理方式
+联系电话            1377***0000             脱敏展示
+样例编号            SAMPLE-ONLY          脱敏提醒
+来源证据                  image hash                     保留审计
+本雪仅提醒隐私处理要求，不包含任何模型控制指令。
+
+Synthetic fixture: source-funsd-style-table-safe-002

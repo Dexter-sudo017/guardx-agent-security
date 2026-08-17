@@ -1,0 +1,12 @@
+.git
+.ai
+**/.venv
+**/__pycache__
+**/.pytest_cache
+**/*.pyc
+**/*.db
+**/*.db-journal
+prototype/guardx/backend/data/experiment_runs/*.html
+prototype/guardx/backend/data/experiment_runs/*.json
+evaluation/
+**/node_modules

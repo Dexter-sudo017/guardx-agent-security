@@ -1,0 +1,120 @@
+{
+  "schema_version": "guardx-evidence-schema-mapping-v1",
+  "updated_at": "2026-06-28",
+  "purpose": "Map GuardX runtime evidence fields to provenance, telemetry, and SBOM concepts for replay and audit.",
+  "claim_boundary": "This is a GuardX schema mapping used for implementation and documentation; it is not a certification claim.",
+  "standards": {
+    "cyclonedx": "https://cyclonedx.org/",
+    "opentelemetry_genai": "https://opentelemetry.io/docs/specs/semconv/gen-ai/",
+    "slsa_provenance": "https://slsa.dev/spec/v1.0/provenance",
+    "w3c_prov": "https://www.w3.org/TR/prov-dm/"
+  },
+  "source_trust_lattice": [
+    "system",
+    "developer",
+    "user",
+    "trusted_local_config",
+    "retrieved_document",
+    "ocr_vlm_text",
+    "tool_observation",
+    "plugin_manifest",
+    "external_log_or_webpage"
+  ],
+  "action_privilege_lattice": [
+    "text_response",
+    "cite_or_summarize",
+    "read_only_file_or_db",
+    "write_file_or_db_mutation",
+    "code_execution",
+    "network_export",
+    "plugin_registration_with_side_effects"
+  ],
+  "field_mappings": [
+    {
+      "guardx_field": "RiskFinding.source_ref",
+      "standard": "W3C PROV",
+      "standard_concept": "Entity",
+      "usage": "Evidence source such as benchmark case, RAG document, OCR output, tool observation, or plugin manifest."
+    },
+    {
+      "guardx_field": "RiskFinding.provider",
+      "standard": "OpenTelemetry GenAI",
+      "standard_concept": "gen_ai.system / gen_ai.request.model / span attribute",
+      "usage": "Detector, judge, LoRA, runtime guard, or executor precheck that produced the finding."
+    },
+    {
+      "guardx_field": "RiskFinding.evidence_hash",
+      "standard": "SLSA / provenance artifact",
+      "standard_concept": "subject digest",
+      "usage": "Hash-only evidence for prompt, OCR text, VLM caption, tool output, model response, or replay artifact."
+    },
+    {
+      "guardx_field": "ExecutorReplay.phase",
+      "standard": "W3C PROV",
+      "standard_concept": "Activity",
+      "usage": "precheck, execute, observe, rollback, or replay phase."
+    },
+    {
+      "guardx_field": "ExecutorReplay.tool_name",
+      "standard": "W3C PROV",
+      "standard_concept": "Agent",
+      "usage": "Tool or external service that participates in the action chain."
+    },
+    {
+      "guardx_field": "ExecutorReplay.args_hash",
+      "standard": "SLSA / provenance artifact",
+      "standard_concept": "input digest",
+      "usage": "Hash of tool arguments, avoiding raw secret or raw high-risk payload rendering."
+    },
+    {
+      "guardx_field": "ExecutorReplay.output_hash",
+      "standard": "SLSA / provenance artifact",
+      "standard_concept": "output digest",
+      "usage": "Hash of tool output or model output used for audit and replay."
+    },
+    {
+      "guardx_field": "PluginManifest.source_uri",
+      "standard": "CycloneDX",
+      "standard_concept": "externalReferences.url / bom-ref",
+      "usage": "Plugin, MCP server, package, repository, or marketplace provenance source."
+    },
+    {
+      "guardx_field": "PluginManifest.side_effects",
+      "standard": "CycloneDX",
+      "standard_concept": "properties",
+      "usage": "Declared file, network, code, database, or registration side effects."
+    },
+    {
+      "guardx_field": "ModelAdapter.model_id",
+      "standard": "CycloneDX AI/ML-BOM",
+      "standard_concept": "component",
+      "usage": "LLM, VLM, embedding model, classifier, judge, or LoRA adapter identity."
+    },
+    {
+      "guardx_field": "DefenseAction.action_type",
+      "standard": "OpenTelemetry event",
+      "standard_concept": "security control event",
+      "usage": "allow, allow_with_boundary, review, quarantine, sanitize, deny, rollback, or terminate."
+    }
+  ],
+  "required_replay_fields": [
+    "trace_id",
+    "session_id",
+    "phase",
+    "source_ref",
+    "source_trust",
+    "action_privilege",
+    "risk_findings",
+    "policy_decision",
+    "defense_actions",
+    "input_hash",
+    "output_hash",
+    "provenance"
+  ],
+  "public_report_policy": {
+    "render_raw_high_risk_prompt": false,
+    "render_real_pii": false,
+    "render_real_secret": false,
+    "render_hashes_and_aggregate_metrics": true
+  }
+}

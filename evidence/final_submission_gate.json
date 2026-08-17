@@ -1,0 +1,49 @@
+{
+  "schema_version": "guardx-final-submission-gate-v1",
+  "status": "pass",
+  "check_count": 8,
+  "failed_count": 0,
+  "claim_boundary": "Local source package gate; not an official platform acceptance or award result.",
+  "checks": [
+    {
+      "item": "source_app",
+      "status": "pass",
+      "evidence": "prototype/guardx/backend/app/main.py"
+    },
+    {
+      "item": "smoke_eval",
+      "status": "pass",
+      "evidence": "prototype/guardx/backend/scripts/smoke_eval.py"
+    },
+    {
+      "item": "submission_audit",
+      "status": "pass",
+      "evidence": "evidence/competition_submission_readiness_audit.json"
+    },
+    {
+      "item": "benchmark_matrix",
+      "status": "pass",
+      "evidence": "evidence/benchmark_traceability_matrix.json"
+    },
+    {
+      "item": "same_batch_ablation",
+      "status": "pass",
+      "evidence": "evidence/submission_same_batch_1079_ablation_2026-07-01.json"
+    },
+    {
+      "item": "agent_vlm_cases",
+      "status": "pass",
+      "evidence": "evidence/agent_vlm_realism_cases_latest.json"
+    },
+    {
+      "item": "vlm_benchmark",
+      "status": "pass",
+      "evidence": "evidence/vlm_multi_image_provider_benchmark.json"
+    },
+    {
+      "item": "task_graph_replay",
+      "status": "pass",
+      "evidence": "evidence/agentdojo_injecagent_task_graph_replay_alignment.json"
+    }
+  ]
+}

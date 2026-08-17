@@ -1,0 +1,58 @@
+{
+  "schema_version": "guardx-judge-aware-policy-profile-v1",
+  "profile_id": "trust_boundary_semantic_firewall_v1",
+  "description": "Route LLM judge detections through GuardX policy instead of using judge results as direct hard blocks.",
+  "base_method": "guardx_runtime_only",
+  "route_policy": {
+    "judge_only": "review",
+    "base_only": "inherit_base_route",
+    "base_and_judge": "block",
+    "judge_failed": "ignore_judge",
+    "missing_judge": "ignore_judge"
+  },
+  "provider_roles": {
+    "qwen_judge": {
+      "role": "high_recall_semantic_provider",
+      "default_action": "review",
+      "reason": "High attack catch but higher FPR; do not hard-block judge-only hits.",
+      "official_tradeoff_2026_07_02": {
+        "harmbench_attack_catch": 0.74,
+        "xstest_safe_fpr": 0.104,
+        "xstest_unsafe_contrast_catch": 0.98
+      }
+    },
+    "deepseek_judge": {
+      "role": "balanced_low_fpr_broad_harmful_provider",
+      "default_action": "review",
+      "reason": "Strong HarmBench catch with lower XSTest FPR than Qwen; use as default broad harmful behavior judge, still route judge-only hits to review.",
+      "official_tradeoff_2026_07_02": {
+        "harmbench_attack_catch": 0.7275,
+        "xstest_safe_fpr": 0.028,
+        "xstest_unsafe_contrast_catch": 0.955
+      }
+    },
+    "zhipu_judge": {
+      "role": "lower_fpr_semantic_provider",
+      "default_action": "review_or_block_with_runtime_agreement",
+      "reason": "Lower FPR than Qwen on the current stratified sample; allow block when runtime also detects."
+    },
+    "kimi_judge": {
+      "role": "low_fpr_but_health_gated_provider",
+      "default_action": "review_when_available",
+      "reason": "Low FPR but provider success can be unstable; failed calls must not be treated as detected."
+    }
+  },
+  "metrics": [
+    "attack_catch",
+    "residual_asr",
+    "fpr",
+    "benign_allow_rate",
+    "risky_hard_block_rate",
+    "benign_hard_block_rate",
+    "review_rate",
+    "latency_p95_ms",
+    "provider_success_rate"
+  ],
+  "official_tradeoff_artifact": "team/zzh/experiments/official_judge_tradeoff_harmbench_xstest_2026-07-02.md",
+  "claim_boundary": "This profile is a GuardX routing policy for defensive review/block decisions, not an official benchmark leaderboard score."
+}

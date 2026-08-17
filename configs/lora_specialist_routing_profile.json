@@ -1,0 +1,146 @@
+{
+  "schema_version": "guardx-lora-specialist-routing-profile-v1",
+  "updated_at": "2026-06-23",
+  "purpose": "Compare and route a global LoRA semantic provider with future surface-specific LoRA specialists.",
+  "global_provider": {
+    "id": "local_lora_global",
+    "current_checkpoints": [
+      "local_lora_300",
+      "local_lora_500"
+    ],
+    "role": "general semantic review signal",
+    "routing_rule": "LoRA-only detections route to review; hard block requires runtime evidence, judge agreement, or dangerous tool side effects.",
+    "current_gap": "Global LoRA 300/500 improves attack catch over HF prompt-injection classifier but keeps high benign-boundary FPR on the 101-case unified stratified sample."
+  },
+  "specialist_candidates": [
+    {
+      "id": "lora_llm_input_harmful_request",
+      "surface_scope": [
+        "LLM input",
+        "LLM session"
+      ],
+      "benchmark_focus": [
+        "AdvBench",
+        "HarmBench",
+        "JailbreakBench"
+      ],
+      "positive_examples": [
+        "direct jailbreak",
+        "roleplay policy bypass",
+        "encoding obfuscation",
+        "broad harmful request"
+      ],
+      "hard_negative_examples": [
+        "XSTest benign safety question",
+        "StrongREJECT benign refusal-boundary question",
+        "benign security education"
+      ],
+      "training_goal": "Raise broad harmful-request catch while reducing benign-boundary false positives.",
+      "routing_rule": "review by default; block only when policy/risk providers also find unsafe intent."
+    },
+    {
+      "id": "lora_rag_tool_agent",
+      "surface_scope": [
+        "RAG",
+        "tool-output",
+        "Agent action",
+        "plugin"
+      ],
+      "benchmark_focus": [
+        "AgentDojo",
+        "InjecAgent",
+        "Promptfoo-style",
+        "garak-style",
+        "PyRIT-style"
+      ],
+      "positive_examples": [
+        "indirect prompt injection",
+        "tool-output injection",
+        "sensitive file access",
+        "network export",
+        "malicious plugin manifest"
+      ],
+      "hard_negative_examples": [
+        "benign RAG citation",
+        "plugin manifest audit",
+        "OWASP/NIST governance lookup",
+        "read-only tool use"
+      ],
+      "training_goal": "Catch cross-layer instruction transfer and action hijack using surface/trust-boundary metadata.",
+      "routing_rule": "review_or_block when untrusted context plus dangerous side effect is present; otherwise review."
+    },
+    {
+      "id": "lora_vlm_ocr",
+      "surface_scope": [
+        "OCR/VLM",
+        "multimodal"
+      ],
+      "benchmark_focus": [
+        "OCR hidden instruction fixtures",
+        "DocVQA/FUNSD/CORD-style synthetic samples"
+      ],
+      "positive_examples": [
+        "hidden instruction in image",
+        "OCR/VLM disagreement",
+        "receipt privacy exfiltration"
+      ],
+      "hard_negative_examples": [
+        "OCR privacy awareness poster",
+        "benign table/form image",
+        "privacy training image"
+      ],
+      "training_goal": "Separate hidden instruction risk from benign privacy/security awareness content.",
+      "routing_rule": "quarantine instruction-like OCR text; allow privacy-awareness content with OCR boundary evidence."
+    },
+    {
+      "id": "lora_benign_recovery",
+      "adapter_dir": "models/guardx-local-lora-benign-recovery-300",
+      "surface_scope": [
+        "all"
+      ],
+      "benchmark_focus": [
+        "XSTest",
+        "StrongREJECT",
+        "false-positive recovery probe"
+      ],
+      "positive_examples": [
+        "benign safety education",
+        "quoted attack for defensive analysis",
+        "incident response explanation",
+        "plugin audit"
+      ],
+      "hard_negative_examples": [
+        "same terms used as direct operational request",
+        "tool output that instructs a follow-up sensitive action"
+      ],
+      "training_goal": "Reduce hard-block false positives by learning allow-with-boundary cases.",
+      "routing_rule": "downgrade LoRA/global/judge-only hard block to review or allow_with_boundary when benign recovery evidence is strong."
+    }
+  ],
+  "router_inputs": [
+    "surface",
+    "layer",
+    "benchmark_family_or_source",
+    "trust_boundary",
+    "tool_side_effects",
+    "risk_finding_labels",
+    "policy_decision",
+    "judge_agreement"
+  ],
+  "selection_metrics": [
+    "Attack Catch",
+    "Residual ASR",
+    "FPR",
+    "Benign Allow",
+    "Benign Hard Block",
+    "Review Rate",
+    "Parse OK Rate",
+    "p95 latency"
+  ],
+  "evaluation_plan": {
+    "short_term": "Use existing local_lora_300/500 as global candidates and route LoRA-only hits to review.",
+    "next_experiment": "Train benign-recovery specialist first because current FPR is the main blocker.",
+    "medium_term": "Train lora_llm_input_harmful_request and lora_rag_tool_agent on separated hard-positive/hard-negative slices.",
+    "claim_boundary": "Specialist LoRA routing is a GuardX Risk Provider strategy, not an official leaderboard score until evaluated on official submission infrastructure."
+  }
+}

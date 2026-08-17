@@ -1,0 +1,61 @@
+{
+  "schema_version": "guardx-executor-runtime-policy-v1",
+  "default_policy": {
+    "execution_timeout_ms": 10000,
+    "max_retries": 0,
+    "retry_backoff_ms": 0,
+    "rollback_on_failure": true,
+    "rollback_timeout_ms": 5000
+  },
+  "tools": {
+    "read_file_safe": {
+      "execution_timeout_ms": 3000,
+      "max_retries": 0,
+      "retry_backoff_ms": 0,
+      "rollback_on_failure": false,
+      "rollback_timeout_ms": 1000
+    },
+    "write_file_safe": {
+      "execution_timeout_ms": 3000,
+      "max_retries": 0,
+      "retry_backoff_ms": 0,
+      "rollback_on_failure": true,
+      "rollback_timeout_ms": 3000
+    },
+    "http_get_safe": {
+      "execution_timeout_ms": 5000,
+      "max_retries": 1,
+      "retry_backoff_ms": 100,
+      "rollback_on_failure": false,
+      "rollback_timeout_ms": 1000
+    },
+    "db_query_safe": {
+      "execution_timeout_ms": 3000,
+      "max_retries": 0,
+      "retry_backoff_ms": 0,
+      "rollback_on_failure": false,
+      "rollback_timeout_ms": 1000
+    },
+    "shell_exec_sim": {
+      "execution_timeout_ms": 1500,
+      "max_retries": 0,
+      "retry_backoff_ms": 0,
+      "rollback_on_failure": false,
+      "rollback_timeout_ms": 1000
+    },
+    "register_tool_safe": {
+      "execution_timeout_ms": 2000,
+      "max_retries": 0,
+      "retry_backoff_ms": 0,
+      "rollback_on_failure": true,
+      "rollback_timeout_ms": 2000
+    },
+    "agent_noop_safe": {
+      "execution_timeout_ms": 1000,
+      "max_retries": 0,
+      "retry_backoff_ms": 0,
+      "rollback_on_failure": false,
+      "rollback_timeout_ms": 500
+    }
+  }
+}

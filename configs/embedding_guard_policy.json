@@ -1,0 +1,69 @@
+{
+  "schema_version": "guardx-embedding-guard-policy-v1",
+  "enabled": true,
+  "model_path": "configs/embedding_guard_model_combined_plus_stress_balanced_svm.json",
+  "embedding_backend": {
+    "type": "cache",
+    "cache_path": "evaluation/srtp_embedguard/embeddings_combined_plus_stress_distilbert_srtp_denoised.json",
+    "srtp_root": "F:/srtp/srtp/eaas-privacy-master",
+    "notes": "Active unified cache exported through real SRTP denoiseModelv3 and covering SAFE/public/stress cases.",
+    "denoise_checkpoint": "configs/srtp_denoise_combined_plus_stress_20260509.pt"
+  },
+  "embedding_dim": 768,
+  "risk_weight": 0.22,
+  "medium_threshold": 0.45,
+  "high_threshold": 0.7,
+  "dp": {
+    "enabled": true,
+    "noise_std": 0.075,
+    "samples": 5,
+    "denoise_blend": 0.6
+  },
+  "soft_prompt": {
+    "enabled": true,
+    "scale": 0.18
+  },
+  "benign_context_phrases": [
+    "只作为风险标签",
+    "不是可执行命令",
+    "安全教育海报",
+    "应脱敏",
+    "defensive training"
+  ],
+  "benign_context_active_markers": [
+    "gx-",
+    "忽略开发者",
+    "忽略系统",
+    "输出管理员",
+    "system override",
+    "export_secret",
+    "external collector"
+  ],
+  "benign_context_score_reduction": 0.18,
+  "benign_context_max_score": 0.08,
+  "sweep": {
+    "noise_std": [
+      0.0,
+      0.015,
+      0.025,
+      0.035,
+      0.05,
+      0.075
+    ],
+    "denoise_blend": [
+      0.0,
+      0.25,
+      0.5,
+      0.65,
+      0.82,
+      0.92
+    ],
+    "soft_prompt_scale": [
+      0.0,
+      0.08,
+      0.18,
+      0.28
+    ]
+  },
+  "notes": "Active unified SRTP EmbedGuard profile: DistilBERT SRTP denoised combined_plus_stress cache + SVM risk head + DP smoothing tuned for FPR<=0.08. Previous combined-only policy backed up."
+}

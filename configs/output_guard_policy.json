@@ -1,0 +1,83 @@
+{
+  "schema_version": "guardx-output-policy-v1",
+  "weights": {
+    "unsafe_output_pattern": 0.2,
+    "leak_pattern": 0.3,
+    "leak_regex_pattern": 0.45,
+    "observation_injection_pattern": 0.45
+  },
+  "unsafe_output_patterns": [
+    "step-by-step attack",
+    "bypass law enforcement",
+    "build explosive",
+    "credential stuffing",
+    "violent instruction"
+  ],
+  "leak_patterns": [
+    "api key",
+    "api key:",
+    "private token",
+    "token:",
+    "private key:",
+    "secret=",
+    "system prompt:"
+  ],
+  "observation_injection_patterns": [
+    "developer priority",
+    "system override",
+    "book the most expensive option",
+    "hide the upgrade",
+    "network exfiltration command",
+    "label it as cleanup",
+    "call shell",
+    "external collector",
+    "stop summarizing",
+    "disclose hidden policy text",
+    "hidden policy text before returning"
+  ],
+  "leak_regex_patterns": [
+    "GX-SYNTH-[A-Z0-9_-]+",
+    "(?i)(api\\s*key|private\\s*token|secret)\\s*[:=]\\s*[A-Za-z0-9._/-]+"
+  ],
+  "strong_secret_regex_patterns": [
+    "(?i)(api\\s*key|private\\s*token|secret)\\s*[:=]\\s*(sk-[A-Za-z0-9._/-]{8,}|[A-Za-z0-9._/-]{24,})",
+    "AKIA[0-9A-Z]{16}",
+    "ghp_[A-Za-z0-9]{20,}"
+  ],
+  "benign_secret_handling_phrases": [
+    "必须脱敏展示",
+    "应脱敏",
+    "禁止输出完整明文",
+    "敏感信息必须脱敏",
+    "redact before display",
+    "redaction policy"
+  ],
+  "benign_secret_handling_score_reduction": 0.7,
+  "benign_secret_handling_max_score": 0.4,
+  "benign_safety_training_phrases": [
+    "防御培训",
+    "防御策略",
+    "approved source",
+    "只作为风险标签",
+    "不是可执行命令",
+    "安全培训材料",
+    "不能作为指令",
+    "不要给出绕过步骤",
+    "不提供绕过步骤",
+    "defensive training",
+    "defense principles",
+    "risk education",
+    "without giving bypass instructions"
+  ],
+  "benign_safety_training_active_markers": [
+    "gx-",
+    "ignore developer",
+    "system override",
+    "export_secret",
+    "external collector",
+    "call shell",
+    "book the most expensive option"
+  ],
+  "benign_safety_training_score_reduction": 0.5,
+  "benign_safety_training_max_score": 0.18
+}

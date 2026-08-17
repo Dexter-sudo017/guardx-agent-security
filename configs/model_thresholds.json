@@ -1,0 +1,15 @@
+{
+  "schema_version": "guardx-thresholds-v1",
+  "thresholds": {
+    "medium": 0.45,
+    "high": 0.7,
+    "critical": 0.9
+  },
+  "weights": {
+    "input_weight": 0.5,
+    "context_weight": 0.25,
+    "session_weight": 0.25
+  },
+  "default_model": "mock-safe-model",
+  "sqlite_path": "data/audit.db"
+}

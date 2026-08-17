@@ -1,0 +1,154 @@
+{
+  "schema_version": "guardx-semantic-policy-routing-profile-v1",
+  "profile_id": "trust_boundary_layer_aware_7b_lora_v2_agent_review_only",
+  "description": "Layer-aware routing profile that scopes the 7B LoRA to Agent/tool/plugin surfaces as a review signal. Global LLM input hard block stays on low-FPR runtime/judge routing; RAG keeps the lower-FPR RAG specialist instead of the 7B model.",
+  "base_method": "guardx_runtime_only",
+  "lora_specialist": {
+    "method_priority": {
+      "llm_input": [
+        "local_lora_300_forced_choice_calibrated",
+        "local_lora_300_forced_choice",
+        "local_lora_300",
+        "local_lora_500_forced_choice_calibrated",
+        "local_lora_500_forced_choice",
+        "local_lora_500"
+      ],
+      "rag": [
+        "local_lora_rag_tool_agent_300_forced_choice_calibrated",
+        "local_lora_rag_tool_agent_300_forced_choice",
+        "local_lora_rag_tool_agent_balanced_v2_500_forced_choice_calibrated",
+        "local_lora_rag_tool_agent_balanced_v2_500_forced_choice",
+        "local_lora_rag_tool_agent_balanced_v2_300_forced_choice_calibrated",
+        "local_lora_rag_tool_agent_balanced_v2_300_forced_choice",
+        "local_lora_rag_tool_agent_targeted_v4_300_forced_choice_tuned061"
+      ],
+      "agent_tool_plugin": [
+        "local_lora_deepseek_qwen7b_targeted_v4_qlora300_forced_choice_tuned037",
+        "local_lora_deepseek_qwen7b_targeted_v4_qlora300_forced_choice_tuned045",
+        "local_lora_rag_tool_agent_targeted_v4_300_forced_choice_tuned061",
+        "local_lora_rag_tool_agent_300_forced_choice_calibrated",
+        "local_lora_rag_tool_agent_300_forced_choice",
+        "local_lora_rag_tool_agent_balanced_v2_300_forced_choice_calibrated",
+        "local_lora_rag_tool_agent_balanced_v2_300_forced_choice"
+      ],
+      "rag_tool_agent": [
+        "local_lora_rag_tool_agent_300_forced_choice_calibrated",
+        "local_lora_rag_tool_agent_300_forced_choice",
+        "local_lora_rag_tool_agent_balanced_v2_300_forced_choice_calibrated",
+        "local_lora_rag_tool_agent_balanced_v2_300_forced_choice"
+      ],
+      "vlm_ocr": [
+        "local_lora_500_forced_choice_calibrated",
+        "local_lora_500_forced_choice",
+        "local_lora_500",
+        "local_lora_300_forced_choice_calibrated",
+        "local_lora_300_forced_choice",
+        "local_lora_300"
+      ]
+    },
+    "semantic_only_action": "review",
+    "runtime_agreement_action": "block",
+    "parse_failure_action": "ignore_provider",
+    "seven_b_scope_note": "7B LoRA is intentionally scoped to agent_tool_plugin as review evidence. It must not create global LLM input hard blocks."
+  },
+  "judge": {
+    "methods": ["deepseek_judge", "zhipu_judge", "kimi_judge", "qwen_judge"],
+    "method_priority": {
+      "llm_input": ["deepseek_judge", "zhipu_judge", "kimi_judge", "qwen_judge"],
+      "rag_tool_agent": ["qwen_judge", "deepseek_judge", "kimi_judge", "zhipu_judge"],
+      "vlm_ocr": ["qwen_judge", "kimi_judge", "zhipu_judge", "deepseek_judge"]
+    },
+    "selection_strategy": "first_ok",
+    "selection_strategy_by_bucket": {
+      "rag_tool_agent": "max_risk_ok",
+      "vlm_ocr": "max_risk_ok"
+    },
+    "judge_only_action": "review",
+    "runtime_agreement_action": "block",
+    "provider_failure_action": "ignore_provider",
+    "high_confidence_auto_block": {
+      "enabled": true,
+      "score_min": 0.99,
+      "action": "block",
+      "attack_types": [
+        "harmful_request",
+        "direct_jailbreak",
+        "roleplay_jailbreak",
+        "roleplay_policy_bypass",
+        "multi_turn_policy_evasion",
+        "harmful_procedure_request",
+        "cyber_abuse_instruction",
+        "data_exfiltration_request",
+        "secret_env_read_probe"
+      ],
+      "note": "Only typed high-confidence judge hits are auto-blocked. Cross-layer/tool side effects still require executor policy checks."
+    },
+    "selection_note": "Qwen-first remains scoped to RAG/tool/agent. 7B LoRA is an Agent/tool/plugin review signal, not a global hard-block source."
+  },
+  "thresholds": {
+    "target_fpr_max": 0.1,
+    "default_lora_score_min": 0.57,
+    "default_judge_score_min": 0.97,
+    "default_recovery_risky_min": 0.52,
+    "note": "Threshold tuning is performed on hash-only method rows. Provider raw outputs and high-risk prompts are not rendered."
+  },
+  "benign_recovery": {
+    "methods": [
+      "local_lora_benign_recovery_v2_500_forced_choice_calibrated",
+      "local_lora_benign_recovery_v2_500_forced_choice",
+      "local_lora_benign_recovery_300_forced_choice_calibrated",
+      "local_lora_benign_recovery_300_forced_choice",
+      "local_lora_benign_recovery_300"
+    ],
+    "enabled": true,
+    "downgrade_runtime_only_hard_block_to": "review",
+    "downgrade_runtime_only_review_to": "allow_with_boundary",
+    "recovery_risky_action": "review",
+    "never_downgrade_dangerous_side_effects": true,
+    "recovery_signal": "provider_ok_and_parse_ok_and_not_detected",
+    "allow_with_boundary_risky_margin": 0.03,
+    "soft_boundary_action": "allow_with_boundary",
+    "judge_only_allow_with_boundary": {
+      "enabled": true,
+      "action": "allow_with_boundary",
+      "attack_types": [
+        "benign_boundary",
+        "benign_credential_hygiene",
+        "safe_education",
+        "benign_safety_education",
+        "benign_cyber_prevention",
+        "safety_training",
+        "governance_lookup",
+        "plugin_manifest_audit",
+        "ocr_privacy_awareness",
+        "rag_quoted_attack_analysis"
+      ],
+      "note": "If a judge flags a known benign-boundary case but runtime and LoRA do not, benign recovery may route it to allow_with_boundary instead of review."
+    },
+    "allow_with_boundary_attack_types": [
+      "benign_boundary",
+      "benign_credential_hygiene",
+      "safe_education",
+      "benign_safety_education",
+      "benign_cyber_prevention",
+      "safety_training",
+      "governance_lookup",
+      "plugin_manifest_audit",
+      "ocr_privacy_awareness",
+      "rag_quoted_attack_analysis",
+      "benign_recovery"
+    ]
+  },
+  "dangerous_side_effect_markers": [
+    "agent",
+    "tool",
+    "plugin",
+    "file",
+    "network",
+    "code",
+    "database",
+    "exfiltration",
+    "side effect"
+  ],
+  "claim_boundary": "This profile evaluates 7B LoRA as a scoped Agent/RAG/tool/plugin review signal. It is not an official benchmark leaderboard score and it does not render raw high-risk prompts."
+}

@@ -1,0 +1,130 @@
+{
+  "schema_version": "guardx-embedding-guard-online-policy-v1",
+  "enabled": true,
+  "profile": "qwen3_joint_online_research",
+  "model_name": "F:/hf_models/Qwen3-0.6B",
+  "checkpoint": "evaluation/runs/inversion_aware_denoise/qwen3_adaptive549_search_grut5_relation_noise015_v1/inversion_aware_denoiser.pt",
+  "adapter_checkpoint": "evaluation/runs/two_stage_frozen_adapter/qwen3_hardv2_frozen549_clean_logit_adapter_v1/risk_adapter.pt",
+  "adapter_enabled": true,
+  "results_json": "evaluation/runs/inversion_aware_denoise/qwen3_adaptive549_search_grut5_relation_noise015_v1/results.json",
+  "embedding_dim": 1024,
+  "device": "auto",
+  "torch_dtype": "float16",
+  "low_cpu_mem_usage": true,
+  "pooling": "last",
+  "max_length": 384,
+  "threshold": 0.554644,
+  "surface_thresholds": {
+    "vlm_ocr": 0.9
+  },
+  "surface_calibration": {
+    "enabled": true,
+    "surfaces": ["rag", "vlm_ocr"],
+    "safe_framing_cap": 0.0,
+    "min_safe_cues": 1,
+    "min_risk_for_safe_framing": 0.25,
+    "active_attack_floor": 1.0,
+    "notes": "Surface-level calibration for benign hard cases that contain security-sensitive words in defensive, training, compliance, or remediation framing. Active jailbreak/injection cues override this attenuation."
+  },
+  "safe_frame_embedding_mlp": {
+    "enabled": true,
+    "checkpoint": "evaluation/runs/safe_frame_recovery_adapter/embedding_mlp_safe_frame_corrected_heldout_v1/embedding_mlp_safe_frame_adapter.pt",
+    "threshold": 0.75,
+    "block_downgrade_max_score": 0.25,
+    "notes": "Private in-process MLP over Qwen3 clean embedding + surface + length. The full embedding is not serialized in API metadata; only score/threshold/decision are exposed."
+  },
+  "segment_aware_dual_head": {
+    "enabled": true,
+    "checkpoint": "evaluation/runs/safe_frame_recovery_adapter/segment_pooled_dual_head_transformer_v5b_finetune_runbook_ocr/segment_pooled_dual_head_transformer_adapter.pt",
+    "results_json": "evaluation/runs/safe_frame_recovery_adapter/segment_pooled_dual_head_transformer_v5b_finetune_runbook_ocr/results.json",
+    "safe_threshold": 0.576794,
+    "active_threshold": 0.998586,
+    "max_segments": 4,
+    "max_segment_length": 48,
+    "risk_floor": 1.0,
+    "force_active_intent_floor": true,
+    "safe_frame_risk_cap": 0.0,
+    "safe_frame_route_allow": true,
+    "safe_frame_route_surfaces": ["chat", "agent_tool", "rag", "vlm_ocr"],
+    "surface_score_calibrator": {
+      "enabled": false,
+      "checkpoint": "evaluation/runs/safe_frame_recovery_adapter/pooled_dual_head_surface_score_calibrator_v2_broad/surface_score_calibrator.pt",
+      "results_json": "evaluation/runs/safe_frame_recovery_adapter/pooled_dual_head_surface_score_calibrator_v2_broad/results.json",
+      "threshold": 0.961824,
+      "notes": "Disabled after v10/v5 blind testing because it over-suppressed chat/agent active recall. Kept as an ablation artifact."
+    },
+    "notes": "Pooled segment-aware dual-head v5b fine-tuned from the v5 active-request checkpoint. Adds a small runbook/OCR hard suite and excludes v8/adaptive-v3, v9/adaptive-v4, v10/adaptive-v5, and v11/adaptive-v6 locked heldouts."
+  },
+  "external_calibration": {
+    "enabled": true,
+    "routing_enabled": true,
+    "mode": "block_review_allow",
+    "variant": "mixed_text",
+    "adapter_path": "evaluation/runs/external_jailbreak_benchmarks/mixed_external_surface_calibration_adapter_runtime_pure_v1/mixed_text_adapter.npz",
+    "results_json": "evaluation/runs/external_jailbreak_benchmarks/mixed_external_surface_calibration_adapter_runtime_pure_v1/results.json",
+    "threshold": 0.492364,
+    "review_risk": 0.45,
+    "review_allow_risk": 0.0,
+    "learned_safe_frame_adapter": {
+      "enabled": true,
+      "adapter_path": "evaluation/runs/safe_frame_recovery_adapter/learned_multilingual_safe_frame_adapter_runtime_v2/safe_frame_text_adapter.npz",
+      "results_json": "evaluation/runs/safe_frame_recovery_adapter/learned_multilingual_safe_frame_adapter_runtime_v2/results.json",
+      "threshold": 0.52,
+      "prefer_for_review_allow": true,
+      "allow_block_to_allow": true,
+      "max_review_allow_online_risk": 0.55,
+      "risky_override_allow_route": true,
+      "safe_cancel_active_route": true,
+      "notes": "Learned multilingual safe-frame adapter. Low score means quoted/evaluation/defensive framing; high score means active reveal/forward/execute behavior. It gates route recovery before pattern fallback."
+    },
+    "safe_review_allow": {
+      "enabled": true,
+      "surfaces": ["default", "chat", "agent_tool", "rag", "vlm_ocr"],
+      "chat_like_surfaces": ["default", "chat", "agent_tool"],
+      "surface_review_surfaces": ["rag", "vlm_ocr"],
+      "max_online_risk": 0.05,
+      "max_surface_adapter_score": 0.5,
+      "min_safe_cues": 1,
+      "min_surface_safe_cues": 1,
+      "min_strong_surface_safe_cues": 1,
+      "notes": "For chat/default, only adapter-only conflicts with very low online risk can be recovered. For RAG/VLM, online-high adapter-low conflicts can be recovered only when adapter score is below 0.35 and the text has strong quoted-example framing such as risk example, should not be executed, classification example, or preserved evidence. Continuation cues override this allow."
+    },
+    "active_route_override": {
+      "enabled": true,
+      "surfaces": ["default", "chat", "agent_tool", "rag", "vlm_ocr"],
+      "max_safe_adapter_score": 0.4,
+      "min_strong_safe_cues": 1,
+      "notes": "If an allow route still contains active reveal/disclose/forward/execute cues, escalate back to review unless a strong quoted-example safe frame cancels the cue. Generic 'defensive training' wording is not enough to cancel active attack cues."
+    },
+    "route_allow_merge_recovery": {
+      "enabled": true,
+      "surfaces": ["default", "chat", "agent_tool", "rag", "vlm_ocr"],
+      "max_embedding_risk": 0.2,
+      "risk_cap": 0.2,
+      "blocked_labels": [
+        "source_priority_override",
+        "fact_instruction_conflict",
+        "unsafe_content",
+        "obfuscation",
+        "multi_turn_escalation",
+        "domain_boundary_violation"
+      ],
+      "recoverable_blocked_labels": [
+        "instruction_in_untrusted_context"
+      ],
+      "notes": "If the embedding route is already allow with low embedding risk, cap final GuardX merge risk for RAG/VLM safe-frame cases unless strong input/context guard labels are present. This prevents base lexical guards from rewriting quoted non-executable safety examples."
+    },
+    "notes": "External-benign/domain-harm calibration adapter. Runtime uses triage: block if Qwen3 online and adapter are both high; allow if both low; route conflicts to review/rewrite/fallback instead of hard allow."
+  },
+  "review_fallback": {
+    "enabled": false,
+    "notes": "Optional LLM judge for conflict route only. Disabled by default and reads credentials from environment variables such as GUARDX_REVIEW_LLM_API_KEY; do not store API keys in this file."
+  },
+  "dp": {
+    "enabled": true,
+    "noise_std": 0.15,
+    "samples": 3,
+    "clip_norm": 1.0
+  },
+  "notes": "Research online profile: text -> Qwen3 embedding -> clipped Gaussian noise -> relation-aware GRU/T5 inversion-aware denoiser -> two-stage clean-logit risk adapter. Keep DistilBERT cache policy as active competition runtime unless explicitly switched."
+}

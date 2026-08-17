@@ -1,0 +1,495 @@
+{
+  "adapters": [
+    {
+      "benchmark": "AdvBench",
+      "case_summary": {
+        "case_count": 520,
+        "data_level_counts": {
+          "external_raw_hash_local": 520
+        },
+        "label_counts": {
+          "risky": 520
+        },
+        "layer_counts": {
+          "LLM input": 520
+        },
+        "metric_family_counts": {
+          "ASR": 520
+        },
+        "payload_render_policy_counts": {
+          "do_not_render_raw": 520
+        },
+        "raw_prompt_policy_counts": {
+          "public_benchmark_raw_for_local_guard_eval_do_not_reprint": 520
+        },
+        "split_counts": {
+          "external_dev": 86,
+          "external_holdout": 47,
+          "external_test": 387
+        },
+        "surface_counts": {
+          "chat": 520
+        }
+      },
+      "manifest_hash": "ac107755e1f996b737a9232ab9a5c7dac391c2a28fae17a96da35582cf3854a1",
+      "manifest_path": "evidence/official_evaluator_adapters/advbench_adapter_manifest.json",
+      "registry": {
+        "guardx_proxy_metric": "harmful_request_attack_catch_proxy",
+        "next_parity_step": "Map local hash-only harmful-request rows to the upstream AdvBench split and run the target-model harmfulness evaluator.",
+        "official_metric_semantics": [
+          "attack_success_rate",
+          "harmful_completion_rate"
+        ],
+        "official_objective": "Measure whether harmful request attacks elicit policy-violating completions.",
+        "official_parity_level": "proxy_adapter",
+        "upstream_url": "https://github.com/llm-attacks/llm-attacks"
+      },
+      "result_summary": {
+        "attack_catch": 0.919231,
+        "benign": 0,
+        "benign_hard_block": null,
+        "cases": 520,
+        "fpr": null,
+        "provider_success": 1.0,
+        "residual_asr_proxy": 0.080769,
+        "review_rate": 0.180769,
+        "risky": 520
+      }
+    },
+    {
+      "benchmark": "AgentDojo",
+      "case_summary": {
+        "case_count": 6,
+        "data_level_counts": {
+          "official_safe_abstraction": 6
+        },
+        "label_counts": {
+          "benign": 1,
+          "risky": 5
+        },
+        "layer_counts": {
+          "LLM input": 4,
+          "RAG": 2
+        },
+        "metric_family_counts": {
+          "FPR": 2,
+          "RAGInjectionBlockRate": 1,
+          "ToolMisuseBlockRate": 3
+        },
+        "payload_render_policy_counts": {
+          "benign_public_text": 1,
+          "safe_to_render_abstraction": 5
+        },
+        "raw_prompt_policy_counts": {
+          "benign_public_text": 2,
+          "safe_abstraction_only": 4
+        },
+        "split_counts": {
+          "official_style_safe_subset": 6
+        },
+        "surface_counts": {
+          "rag": 2,
+          "tool_call": 2,
+          "tool_sequence": 2
+        }
+      },
+      "manifest_hash": "00628bbfcbfee424cfc065af2ea50f6c77daf2c6994a8faf81b346c796692c10",
+      "manifest_path": "evidence/official_evaluator_adapters/agentdojo_adapter_manifest.json",
+      "registry": {
+        "guardx_proxy_metric": "agent_injection_side_effect_block_proxy",
+        "next_parity_step": "Map each case to AgentDojo task/user/tool/attacker observation schema and run a real agent loop.",
+        "official_metric_semantics": [
+          "task_utility",
+          "security_violation_rate",
+          "injection_success_rate"
+        ],
+        "official_objective": "Evaluate indirect prompt injection against tool-using agents.",
+        "official_parity_level": "task_schema_proxy",
+        "upstream_url": "https://github.com/ethz-spylab/agentdojo"
+      },
+      "result_summary": {
+        "attack_catch": 0.4,
+        "benign": 1,
+        "benign_hard_block": 0.0,
+        "cases": 6,
+        "fpr": 0.0,
+        "provider_success": 1.0,
+        "residual_asr_proxy": 0.6,
+        "review_rate": 0.166667,
+        "risky": 5
+      }
+    },
+    {
+      "benchmark": "GuardX-BenignStress",
+      "case_summary": {
+        "case_count": 1200,
+        "data_level_counts": {
+          "guardx_local_regression": 1200
+        },
+        "label_counts": {
+          "benign": 1200
+        },
+        "layer_counts": {
+          "Agent": 120,
+          "LLM input": 480,
+          "LLM session": 120,
+          "OCR/VLM": 120,
+          "Plugin or MCP": 120,
+          "RAG": 240
+        },
+        "metric_family_counts": {
+          "FPR": 1200
+        },
+        "payload_render_policy_counts": {
+          "benign_public_text": 1200
+        },
+        "raw_prompt_policy_counts": {
+          "benign_public_text": 1200
+        },
+        "split_counts": {
+          "heldout": 1200
+        },
+        "surface_counts": {
+          "agent_tool": 120,
+          "chat": 480,
+          "log": 120,
+          "plugin": 120,
+          "rag": 240,
+          "vlm": 120
+        }
+      },
+      "manifest_hash": "4b7fadeb794017087dfa18339f417e2245c81188613174a15e46d64f94df57ab",
+      "manifest_path": "evidence/official_evaluator_adapters/guardx_benignstress_adapter_manifest.json",
+      "registry": {
+        "guardx_proxy_metric": "benign_stress_fpr_proxy",
+        "next_parity_step": "Keep as GuardX internal benign regression, not an official benchmark claim.",
+        "official_metric_semantics": [
+          "false_positive_rate",
+          "benign_hard_block_rate"
+        ],
+        "official_objective": "Stress-test benign safety education, roleplay, RAG quotation, OCR privacy posters, and plugin audit text.",
+        "official_parity_level": "local_regression",
+        "upstream_url": "guardx-local"
+      },
+      "result_summary": {
+        "attack_catch": null,
+        "benign": 1200,
+        "benign_hard_block": 0.0,
+        "cases": 1200,
+        "fpr": 0.0,
+        "provider_success": 1.0,
+        "residual_asr_proxy": null,
+        "review_rate": 0.0,
+        "risky": 0
+      }
+    },
+    {
+      "benchmark": "HarmBench",
+      "case_summary": {
+        "case_count": 325,
+        "data_level_counts": {
+          "external_raw_hash_local": 320,
+          "official_safe_abstraction": 5
+        },
+        "label_counts": {
+          "risky": 325
+        },
+        "layer_counts": {
+          "LLM input": 325
+        },
+        "metric_family_counts": {
+          "ASR": 322,
+          "DSR": 1,
+          "PrivacyLeakageRate": 2
+        },
+        "payload_render_policy_counts": {
+          "do_not_render_raw": 320,
+          "safe_to_render_abstraction": 5
+        },
+        "raw_prompt_policy_counts": {
+          "public_benchmark_raw_for_local_guard_eval_do_not_reprint": 320,
+          "safe_abstraction_only": 5
+        },
+        "split_counts": {
+          "external_dev": 65,
+          "external_holdout": 25,
+          "external_test": 230,
+          "official_style_safe_subset": 5
+        },
+        "surface_counts": {
+          "chat": 325
+        }
+      },
+      "manifest_hash": "70e14c69b0ba4aed07259be329f094a595e2f3c268b7d6553aa47892649f50e5",
+      "manifest_path": "evidence/official_evaluator_adapters/harmbench_adapter_manifest.json",
+      "registry": {
+        "guardx_proxy_metric": "harmful_behavior_defense_success_proxy",
+        "next_parity_step": "Preserve HarmBench behavior ids and run the upstream classifier/evaluator locally where policy and license allow.",
+        "official_metric_semantics": [
+          "harmfulness_classifier_score",
+          "attack_success_rate"
+        ],
+        "official_objective": "Evaluate model refusal or harmful completion behavior across harmful behavior categories.",
+        "official_parity_level": "proxy_adapter",
+        "upstream_url": "https://github.com/centerforaisafety/HarmBench"
+      },
+      "result_summary": {
+        "attack_catch": 0.68,
+        "benign": 0,
+        "benign_hard_block": null,
+        "cases": 325,
+        "fpr": null,
+        "provider_success": 1.0,
+        "residual_asr_proxy": 0.32,
+        "review_rate": 0.332308,
+        "risky": 325
+      }
+    },
+    {
+      "benchmark": "InjecAgent",
+      "case_summary": {
+        "case_count": 4,
+        "data_level_counts": {
+          "official_safe_abstraction": 4
+        },
+        "label_counts": {
+          "risky": 4
+        },
+        "layer_counts": {
+          "LLM input": 3,
+          "RAG": 1
+        },
+        "metric_family_counts": {
+          "ASR": 1,
+          "PrivacyLeakageRate": 1,
+          "ToolMisuseBlockRate": 2
+        },
+        "payload_render_policy_counts": {
+          "safe_to_render_abstraction": 4
+        },
+        "raw_prompt_policy_counts": {
+          "safe_abstraction_only": 4
+        },
+        "split_counts": {
+          "official_style_safe_subset": 4
+        },
+        "surface_counts": {
+          "rag": 1,
+          "tool_call": 2,
+          "vlm_ocr": 1
+        }
+      },
+      "manifest_hash": "8a94c1e9daaee59b27d8e52796fe870523a7dad621fcbdb82e09c1b4248f0656",
+      "manifest_path": "evidence/official_evaluator_adapters/injecagent_adapter_manifest.json",
+      "registry": {
+        "guardx_proxy_metric": "agent_data_exfiltration_block_proxy",
+        "next_parity_step": "Preserve user tool / attacker tool state and replay the official task graph with GuardX precheck hooks.",
+        "official_metric_semantics": [
+          "data_exfiltration_success_rate",
+          "tool_misuse_rate"
+        ],
+        "official_objective": "Evaluate tool-integrated agent indirect injection and data stealing.",
+        "official_parity_level": "task_schema_proxy",
+        "upstream_url": "https://github.com/uiuc-kang-lab/InjecAgent"
+      },
+      "result_summary": {
+        "attack_catch": 0.5,
+        "benign": 0,
+        "benign_hard_block": null,
+        "cases": 4,
+        "fpr": null,
+        "provider_success": 1.0,
+        "residual_asr_proxy": 0.5,
+        "review_rate": 0.0,
+        "risky": 4
+      }
+    },
+    {
+      "benchmark": "JailbreakBench",
+      "case_summary": {
+        "case_count": 205,
+        "data_level_counts": {
+          "external_raw_hash_local": 200,
+          "official_safe_abstraction": 5
+        },
+        "label_counts": {
+          "benign": 100,
+          "risky": 105
+        },
+        "layer_counts": {
+          "LLM input": 205
+        },
+        "metric_family_counts": {
+          "ASR": 104,
+          "FPR": 100,
+          "PrivacyLeakageRate": 1
+        },
+        "payload_render_policy_counts": {
+          "do_not_render_raw": 200,
+          "safe_to_render_abstraction": 5
+        },
+        "raw_prompt_policy_counts": {
+          "public_benchmark_raw_for_local_guard_eval_do_not_reprint": 200,
+          "safe_abstraction_only": 5
+        },
+        "split_counts": {
+          "external_dev": 35,
+          "external_holdout": 20,
+          "external_test": 145,
+          "official_style_safe_subset": 5
+        },
+        "surface_counts": {
+          "chat": 205
+        }
+      },
+      "manifest_hash": "5905678f1ba8cfe77297e92bd555d92579ae080be8be76b31a88eb14d605836c",
+      "manifest_path": "evidence/official_evaluator_adapters/jailbreakbench_adapter_manifest.json",
+      "registry": {
+        "guardx_proxy_metric": "jailbreak_attack_catch_proxy",
+        "next_parity_step": "Keep official split/task ids and replace safe abstractions with local restricted raw rows plus official evaluator output.",
+        "official_metric_semantics": [
+          "attack_success_rate",
+          "refusal_rate",
+          "benign_false_positive_rate"
+        ],
+        "official_objective": "Evaluate jailbreak prompts against model refusal and harmfulness outcomes.",
+        "official_parity_level": "proxy_adapter",
+        "upstream_url": "https://github.com/JailbreakBench/jailbreakbench"
+      },
+      "result_summary": {
+        "attack_catch": 0.266667,
+        "benign": 100,
+        "benign_hard_block": 0.0,
+        "cases": 205,
+        "fpr": 0.04,
+        "provider_success": 1.0,
+        "residual_asr_proxy": 0.733333,
+        "review_rate": 0.097561,
+        "risky": 105
+      }
+    },
+    {
+      "benchmark": "StrongREJECT",
+      "case_summary": {
+        "case_count": 2,
+        "data_level_counts": {
+          "official_safe_abstraction": 2
+        },
+        "label_counts": {
+          "benign": 1,
+          "risky": 1
+        },
+        "layer_counts": {
+          "LLM input": 2
+        },
+        "metric_family_counts": {
+          "ASR": 1,
+          "FPR": 1
+        },
+        "payload_render_policy_counts": {
+          "benign_public_text": 1,
+          "safe_to_render_abstraction": 1
+        },
+        "raw_prompt_policy_counts": {
+          "benign_public_text": 1,
+          "safe_abstraction_only": 1
+        },
+        "split_counts": {
+          "official_style_safe_subset": 2
+        },
+        "surface_counts": {
+          "chat": 2
+        }
+      },
+      "manifest_hash": "575ec459534b70ec8252b1912ea4c9e4472dac5d7172e2d6331aa120645002dd",
+      "manifest_path": "evidence/official_evaluator_adapters/strongreject_adapter_manifest.json",
+      "registry": {
+        "guardx_proxy_metric": "refusal_boundary_proxy",
+        "next_parity_step": "Preserve StrongREJECT split/category metadata and report official scorer compatibility separately.",
+        "official_metric_semantics": [
+          "refusal_boundary",
+          "over_refusal_rate"
+        ],
+        "official_objective": "Evaluate robustness and refusal boundaries under adversarial prompts.",
+        "official_parity_level": "proxy_adapter",
+        "upstream_url": "https://github.com/alexandrasouly/strongreject"
+      },
+      "result_summary": {
+        "attack_catch": 1.0,
+        "benign": 1,
+        "benign_hard_block": 0.0,
+        "cases": 2,
+        "fpr": 0.0,
+        "provider_success": 1.0,
+        "residual_asr_proxy": 0.0,
+        "review_rate": 0.5,
+        "risky": 1
+      }
+    },
+    {
+      "benchmark": "XSTest",
+      "case_summary": {
+        "case_count": 8,
+        "data_level_counts": {
+          "official_safe_abstraction": 8
+        },
+        "label_counts": {
+          "benign": 6,
+          "risky": 2
+        },
+        "layer_counts": {
+          "LLM input": 7,
+          "RAG": 1
+        },
+        "metric_family_counts": {
+          "FPR": 8
+        },
+        "payload_render_policy_counts": {
+          "benign_public_text": 6,
+          "safe_to_render_abstraction": 2
+        },
+        "raw_prompt_policy_counts": {
+          "benign_public_text": 8
+        },
+        "split_counts": {
+          "official_style_safe_subset": 8
+        },
+        "surface_counts": {
+          "chat": 4,
+          "rag": 1,
+          "tool_call": 2,
+          "vlm_ocr": 1
+        }
+      },
+      "manifest_hash": "502f0106d0fee3b9f4f035092f8aa76f87f0f5a6d45f5907d58670419aa3f256",
+      "manifest_path": "evidence/official_evaluator_adapters/xstest_adapter_manifest.json",
+      "registry": {
+        "guardx_proxy_metric": "benign_over_refusal_fpr_proxy",
+        "next_parity_step": "Expand benign safety rows and score over-refusal with the official XSTest taxonomy.",
+        "official_metric_semantics": [
+          "false_refusal_rate",
+          "benign_allow_rate"
+        ],
+        "official_objective": "Measure exaggerated safety and benign over-refusal.",
+        "official_parity_level": "proxy_adapter",
+        "upstream_url": "https://github.com/paul-rottger/exaggerated-safety"
+      },
+      "result_summary": {
+        "attack_catch": 0.0,
+        "benign": 6,
+        "benign_hard_block": 0.0,
+        "cases": 8,
+        "fpr": 0.166667,
+        "provider_success": 1.0,
+        "residual_asr_proxy": 1.0,
+        "review_rate": 0.125,
+        "risky": 2
+      }
+    }
+  ],
+  "case_file": "evaluation/runs/submission_combined_1079_benignstress_20260701/case_file.jsonl",
+  "claim_boundary": "Adapter manifests only; not official leaderboard scores.",
+  "created_at": "2026-07-01T17:24:53",
+  "results_file": "evaluation/runs/submission_combined_1079_benignstress_20260701/method_results.jsonl",
+  "schema_version": "guardx-official-evaluator-adapter-overview-v1"
+}

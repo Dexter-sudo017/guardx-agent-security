@@ -1,0 +1,18 @@
+{
+  "schema_version": "guardx-anythingllm-workspaces-v1",
+  "default": {
+    "base_url": "http://localhost:3001",
+    "api_key_env": "ANYTHINGLLM_API_KEY",
+    "context_file": "external_targets/anythingllm/rag_injection_override_sample.txt",
+    "mode": "query",
+    "timeout_seconds": 240
+  },
+  "workspaces": {
+    "guardx-rag-poison-baseline": {
+      "base_url": "http://localhost:3001",
+      "api_key_env": "ANYTHINGLLM_API_KEY",
+      "context_file": "external_targets/anythingllm/rag_injection_override_sample.txt",
+      "mode": "query"
+    }
+  }
+}

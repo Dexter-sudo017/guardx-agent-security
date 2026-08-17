@@ -1,0 +1,43 @@
+{
+  "schema_version": "guardx-false-positive-recovery-policy-v1",
+  "updated_at": "2026-06-23",
+  "purpose": "Reduce hard blocking of benign safety, governance, RAG analysis, OCR privacy, and plugin audit content.",
+  "recovery_profiles": [
+    {
+      "id": "benign_security_education",
+      "surfaces": ["chat", "rag"],
+      "signals": ["explain", "high level", "defensive", "training", "safety education", "without giving bypass instructions"],
+      "target_action": "allow_with_policy_explanation",
+      "notes": "XSTest / StrongREJECT style benign safety questions should not be hard-blocked."
+    },
+    {
+      "id": "quoted_attack_for_analysis",
+      "surfaces": ["rag", "chat"],
+      "signals": ["quoted example", "for analysis", "classify this", "taxonomy", "do not execute", "evidence only"],
+      "target_action": "allow_with_context_boundary",
+      "notes": "RAG documents may quote unsafe text for defensive analysis; keep it as evidence, not instruction."
+    },
+    {
+      "id": "ocr_privacy_awareness",
+      "surfaces": ["vlm", "rag"],
+      "signals": ["privacy poster", "do not share", "redact", "synthetic token", "awareness"],
+      "target_action": "allow_with_ocr_boundary",
+      "notes": "OCR privacy education posters should be allowed while preserving OCR evidence boundaries."
+    },
+    {
+      "id": "plugin_manifest_audit",
+      "surfaces": ["plugin", "agent_tool"],
+      "signals": ["manifest", "audit", "source_uri", "side_effects", "constraints", "rollback_supported"],
+      "target_action": "allow_audit_or_review_plugin",
+      "notes": "Plugin manifest review is a defensive audit task, not tool misuse by itself."
+    },
+    {
+      "id": "governance_doc_lookup",
+      "surfaces": ["chat", "rag", "agent_tool"],
+      "signals": ["OWASP", "NIST", "policy summary", "governance", "risk management"],
+      "target_action": "allow_with_citation",
+      "notes": "Governance/security document lookup should be allowed unless it asks for operational abuse."
+    }
+  ],
+  "claim_boundary": "Recovery profiles reduce hard blocks; they do not erase risk findings when active attack intent or tool side effects are present."
+}

@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GuardX Gateway</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --ink: #1d2633;
+      --muted: #647084;
+      --line: #dce2ea;
+      --accent: #146c94;
+      --ok: #137a45;
+      --warn: #b45309;
+      --danger: #b42318;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 14px/1.45 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    header {
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    h1 { margin: 0; font-size: 18px; letter-spacing: 0; }
+    nav { display: flex; gap: 8px; flex-wrap: wrap; }
+    nav a, nav button {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--ink);
+      padding: 7px 9px;
+      text-decoration: none;
+      font: inherit;
+      cursor: pointer;
+    }
+    nav button.lang.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: #e8f3f6;
+    }
+    main {
+      display: grid;
+      grid-template-columns: minmax(320px, 460px) minmax(360px, 1fr);
+      gap: 16px;
+      padding: 16px 20px 24px;
+    }
+    section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      min-width: 0;
+    }
+    h2 { margin: 0 0 12px; font-size: 14px; letter-spacing: 0; }
+    label { display: block; color: var(--muted); font-size: 12px; margin: 10px 0 5px; }
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      color: var(--ink);
+      background: #fff;
+      padding: 8px 9px;
+      font: inherit;
+    }
+    textarea { min-height: 110px; resize: vertical; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .actions { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+    button {
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: #fff;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font: inherit;
+      cursor: pointer;
+    }
+    button:disabled { opacity: 0.55; cursor: progress; }
+    .status { color: var(--muted); min-height: 20px; }
+    .kv {
+      display: grid;
+      grid-template-columns: 170px 1fr;
+      gap: 6px 12px;
+      margin-bottom: 12px;
+    }
+    .key { color: var(--muted); }
+    .badge {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 12px;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      background: #fbfcfe;
+    }
+    .badge.allow { color: var(--ok); border-color: #b7dfc8; background: #f0fbf4; }
+    .badge.rewrite { color: var(--warn); border-color: #f0d49b; background: #fff8eb; }
+    .badge.block, .badge.terminate, .badge.redact_output { color: var(--danger); border-color: #f0bab4; background: #fff5f4; }
+    .gate-panel {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 12px;
+      align-items: start;
+    }
+    .gate-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .gate-box {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px;
+      background: #fbfcfe;
+      min-height: 64px;
+    }
+    .gate-box strong {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+    .pill {
+      display: inline-block;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 2px 7px;
+      margin: 2px 3px 2px 0;
+      background: #fff;
+      font-size: 12px;
+    }
+    .gate-reasons {
+      margin: 8px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+    }
+    .gate-detail {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--muted);
+      word-break: break-word;
+    }
+    .gate-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+    pre {
+      overflow: auto;
+      min-height: 220px;
+      max-height: 540px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfe;
+      padding: 12px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    @media (max-width: 900px) {
+      main { grid-template-columns: 1fr; padding: 12px; }
+      .row { grid-template-columns: 1fr; }
+      .kv { grid-template-columns: 1fr; }
+      .gate-panel { grid-template-columns: 1fr; }
+      .gate-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>GuardX Gateway</h1>
+    <nav>
+      <a href="/portal" data-i18n="portal">主页</a>
+      <a href="/" data-i18n="console">控制台</a>
+      <a href="/dashboard" data-i18n="dashboard">仪表盘</a>
+      <a href="/experiment-dashboard" data-i18n="experiments">实验结果</a>
+      <a href="/matrix-dashboard" data-i18n="matrix">矩阵看板</a>
+      <button class="lang" data-lang="zh">中文</button>
+      <button class="lang" data-lang="en">EN</button>
+      <button id="logout" data-i18n="logout">退出</button>
+    </nav>
+  </header>
+  <main>
+    <section class="gate-panel" aria-live="polite">
+      <div>
+        <h2 data-i18n="gateTitle">推荐模型 Gate</h2>
+        <div id="gatewayGateMeta" class="status" data-i18n="gateLoading">读取当前推荐模型状态...</div>
+        <div id="gatewayGateDetails" class="gate-detail">-</div>
+        <div id="gatewayGateThresholds" class="gate-detail">-</div>
+        <div class="gate-actions">
+          <button id="gatewayGatePlanRefresh" data-i18n="gatePlanRefresh">预检真实矩阵</button>
+          <div id="gatewayGatePlan" class="gate-detail">-</div>
+        </div>
+        <ul id="gatewayGateReasons" class="gate-reasons"><li>-</li></ul>
+      </div>
+      <div class="gate-grid">
+        <div class="gate-box"><strong data-i18n="gateRecommended">推荐</strong><div id="gatewayGateRecommended">-</div></div>
+        <div class="gate-box"><strong data-i18n="gatePromoted">晋级</strong><div id="gatewayGatePromoted">-</div></div>
+        <div class="gate-box"><strong data-i18n="gateStable">稳定</strong><div id="gatewayGateStable">-</div></div>
+        <div class="gate-box"><strong data-i18n="gateDemoted">降级</strong><div id="gatewayGateDemoted">-</div></div>
+      </div>
+    </section>
+    <section>
+      <h2 data-i18n="requestTitle">请求</h2>
+      <div class="row">
+        <div>
+          <label for="targetType" data-i18n="targetType">目标类型</label>
+          <select id="targetType">
+            <option value="anythingllm">AnythingLLM</option>
+            <option value="custom_rag">Custom RAG</option>
+          </select>
+        </div>
+        <div>
+          <label for="targetPath" data-i18n="targetPath">自研 RAG 路径</label>
+          <input id="targetPath" value="/api/chat">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="baseUrl" data-i18n="baseUrl">目标 Base URL</label>
+          <input id="baseUrl" value="http://localhost:3001">
+        </div>
+        <div>
+          <label for="workspace" data-i18n="workspace">Workspace slug</label>
+          <input id="workspace" value="guardx-rag">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="sessionId" data-i18n="sessionId">Session ID</label>
+          <input id="sessionId" value="gateway-demo">
+        </div>
+        <div>
+          <label for="mode" data-i18n="mode">AnythingLLM 模式</label>
+          <select id="mode">
+            <option value="query">query</option>
+            <option value="chat">chat</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="messageField" data-i18n="messageField">自研 RAG 消息字段</label>
+          <input id="messageField" value="message">
+        </div>
+        <div>
+          <label for="contextField" data-i18n="contextField">自研 RAG 上下文字段</label>
+          <input id="contextField" value="context_chunks">
+        </div>
+      </div>
+      <label for="token" data-i18n="proxyToken">GuardX proxy token</label>
+      <input id="token" type="password" autocomplete="off" placeholder="optional x-guardx-token">
+      <label for="message" data-i18n="message">消息</label>
+      <textarea id="message">请根据知识库回答这个问题。</textarea>
+      <label for="context" data-i18n="context">检索上下文，每行一个 chunk</label>
+      <textarea id="context" data-i18n-placeholder="contextPlaceholder" placeholder="可选。为空时服务端会读取 GUARDX_PROXY_CONTEXT_FILE 或 AnythingLLM 样本文档。"></textarea>
+      <div class="actions">
+        <button id="send" data-i18n="send">通过 GuardX 发送</button>
+        <span id="status" class="status"></span>
+      </div>
+    </section>
+    <section>
+      <h2 data-i18n="decisionTitle">决策</h2>
+      <div class="kv">
+        <div class="key" data-i18n="action">动作</div><div id="action"><span class="badge">idle</span></div>
+        <div class="key" data-i18n="targetCalled">是否触达目标</div><div id="targetCalled">-</div>
+        <div class="key" data-i18n="riskScore">风险分</div><div id="risk">-</div>
+        <div class="key">Replay ID</div><div id="replay">-</div>
+        <div class="key" data-i18n="latency">延迟</div><div id="latency">-</div>
+      </div>
+      <pre id="output">{}</pre>
+    </section>
+  </main>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const dict = {
+      zh: {
+        portal: "主页", console: "控制台", dashboard: "仪表盘", experiments: "实验结果", matrix: "矩阵看板", logout: "退出",
+        requestTitle: "请求", targetType: "目标类型", targetPath: "自研 RAG 路径", baseUrl: "目标 Base URL", workspace: "Workspace slug",
+        sessionId: "Session ID", mode: "AnythingLLM 模式", messageField: "自研 RAG 消息字段", contextField: "自研 RAG 上下文字段",
+        proxyToken: "GuardX proxy token", message: "消息", context: "检索上下文，每行一个 chunk", contextPlaceholder: "可选。为空时服务端会读取 GUARDX_PROXY_CONTEXT_FILE 或 AnythingLLM 样本文档。",
+        send: "通过 GuardX 发送", decisionTitle: "决策", action: "动作", targetCalled: "是否触达目标", riskScore: "风险分", latency: "延迟",
+        sending: "发送中", done: "完成", failed: "失败",
+        gateTitle: "推荐模型 Gate", gateLoading: "读取当前推荐模型状态...", gateUnavailable: "暂无可用推荐模型 Gate", gateRun: "运行", gateState: "状态", gateStateReady: "可用", gateStateNoRecommendation: "无推荐", gateRecommended: "推荐", gatePromoted: "晋级", gateStable: "稳定", gateDemoted: "降级", gateNone: "无", gateCreated: "生成", gateModified: "更新", gateSource: "来源", gateThresholds: "阈值", gateExpectedPath: "期望路径", gateError: "错误", gatePlanRefresh: "预检真实矩阵", gatePlanLoading: "预检中...", gatePlanConfigured: "可跑模型", gatePlanMissing: "缺失配置"
+      },
+      en: {
+        portal: "Portal", console: "Console", dashboard: "Dashboard", experiments: "Experiments", matrix: "Matrix", logout: "Logout",
+        requestTitle: "Request", targetType: "Target type", targetPath: "Custom RAG path", baseUrl: "Target base URL", workspace: "Workspace slug",
+        sessionId: "Session ID", mode: "AnythingLLM mode", messageField: "Custom message field", contextField: "Custom context field",
+        proxyToken: "GuardX proxy token", message: "Message", context: "Retrieved context chunks, one per line", contextPlaceholder: "Optional. Empty context lets the server read GUARDX_PROXY_CONTEXT_FILE or the AnythingLLM sample document.",
+        send: "Send through GuardX", decisionTitle: "Decision", action: "Action", targetCalled: "Target called", riskScore: "Risk score", latency: "Latency",
+        sending: "Sending", done: "Done", failed: "Failed",
+        gateTitle: "Recommendation Gate", gateLoading: "Loading current model recommendation state...", gateUnavailable: "No model recommendation gate is available", gateRun: "Run", gateState: "State", gateStateReady: "Ready", gateStateNoRecommendation: "No recommendation", gateRecommended: "Recommended", gatePromoted: "Promoted", gateStable: "Stable", gateDemoted: "Demoted", gateNone: "None", gateCreated: "Created", gateModified: "Updated", gateSource: "Source", gateThresholds: "Thresholds", gateExpectedPath: "Expected path", gateError: "Error", gatePlanRefresh: "Preflight Matrix", gatePlanLoading: "Checking...", gatePlanConfigured: "Runnable models", gatePlanMissing: "Missing config"
+      }
+    };
+    let currentLang = localStorage.getItem("guardx_lang") || "zh";
+    let gateState = null;
+    let gatePlanState = null;
+    const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[char]));
+    function renderPills(values) {
+      const pack = dict[currentLang] || dict.zh;
+      if (!values || !values.length) return `<span class="pill">${pack.gateNone}</span>`;
+      return values.map((item) => `<span class="pill">${escapeHtml(item)}</span>`).join("");
+    }
+    function formatTime(value) {
+      if (!value) return "-";
+      const parsed = Date.parse(value);
+      if (Number.isNaN(parsed)) return String(value);
+      return new Date(parsed).toLocaleString(currentLang === "en" ? "en-US" : "zh-CN");
+    }
+    function gateStateLabel(state) {
+      const pack = dict[currentLang] || dict.zh;
+      if (state === "ready") return pack.gateStateReady;
+      if (state === "no_recommendation") return pack.gateStateNoRecommendation;
+      return state || "-";
+    }
+    function thresholdText(thresholds) {
+      const pack = dict[currentLang] || dict.zh;
+      if (!thresholds || !Object.keys(thresholds).length) return `${pack.gateThresholds}: -`;
+      const parts = Object.entries(thresholds).map(([key, value]) => `${key}=${value}`);
+      return `${pack.gateThresholds}: ${parts.join(", ")}`;
+    }
+    function renderGatePlan() {
+      const pack = dict[currentLang] || dict.zh;
+      if (!gatePlanState) {
+        $("gatewayGatePlan").textContent = "-";
+        return;
+      }
+      const configured = gatePlanState.configured_models || [];
+      const missing = Object.entries(gatePlanState.missing_env || {}).map(([model, envs]) => `${model}: ${(envs || []).join(", ")}`);
+      $("gatewayGatePlan").textContent = `${pack.gatePlanConfigured}: ${configured.join(", ") || pack.gateNone} | ${pack.gatePlanMissing}: ${missing.join(" ; ") || pack.gateNone}`;
+    }
+    function renderGate() {
+      const pack = dict[currentLang] || dict.zh;
+      if (!gateState || !gateState.available || !gateState.gate) {
+        $("gatewayGateMeta").textContent = pack.gateUnavailable;
+        const status = gateState && gateState.status ? gateState.status : {};
+        $("gatewayGateDetails").textContent = gateState && gateState.error
+          ? `${pack.gateError}: ${gateState.error}`
+          : `${pack.gateExpectedPath}: ${status.expected_path || (gateState && gateState.path) || "-"}`;
+        $("gatewayGateThresholds").textContent = "";
+        ["gatewayGateRecommended", "gatewayGatePromoted", "gatewayGateStable", "gatewayGateDemoted"].forEach((id) => $(id).innerHTML = renderPills([]));
+        $("gatewayGateReasons").innerHTML = `<li>${pack.gateNone}</li>`;
+        return;
+      }
+      const gate = gateState.gate;
+      const status = gateState.status || {};
+      $("gatewayGateMeta").textContent = `${pack.gateRun}: ${status.run_id || gate.run_id || "-"} | ${pack.gateState}: ${gateStateLabel(status.state)}`;
+      $("gatewayGateDetails").textContent = `${pack.gateCreated}: ${formatTime(status.created_at || gate.created_at)} | ${pack.gateModified}: ${formatTime(status.modified_at)} | ${pack.gateSource}: ${status.source_summary_artifact || gate.summary_artifact || "-"}`;
+      $("gatewayGateThresholds").textContent = thresholdText(status.thresholds || gate.thresholds || {});
+      $("gatewayGateRecommended").innerHTML = renderPills(gate.recommended_models || []);
+      $("gatewayGatePromoted").innerHTML = renderPills(gate.promoted_models || []);
+      $("gatewayGateStable").innerHTML = renderPills(gate.stable_models || []);
+      $("gatewayGateDemoted").innerHTML = renderPills(gate.demoted_models || []);
+      const excluded = gate.excluded_models || [];
+      $("gatewayGateReasons").innerHTML = excluded.length
+        ? excluded.map((item) => `<li><strong>${escapeHtml(item.model)}</strong>: ${escapeHtml((item.reasons || []).join(", ") || item.status || "-")}</li>`).join("")
+        : `<li>${pack.gateNone}</li>`;
+    }
+    function applyLang(lang) {
+      currentLang = lang;
+      const pack = dict[lang] || dict.zh;
+      document.documentElement.lang = lang === "en" ? "en" : "zh-CN";
+      document.querySelectorAll("[data-i18n]").forEach((node) => node.textContent = pack[node.dataset.i18n] || node.textContent);
+      document.querySelectorAll("[data-i18n-placeholder]").forEach((node) => node.placeholder = pack[node.dataset.i18nPlaceholder] || node.placeholder);
+      document.querySelectorAll(".lang").forEach((button) => button.classList.toggle("active", button.dataset.lang === lang));
+      localStorage.setItem("guardx_lang", lang);
+      renderGate();
+      renderGatePlan();
+    }
+    document.querySelectorAll(".lang").forEach((button) => button.addEventListener("click", () => applyLang(button.dataset.lang)));
+    applyLang(currentLang);
+    const send = $("send");
+    const status = $("status");
+    const output = $("output");
+    $("logout").addEventListener("click", async () => {
+      await fetch("/v1/web_logout", {method: "POST"});
+      location.href = "/login";
+    });
+    fetch("/v1/audit/model_recommendation_gate")
+      .then((response) => response.json())
+      .then((data) => { gateState = data; renderGate(); })
+      .catch(() => { gateState = {available: false}; renderGate(); });
+    $("gatewayGatePlanRefresh").addEventListener("click", async () => {
+      const pack = dict[currentLang] || dict.zh;
+      $("gatewayGatePlan").textContent = pack.gatePlanLoading;
+      try {
+        const response = await fetch("/v1/audit/real_model_matrix_plan?models=auto&run_id=gateway-preflight");
+        gatePlanState = await response.json();
+      } catch (error) {
+        gatePlanState = {configured_models: [], missing_env: {request: [String(error)]}};
+      }
+      renderGatePlan();
+    });
+
+    function contextChunks() {
+      return $("context").value.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+    }
+
+    function renderBadge(action) {
+      const safe = String(action || "unknown").replace(/[^a-z_]/g, "");
+      return `<span class="badge ${safe}">${action || "unknown"}</span>`;
+    }
+
+    send.addEventListener("click", async () => {
+      send.disabled = true;
+      status.textContent = (dict[currentLang] || dict.zh).sending;
+      const targetType = $("targetType").value;
+      const workspace = $("workspace").value.trim() || "guardx-rag";
+      const body = {
+        base_url: $("baseUrl").value.trim(),
+        session_id: $("sessionId").value.trim() || "gateway-demo",
+        mode: $("mode").value,
+        message: $("message").value,
+        context_chunks: contextChunks(),
+        path: $("targetPath").value.trim(),
+        message_field: $("messageField").value.trim() || "message",
+        context_field: $("contextField").value.trim() || "context_chunks",
+        answer_fields: ["answer", "textResponse", "response", "text", "content"]
+      };
+      const headers = {"Content-Type": "application/json"};
+      const token = $("token").value.trim();
+      if (token) headers["x-guardx-token"] = token;
+      try {
+        const endpoint = targetType === "custom_rag"
+          ? "/v1/proxy/custom_rag/chat"
+          : `/v1/proxy/anythingllm/workspace/${encodeURIComponent(workspace)}/chat`;
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers,
+          body: JSON.stringify(body)
+        });
+        const data = await response.json();
+        $("action").innerHTML = renderBadge(data.action || `http_${response.status}`);
+        $("targetCalled").textContent = String(Boolean(data.target_called));
+        $("risk").textContent = data.risk_score ?? "-";
+        $("replay").textContent = data.replay_id || "-";
+        $("latency").textContent = data.latency_ms ? `${data.latency_ms} ms` : "-";
+        output.textContent = JSON.stringify(data, null, 2);
+        status.textContent = response.ok ? (dict[currentLang] || dict.zh).done : `HTTP ${response.status}`;
+      } catch (error) {
+        $("action").innerHTML = renderBadge("error");
+        output.textContent = JSON.stringify({error: String(error)}, null, 2);
+        status.textContent = (dict[currentLang] || dict.zh).failed;
+      } finally {
+        send.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

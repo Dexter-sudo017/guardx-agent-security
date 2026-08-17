@@ -1,0 +1,24 @@
+{
+  "schema_version": "guardx-llm-judge-policy-v1",
+  "enabled": false,
+  "provider": "disabled",
+  "judge_call_min_score": 0.18,
+  "judge_call_max_score": 0.72,
+  "judge_trigger_mode": "uncertainty_or_disagreement",
+  "uncertainty_margin": 0.035,
+  "max_score": 0.18,
+  "timeout_seconds": 20,
+  "openai_compatible": {
+    "base_url_env": "GUARDX_JUDGE_BASE_URL",
+    "api_key_env": "GUARDX_JUDGE_API_KEY",
+    "model_env": "GUARDX_JUDGE_MODEL",
+    "default_base_url": "",
+    "default_model": ""
+  },
+  "ollama": {
+    "base_url_env": "GUARDX_OLLAMA_BASE_URL",
+    "model_env": "GUARDX_JUDGE_MODEL",
+    "default_base_url": "http://127.0.0.1:11434",
+    "default_model": "qwen2.5-coder:1.5b"
+  }
+}

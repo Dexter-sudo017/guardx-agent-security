@@ -1,0 +1,53 @@
+{
+  "schema_version": "guardx-llm-judge-profiles-example-v1",
+  "raw_key_policy": "Do not commit API keys. Use local environment variables only.",
+  "profiles": {
+    "kimi": {
+      "provider": "openai_compatible",
+      "base_url_env": "GUARDX_JUDGE_BASE_URL",
+      "api_key_env": "GUARDX_JUDGE_API_KEY",
+      "model_env": "GUARDX_JUDGE_MODEL",
+      "suggested_base_url": "https://api.moonshot.cn/v1",
+      "suggested_model": "moonshot-v1-8k"
+    },
+    "zhipu_glm": {
+      "provider": "openai_compatible",
+      "base_url_env": "GUARDX_JUDGE_BASE_URL",
+      "api_key_env": "GUARDX_JUDGE_API_KEY",
+      "model_env": "GUARDX_JUDGE_MODEL",
+      "suggested_base_url": "https://open.bigmodel.cn/api/paas/v4",
+      "suggested_model": "glm-4-flash"
+    },
+    "dashscope_qwen": {
+      "provider": "openai_compatible",
+      "base_url_env": "GUARDX_JUDGE_BASE_URL",
+      "api_key_env": "GUARDX_JUDGE_API_KEY",
+      "model_env": "GUARDX_JUDGE_MODEL",
+      "suggested_base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      "suggested_model": "qwen-plus"
+    },
+    "deepseek": {
+      "provider": "openai_compatible",
+      "base_url_env": "GUARDX_JUDGE_BASE_URL",
+      "api_key_env": "GUARDX_JUDGE_API_KEY",
+      "model_env": "GUARDX_JUDGE_MODEL",
+      "suggested_base_url": "https://api.deepseek.com",
+      "suggested_model": "deepseek-chat"
+    },
+    "4router_gpt": {
+      "provider": "openai_compatible",
+      "base_url_env": "GUARDX_JUDGE_BASE_URL",
+      "api_key_env": "GUARDX_JUDGE_API_KEY",
+      "model_env": "GUARDX_JUDGE_MODEL",
+      "suggested_base_url": "https://api.4router.cn/v1",
+      "suggested_model": "gpt-4o-mini"
+    },
+    "ollama_local": {
+      "provider": "ollama",
+      "base_url_env": "GUARDX_OLLAMA_BASE_URL",
+      "model_env": "GUARDX_JUDGE_MODEL",
+      "suggested_base_url": "http://127.0.0.1:11434",
+      "suggested_model": "qwen2.5-coder:1.5b"
+    }
+  }
+}

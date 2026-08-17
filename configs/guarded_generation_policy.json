@@ -1,0 +1,26 @@
+{
+  "schema_version": "guardx-guarded-generation-policy-v1",
+  "adapter_fallback": {
+    "enabled": true,
+    "max_attempts": 2,
+    "candidate_models": [
+      "dashscope-qwen-plus",
+      "deepseek-openai-compatible",
+      "kimi-cn-k2_5",
+      "zai-glm-4_5v"
+    ]
+  },
+  "contextual_constraints": [
+    {
+      "rule_id": "secret_redaction_policy_placeholders",
+      "match_phrases": [
+        "必须脱敏展示",
+        "禁止输出完整明文",
+        "API key",
+        "api key",
+        "token"
+      ],
+      "instruction": "GuardX generation constraint: when writing secret-handling policy or examples, use placeholders such as [REDACTED], [TOKEN_REDACTED], or <PHONE_REDACTED>; do not invent or print complete API keys, tokens, phone numbers, private keys, or credential-like strings."
+    }
+  ]
+}

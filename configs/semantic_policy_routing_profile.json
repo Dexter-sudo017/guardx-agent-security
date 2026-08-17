@@ -1,0 +1,62 @@
+{
+  "schema_version": "guardx-semantic-policy-routing-profile-v1",
+  "profile_id": "trust_boundary_lora_judge_recovery_v1",
+  "description": "Formal GuardX routing profile that combines runtime trust-boundary evidence, LoRA specialist signals, LLM judge signals, and benign-recovery evidence.",
+  "base_method": "guardx_runtime_only",
+  "lora_specialist": {
+    "method_priority": {
+      "llm_input": ["local_lora_300_forced_choice_calibrated", "local_lora_300_forced_choice", "local_lora_300", "local_lora_500_forced_choice_calibrated", "local_lora_500_forced_choice", "local_lora_500"],
+      "rag_tool_agent": ["local_lora_rag_tool_agent_300_forced_choice_calibrated", "local_lora_rag_tool_agent_300_forced_choice", "local_lora_rag_tool_agent_balanced_v2_500_forced_choice_calibrated", "local_lora_rag_tool_agent_balanced_v2_500_forced_choice", "local_lora_rag_tool_agent_balanced_v2_300_forced_choice_calibrated", "local_lora_rag_tool_agent_balanced_v2_300_forced_choice", "local_lora_rag_tool_agent_100_forced_choice_calibrated", "local_lora_rag_tool_agent_100_forced_choice", "local_lora_500_forced_choice_calibrated", "local_lora_500_forced_choice", "local_lora_500", "local_lora_300_forced_choice_calibrated", "local_lora_300_forced_choice", "local_lora_300"],
+      "vlm_ocr": ["local_lora_500_forced_choice_calibrated", "local_lora_500_forced_choice", "local_lora_500", "local_lora_300_forced_choice_calibrated", "local_lora_300_forced_choice", "local_lora_300"]
+    },
+    "semantic_only_action": "review",
+    "runtime_agreement_action": "block",
+    "parse_failure_action": "ignore_provider"
+  },
+  "judge": {
+    "methods": ["qwen_judge", "deepseek_judge", "zhipu_judge", "kimi_judge"],
+    "judge_only_action": "review",
+    "runtime_agreement_action": "block",
+    "provider_failure_action": "ignore_provider"
+  },
+  "thresholds": {
+    "target_fpr_max": 0.1,
+    "default_lora_score_min": 0.48,
+    "default_judge_score_min": 0.55,
+    "default_recovery_risky_min": 0.48,
+    "note": "Threshold tuning is performed by tune_semantic_policy_routing_thresholds.py on hash-only method rows. Provider raw outputs and high-risk prompts are not rendered."
+  },
+  "benign_recovery": {
+    "methods": ["local_lora_benign_recovery_300_forced_choice_calibrated", "local_lora_benign_recovery_300_forced_choice", "local_lora_benign_recovery_300"],
+    "enabled": true,
+    "downgrade_semantic_only_to": "allow_with_boundary",
+    "downgrade_runtime_only_hard_block_to": "review",
+    "recovery_risky_action": "review",
+    "never_downgrade_dangerous_side_effects": true,
+    "recovery_signal": "provider_ok_and_parse_ok_and_not_detected"
+  },
+  "dangerous_side_effect_markers": [
+    "agent",
+    "tool",
+    "plugin",
+    "file",
+    "network",
+    "code",
+    "database",
+    "exfiltration",
+    "side effect"
+  ],
+  "metrics": [
+    "Attack Catch",
+    "Residual ASR",
+    "FPR",
+    "Benign Allow",
+    "risky hard block",
+    "benign hard block",
+    "review rate",
+    "provider success",
+    "parse ok",
+    "latency"
+  ],
+  "claim_boundary": "This profile is a GuardX defense-action routing policy for comparable experiments. It is not an official benchmark leaderboard score."
+}

@@ -1,0 +1,24 @@
+{
+  "schema_version": "guardx-policy-registry-v1",
+  "policies": [
+    {"name": "input_guard", "path": "configs/input_guard_policy.json", "required": true},
+    {"name": "context_guard", "path": "configs/context_guard_policy.json", "required": true},
+    {"name": "rag_information_flow", "path": "configs/rag_information_flow_policy.json", "required": true},
+    {"name": "output_guard", "path": "configs/output_guard_policy.json", "required": true},
+    {"name": "tool_sandbox", "path": "configs/tool_policy.json", "required": true},
+    {"name": "semantic_ensemble", "path": "configs/semantic_ensemble_policy.json", "required": true},
+    {"name": "model_thresholds", "path": "configs/model_thresholds.json", "required": true},
+    {"name": "policy_profiles", "path": "configs/policy_profiles.json", "required": true},
+    {"name": "semantic_policy_routing", "path": "configs/semantic_policy_routing_profile.json", "required": false},
+    {"name": "judge_aware_policy", "path": "configs/judge_aware_policy_profile.json", "required": false},
+    {"name": "lora_specialist_routing", "path": "configs/lora_specialist_routing_profile.json", "required": false},
+    {"name": "risk_provider_registry", "path": "configs/risk_provider_registry.json", "required": true},
+    {"name": "executor_capabilities", "path": "configs/executor_capabilities.json", "required": true},
+    {"name": "executor_runtime_policy", "path": "configs/executor_runtime_policy.json", "required": true},
+    {"name": "experiment_suites", "path": "configs/experiment_suites.json", "required": true},
+    {"name": "guarded_generation", "path": "configs/guarded_generation_policy.json", "required": true},
+    {"name": "external_redteam_frameworks", "path": "configs/external_redteam_frameworks.json", "required": false},
+    {"name": "deployment_security", "path": "configs/guardx_deployment_security_policy.json", "required": false},
+    {"name": "srtp_embedguard_plugin", "path": "configs/plugins/srtp_embedguard.json", "required": false}
+  ]
+}

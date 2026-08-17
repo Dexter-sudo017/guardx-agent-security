@@ -1,0 +1,45 @@
+{
+  "schema_version": "guardx-agent-vlm-realism-schema-v1",
+  "updated_at": "2026-06-23",
+  "purpose": "Describe AgentDojo/InjecAgent-style agent tasks and VLM/OCR evidence tasks without storing raw high-risk prompts or real PII.",
+  "common_fields": {
+    "case_id": "Stable case id.",
+    "family": "agentdojo_style | injecagent_style | rag_poisoning | tool_output_hijack | plugin_supply_chain | vlm_ocr_disagreement | vlm_hidden_instruction | vlm_privacy_exfiltration | benign_recovery",
+    "surface": "agent | rag | tool_observation | vlm_ocr | plugin",
+    "expected_label": "risky | benign",
+    "raw_prompt_policy": "safe_abstraction_only | hash_only_or_local_private",
+    "source_reference": "AgentDojo | InjecAgent | DocVQA-style | FUNSD-style | CORD-style | synthetic_cn",
+    "trust_boundary": "trusted_user_goal | untrusted_retrieved_context | untrusted_tool_observation | untrusted_ocr_text | untrusted_vlm_caption",
+    "expected_defense_action": "deny_tool | quarantine_context | sanitize_observation | require_plugin_review | ocr_instruction_quarantine | allow_with_boundary",
+    "portal_storyline": "rag_indirect_injection | ocr_vlm_hidden_instruction | tool_output_hijack | agent_file_network_plugin_audit"
+  },
+  "agent_fields": {
+    "user_goal_safe_abstraction": "Benign user goal summary.",
+    "trusted_context_safe_abstraction": "Trusted task facts.",
+    "untrusted_observation_safe_abstraction": "Tool or retrieved observation summary.",
+    "available_tools": ["read_file_safe", "http_get_safe", "shell_exec_sim", "db_query_safe", "register_tool_safe"],
+    "tool_plan": [
+      {
+        "phase": "precheck | execute | observe | rollback",
+        "tool": "Tool name.",
+        "expected_allowed": true,
+        "expected_reason": "Expected GuardX policy reason."
+      }
+    ]
+  },
+  "vlm_ocr_fields": {
+    "image_path": "Relative path to synthetic/non-PII image evidence.",
+    "image_sha256": "SHA256 of image bytes.",
+    "ocr_engines": [
+      {
+        "engine": "tesseract | paddleocr",
+        "version": "Recorded engine version.",
+        "output_hash": "SHA256 of OCR output text."
+      }
+    ],
+    "vlm_provider": "qwen-vl-plus | glm-vision | kimi-vision | other",
+    "vlm_output_hash": "Hash of caption/risk output if available.",
+    "disagreement_type": "ocr_detects_hidden_text_vlm_omits | vlm_mentions_instruction_ocr_misses | no_disagreement"
+  },
+  "claim_boundary": "These cases support unified evaluation and replay evidence. They are not official AgentDojo/InjecAgent/VLM leaderboard scores."
+}

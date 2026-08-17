@@ -1,0 +1,16 @@
+{
+  "schema_version": "guardx-risk-provider-registry-v1",
+  "providers": [
+    {
+      "provider_id": "srtp_embedguard",
+      "enabled": true,
+      "surfaces": ["chat", "rag", "vlm", "agent_tool", "eval"],
+      "plugin_config": "configs/plugins/srtp_embedguard.json",
+      "runtime": {
+        "failure_threshold": 2,
+        "cooldown_seconds": 30,
+        "health_cache_seconds": 5
+      }
+    }
+  ]
+}

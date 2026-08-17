@@ -1,0 +1,51 @@
+{
+  "schema_version": "guardx-claim-defense-matrix-v1",
+  "ready": true,
+  "item_count": 5,
+  "unresolved_count": 0,
+  "raw_prompt_rendered": false,
+  "real_private_data_rendered": false,
+  "claim_boundary": "Maps report claims to local source and evidence. It does not include official leaderboard score or award claim.",
+  "items": [
+    {
+      "question": "What was implemented?",
+      "answer": "A runtime security control plane for chat, RAG, VLM/OCR, tool calls and agent actions.",
+      "evidence": [
+        "prototype/guardx/backend/app",
+        "configs"
+      ]
+    },
+    {
+      "question": "How are risks represented?",
+      "answer": "Providers emit structured RiskFinding records that preserve source surface, evidence references and policy features.",
+      "evidence": [
+        "prototype/guardx/backend/app/risk_providers",
+        "prototype/guardx/backend/app/policy"
+      ]
+    },
+    {
+      "question": "How are actions controlled?",
+      "answer": "Policy decisions map to defense actions and executor lifecycle checks before side-effecting operations.",
+      "evidence": [
+        "prototype/guardx/backend/app/executor",
+        "prototype/guardx/backend/app/orchestration"
+      ]
+    },
+    {
+      "question": "How was performance evaluated?",
+      "answer": "Same-batch ablation, benign stress, Agent/VLM cases and task-graph replay are provided as local evidence.",
+      "evidence": [
+        "evidence/submission_same_batch_1079_ablation_2026-07-01.json",
+        "evidence/agent_vlm_realism_cases_latest.json"
+      ]
+    },
+    {
+      "question": "Can a reviewer reproduce the core path?",
+      "answer": "Run smoke_eval.py and run_submission_reviewer_smoke.py from the package root after installing CI dependencies.",
+      "evidence": [
+        "README.md",
+        "prototype/guardx/backend/scripts/smoke_eval.py"
+      ]
+    }
+  ]
+}

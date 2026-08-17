@@ -1,0 +1,95 @@
+{
+  "schema_version": "guardx-policy-profiles-v1",
+  "default_profile": "v5l",
+  "profiles": {
+    "v5l": {
+      "thresholds": {
+        "medium": 0.45,
+        "high": 0.7,
+        "critical": 0.9
+      },
+      "required_guards": ["input_guard", "context_guard", "srtp_embedguard", "output_guard"],
+      "audit_level": "summary",
+      "rules": {
+        "provider_weights": {
+          "input_guard": 1.0,
+          "context_guard": 1.0,
+          "srtp_embedguard": 1.0,
+          "output_guard": 1.0
+        },
+        "risk_type_weights": {
+          "prompt_injection": 1.0,
+          "jailbreak": 1.0,
+          "privacy_leakage": 1.0,
+          "tool_abuse": 1.0,
+          "unsafe_content": 1.0
+        },
+        "surface_weights": {
+          "chat": 1.0,
+          "rag": 1.0,
+          "vlm": 1.0,
+          "agent_tool": 1.0,
+          "eval": 1.0
+        }
+      }
+    },
+    "v21": {
+      "thresholds": {
+        "medium": 0.4,
+        "high": 0.68,
+        "critical": 0.88
+      },
+      "required_guards": ["input_guard", "context_guard", "srtp_embedguard", "output_guard"],
+      "audit_level": "full",
+      "rules": {
+        "provider_weights": {
+          "srtp_embedguard": 1.1,
+          "context_guard": 1.05,
+          "output_guard": 1.15
+        },
+        "risk_type_weights": {
+          "prompt_injection": 1.05,
+          "privacy_leakage": 1.1,
+          "tool_abuse": 1.05
+        },
+        "surface_weights": {
+          "rag": 1.05,
+          "vlm": 1.05,
+          "agent_tool": 1.1
+        }
+      }
+    },
+    "strict_review": {
+      "thresholds": {
+        "medium": 0.2,
+        "high": 0.55,
+        "critical": 0.8
+      },
+      "required_guards": ["input_guard", "context_guard", "srtp_embedguard", "output_guard"],
+      "audit_level": "full",
+      "rules": {
+        "provider_weights": {
+          "input_guard": 1.15,
+          "context_guard": 1.15,
+          "srtp_embedguard": 1.2,
+          "output_guard": 1.2,
+          "action_guard": 1.2
+        },
+        "risk_type_weights": {
+          "prompt_injection": 1.15,
+          "jailbreak": 1.15,
+          "privacy_leakage": 1.2,
+          "tool_abuse": 1.2,
+          "unsafe_content": 1.15
+        },
+        "surface_weights": {
+          "chat": 1.05,
+          "rag": 1.15,
+          "vlm": 1.15,
+          "agent_tool": 1.2,
+          "eval": 1.1
+        }
+      }
+    }
+  }
+}

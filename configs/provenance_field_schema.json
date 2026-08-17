@@ -1,0 +1,65 @@
+{
+  "schema_version": "guardx-provenance-field-schema-v1",
+  "updated_at": "2026-06-02",
+  "source_standards": [
+    {
+      "source_id": "src_w3c_prov",
+      "name": "W3C PROV",
+      "url": "https://www.w3.org/TR/prov-overview/",
+      "mapped_concepts": ["entity", "activity", "agent"]
+    },
+    {
+      "source_id": "src_otel_genai",
+      "name": "OpenTelemetry GenAI semantic conventions",
+      "url": "https://opentelemetry.io/docs/specs/semconv/gen-ai/",
+      "mapped_concepts": ["trace", "span", "model", "tool"]
+    },
+    {
+      "source_id": "src_slsa_provenance",
+      "name": "SLSA Provenance",
+      "url": "https://slsa.dev/spec/v1.1/provenance",
+      "mapped_concepts": ["builder", "materials", "invocation", "subject"]
+    },
+    {
+      "source_id": "src_cyclonedx_provenance",
+      "name": "CycloneDX provenance",
+      "url": "https://cyclonedx.org/use-cases/provenance/",
+      "mapped_concepts": ["component", "purl", "supplier", "external_reference"]
+    }
+  ],
+  "field_groups": {
+    "source_provenance": {
+      "required": ["source_id", "source_type", "source_uri", "content_sha256", "license_note", "created_or_retrieved_at"],
+      "optional": ["document_title", "chunk_id", "page", "bbox", "ocr_engine", "ocr_engine_version", "ocr_output_sha256", "synthetic_overlay", "contains_real_pii"],
+      "guardx_policy": "Do not store full external document text, real PII, API keys, or decoder reconstruction text."
+    },
+    "executor_provenance": {
+      "required": ["trace_id", "session_id", "tool_name", "capability_id", "runner_id", "side_effects", "dry_run", "requested_action", "policy_route"],
+      "optional": ["runner_version", "sandbox_profile", "allowed_action", "rollback_supported", "observation_sha256", "input_ref", "output_ref", "parent_execution_key"],
+      "guardx_policy": "Record action metadata and hashes; do not record raw secrets or raw tool output containing secrets."
+    },
+    "supply_chain_provenance": {
+      "required": ["component_name", "component_type", "version", "source_uri", "supplier", "integrity_status"],
+      "optional": ["purl", "repo_url", "commit_sha", "signature", "sbom_ref", "slsa_builder", "install_source", "license", "known_vuln_refs"],
+      "guardx_policy": "Treat unknown runner, unknown source, missing integrity, network/write/registration side effects as audit findings."
+    },
+    "decoder_probe_provenance": {
+      "required": ["run_id", "dataset_source_id", "text_hash_policy", "eval_only", "production_routing", "contains_raw_text"],
+      "optional": ["embedding_variant", "decoder_kind", "train_size", "eval_size", "max_token_f1", "exact_match_rate", "sensitive_case_hit_rate"],
+      "guardx_policy": "Decoder probe is eval-only and hash-preserving. Never route reconstruction text to production."
+    }
+  },
+  "minimum_replay_record": {
+    "trace_id": "string",
+    "session_id": "string",
+    "source_refs": ["source_id"],
+    "tool_name": "string",
+    "capability_id": "string",
+    "runner_id": "string",
+    "side_effects": "read|write|network|compute|registration|none|unknown",
+    "dry_run": "boolean",
+    "policy_route": "allow|review|block",
+    "risk_types": ["string"],
+    "observation_sha256": "hex_sha256"
+  }
+}

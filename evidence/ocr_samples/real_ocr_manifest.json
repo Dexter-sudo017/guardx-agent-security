@@ -1,0 +1,128 @@
+{
+  "schema_version": "guardx-real-ocr-evidence-manifest-v1",
+  "generated_at": "2026-06-02T04:02:11.635683+00:00",
+  "source_fixture_manifest": "evidence/ocr_samples/manifest.json",
+  "privacy_policy": "synthetic_images_only_no_real_pii_store_ocr_text_and_hashes",
+  "tesseract_tessdata_dir_policy": "local_tool_cache_not_committed",
+  "engine_summary": {
+    "tesseract": "captured",
+    "paddleocr": "captured"
+  },
+  "records": [
+    {
+      "sample_id": "ocr_fixture_docvqa_hidden_margin_001",
+      "image_id": "source-docvqa-style-hidden-margin-001",
+      "expected_case_id": "source_ocr_docvqa_hidden_margin",
+      "synthetic": true,
+      "contains_real_pii": false,
+      "render": {
+        "render_engine": "microsoft_edge_headless",
+        "render_engine_version": "Microsoft Edge 148.0.3967.96",
+        "rendered_image_path": "evidence/ocr_samples/rendered/source-docvqa-style-hidden-margin-001.edge.png",
+        "rendered_image_sha256": "dcd59e66258d4e8897a2d74dddd4073be8d59ada477a5adf5d4698ff345093c5",
+        "viewport": {
+          "width": 900,
+          "height": 560
+        }
+      },
+      "ocr_runs": [
+        {
+          "engine": "tesseract",
+          "engine_version": "tesseract v5.4.0.20240606",
+          "languages": "chi_sim+eng",
+          "available_languages": [
+            "chi_sim",
+            "eng"
+          ],
+          "ocr_output_path": "evidence/ocr_samples/ocr_real/tesseract/source-docvqa-style-hidden-margin-001.tesseract.txt",
+          "ocr_output_sha256": "371219e2e705ddd5805fd6fb74be6f60080b30d7bef3b407e2a78854b0cc07e8",
+          "command": "tesseract <rendered_png> stdout --tessdata-dir <local_tessdata> -l <languages> --psm 6"
+        },
+        {
+          "engine": "paddleocr",
+          "available": true,
+          "engine_version": "paddleocr=3.6.0; paddle=3.2.2",
+          "ocr_output_path": "evidence/ocr_samples/ocr_real/paddleocr/source-docvqa-style-hidden-margin-001.paddleocr.txt",
+          "ocr_output_sha256": "649ca1781d093103e593646d7b546a36e4bdc7134e4941d3222955fd34972e53"
+        }
+      ]
+    },
+    {
+      "sample_id": "ocr_fixture_cord_receipt_privacy_001",
+      "image_id": "source-cord-style-receipt-001",
+      "expected_case_id": "source_ocr_cord_receipt_privacy_exfil",
+      "synthetic": true,
+      "contains_real_pii": false,
+      "render": {
+        "render_engine": "microsoft_edge_headless",
+        "render_engine_version": "Microsoft Edge 148.0.3967.96",
+        "rendered_image_path": "evidence/ocr_samples/rendered/source-cord-style-receipt-001.edge.png",
+        "rendered_image_sha256": "02eddfeff3f643d283816e612a987fbcf94d89aa4e3f9e54e092ab9dc7d54cd5",
+        "viewport": {
+          "width": 520,
+          "height": 740
+        }
+      },
+      "ocr_runs": [
+        {
+          "engine": "tesseract",
+          "engine_version": "tesseract v5.4.0.20240606",
+          "languages": "chi_sim+eng",
+          "available_languages": [
+            "chi_sim",
+            "eng"
+          ],
+          "ocr_output_path": "evidence/ocr_samples/ocr_real/tesseract/source-cord-style-receipt-001.tesseract.txt",
+          "ocr_output_sha256": "84c1083c5de9554deb576b675923c062ac1bf992ff05484f218fe9d6ca8a836e",
+          "command": "tesseract <rendered_png> stdout --tessdata-dir <local_tessdata> -l <languages> --psm 6"
+        },
+        {
+          "engine": "paddleocr",
+          "available": true,
+          "engine_version": "paddleocr=3.6.0; paddle=3.2.2",
+          "ocr_output_path": "evidence/ocr_samples/ocr_real/paddleocr/source-cord-style-receipt-001.paddleocr.txt",
+          "ocr_output_sha256": "5ef1ea81756717725b74afdcd137975cd79c991cd5ae9ba89824d30c3ed5456f"
+        }
+      ]
+    },
+    {
+      "sample_id": "ocr_fixture_funsd_form_notice_001",
+      "image_id": "source-funsd-style-form-001",
+      "expected_case_id": "source_ocr_funsd_benign_form_notice",
+      "synthetic": true,
+      "contains_real_pii": false,
+      "render": {
+        "render_engine": "microsoft_edge_headless",
+        "render_engine_version": "Microsoft Edge 148.0.3967.96",
+        "rendered_image_path": "evidence/ocr_samples/rendered/source-funsd-style-form-001.edge.png",
+        "rendered_image_sha256": "a54f4c274c30d947ca522479c1158e4b3a3cc7c202e722020126c0f2e329c1b3",
+        "viewport": {
+          "width": 760,
+          "height": 520
+        }
+      },
+      "ocr_runs": [
+        {
+          "engine": "tesseract",
+          "engine_version": "tesseract v5.4.0.20240606",
+          "languages": "chi_sim+eng",
+          "available_languages": [
+            "chi_sim",
+            "eng"
+          ],
+          "ocr_output_path": "evidence/ocr_samples/ocr_real/tesseract/source-funsd-style-form-001.tesseract.txt",
+          "ocr_output_sha256": "fa14ff5a141b219bfac2e530309d65ab22efd9e66dae7f4854f2dac6e8974bd4",
+          "command": "tesseract <rendered_png> stdout --tessdata-dir <local_tessdata> -l <languages> --psm 6"
+        },
+        {
+          "engine": "paddleocr",
+          "available": true,
+          "engine_version": "paddleocr=3.6.0; paddle=3.2.2",
+          "ocr_output_path": "evidence/ocr_samples/ocr_real/paddleocr/source-funsd-style-form-001.paddleocr.txt",
+          "ocr_output_sha256": "4150c8d1b8ab0c5c4d03800a0dc9cea8cf12da9c2bdeb3187fcf03893c592e18"
+        }
+      ]
+    }
+  ],
+  "unavailable_engines": []
+}

@@ -1,0 +1,37 @@
+{
+  "schema_version": "guardx-lora-calibration-profile-v1",
+  "updated_at": "2026-06-23",
+  "purpose": "Select a local LoRA semantic provider for GuardX combined routing without turning it into a direct hard-block detector.",
+  "candidate_checkpoints": [
+    {
+      "id": "local_lora_300",
+      "role": "low_fpr_candidate",
+      "routing": "review_signal_only",
+      "selection_reason": "Prefer when false-positive pressure is the primary risk."
+    },
+    {
+      "id": "local_lora_500",
+      "role": "high_recall_candidate",
+      "routing": "review_signal_only_unless_runtime_agrees",
+      "selection_reason": "Prefer when attack catch is prioritized; do not hard-block LoRA-only hits."
+    }
+  ],
+  "benign_calibration_buckets": [
+    "XSTest-style benign safety questions",
+    "StrongREJECT-style refusal-boundary questions",
+    "RAG documents quoting attacks for defensive analysis",
+    "OCR privacy awareness posters",
+    "Plugin manifest audit documents",
+    "OWASP/NIST governance document lookups"
+  ],
+  "selection_metrics": [
+    "Attack Catch",
+    "Residual ASR",
+    "FPR",
+    "Benign Allow",
+    "Parse OK Rate",
+    "p95 latency"
+  ],
+  "deployment_rule": "LoRA contributes RiskFinding evidence to GuardX combined; LoRA-only detections route to review, not block.",
+  "claim_boundary": "LoRA is a local low-cost semantic Risk Provider. It is not claimed as an official leaderboard model or the sole jailbreak defense."
+}

@@ -1,0 +1,71 @@
+{
+  "created_at": "2026-06-29T11:15:00",
+  "raw_prompt_policy": "hash_only_no_raw_high_risk_prompt_or_real_pii",
+  "profile": "guardx_layer_aware_input_specialist_v2b_300_balanced_t0725_w004",
+  "threshold": 0.725,
+  "benign_recovery_window": 0.04,
+  "inputs": {
+    "base_results": "evaluation/runs/unified_external_benchmark/unified_1079_layer_aware_7b_lora_v2_recovery_soft_boundary_20260627/method_results.jsonl",
+    "input_specialist_raw_1079": "evaluation/runs/unified_external_benchmark/unified_1079_lora_input_specialist_v2b_300_inputprofile_raw_20260628/method_results.jsonl",
+    "input_specialist_raw_benign_stress": "evaluation/runs/unified_external_benchmark/benign_stress_1200_lora_input_specialist_v2b_300_inputprofile_raw_bs1_20260628/method_results.jsonl"
+  },
+  "results": {
+    "balanced_t0725_w004_1079": {
+      "attack_catch": 0.762887,
+      "benign": 109,
+      "benign_allow": 0.954128,
+      "benign_hard_block": 0.0,
+      "cases": 1079,
+      "fpr": 0.045872,
+      "review_rate": 0.214087,
+      "risky": 970
+    },
+    "balanced_t0725_w004_benign_stress": {
+      "benign": 1200,
+      "benign_allow": 1.0,
+      "benign_hard_block": 0.0,
+      "cases": 1200,
+      "fpr": 0.0,
+      "review_rate": 0.0,
+      "risky": 0
+    },
+    "balanced_t0725_w004_1079_plus_benign_stress": {
+      "attack_catch": 0.762887,
+      "benign": 1309,
+      "benign_allow": 0.99618,
+      "benign_hard_block": 0.0,
+      "cases": 2279,
+      "fpr": 0.00382,
+      "review_rate": 0.10136,
+      "risky": 970
+    }
+  },
+  "comparison": {
+    "v1_low_fpr_display": {
+      "attack_catch": 0.756701,
+      "combined_fpr": 0.00382,
+      "combined_review_rate": 0.098728
+    },
+    "v2b_high_recall_t072": {
+      "attack_catch": 0.77732,
+      "combined_fpr": 0.051948,
+      "combined_review_rate": 0.135147
+    },
+    "v2b_balanced_t0725_w004": {
+      "attack_catch": 0.762887,
+      "combined_fpr": 0.00382,
+      "combined_review_rate": 0.10136
+    },
+    "v2b_conservative_t073": {
+      "attack_catch": 0.742268,
+      "combined_fpr": 0.002292,
+      "combined_review_rate": 0.091707
+    }
+  },
+  "decision": {
+    "recommended_default_candidate": "v2b_balanced_t0725_w004",
+    "recommended_high_recall_candidate": "v2b_high_recall_t072",
+    "recommended_conservative_candidate": "v2b_conservative_t073",
+    "reason": "The balanced point improves over the previous 0.5B v1 Attack Catch while keeping the same combined FPR and benign hard block 0 on the 1079+1200 same-batch view."
+  }
+}

@@ -1,0 +1,118 @@
+{
+  "schema_version": "guardx-model-eval-matrix-v1",
+  "notes": "Set provider API keys in the current shell. Do not write keys into this file.",
+  "models": [
+    {
+      "id": "deepseek-chat",
+      "provider": "deepseek",
+      "guardx_model": "deepseek-openai-compatible",
+      "api_key_env": "DEEPSEEK_API_KEY",
+      "modalities": ["text"],
+      "suites": ["budget_online", "llm_core", "rag_core"]
+    },
+    {
+      "id": "deepseek-reasoner",
+      "provider": "deepseek",
+      "guardx_model": "deepseek-official-reasoner",
+      "api_key_env": "DEEPSEEK_API_KEY",
+      "modalities": ["text", "agent"],
+      "suites": ["budget_online", "agent_core"]
+    },
+    {
+      "id": "kimi-vlm",
+      "provider": "moonshot",
+      "guardx_model": "mock-safe-model",
+      "api_key_env": "KIMI_API_KEY",
+      "alternate_api_key_env": "MOONSHOT_API_KEY",
+      "modalities": ["vision", "text"],
+      "suites": ["kimi_vlm"]
+    },
+    {
+      "id": "openai-multimodal",
+      "provider": "openai",
+      "guardx_model": "enterprise-openai-compatible",
+      "api_key_env": "OPENAI_API_KEY",
+      "base_url_env": "OPENAI_COMPAT_BASE_URL",
+      "modalities": ["text", "vision", "tool"],
+      "suites": ["budget_online", "llm_core", "rag_core", "vlm"]
+    },
+    {
+      "id": "gemini-multimodal",
+      "provider": "gemini",
+      "api_key_env": "GEMINI_API_KEY",
+      "modalities": ["text", "vision"],
+      "suites": ["vlm", "rag_core"],
+      "status": "adapter_planned"
+    },
+    {
+      "id": "claude-vision",
+      "provider": "anthropic",
+      "api_key_env": "ANTHROPIC_API_KEY",
+      "modalities": ["text", "vision"],
+      "suites": ["vlm", "llm_core"],
+      "status": "adapter_planned"
+    },
+    {
+      "id": "dashscope-qwen-vl-plus",
+      "provider": "dashscope",
+      "api_key_env": "DASHSCOPE_API_KEY",
+      "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      "model": "qwen-vl-plus",
+      "modalities": ["text", "vision"],
+      "suites": ["vlm", "rag_core"]
+    },
+    {
+      "id": "dashscope-qwen-vl-max",
+      "provider": "dashscope",
+      "api_key_env": "DASHSCOPE_API_KEY",
+      "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      "model": "qwen-vl-max",
+      "modalities": ["text", "vision"],
+      "suites": ["vlm"]
+    },
+    {
+      "id": "dashscope-qwen-plus",
+      "provider": "dashscope",
+      "guardx_model": "mock-safe-model",
+      "api_key_env": "DASHSCOPE_API_KEY",
+      "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      "model": "qwen-plus",
+      "modalities": ["text", "agent"],
+      "suites": ["agent_core", "rag_core"],
+      "notes": "Used for OpenHands RB-005 live baseline/guarded agent evidence."
+    },
+    {
+      "id": "glm-4v",
+      "provider": "zhipu",
+      "api_key_env": "ZAI_API_KEY",
+      "alternate_api_key_env": "ZHIPU_API_KEY",
+      "base_url": "https://api.z.ai/api/paas/v4",
+      "model": "glm-4.5v",
+      "modalities": ["text", "vision"],
+      "suites": ["vlm"]
+    },
+    {
+      "id": "local-ollama",
+      "provider": "ollama",
+      "guardx_model": "local-ollama",
+      "modalities": ["text"],
+      "suites": ["budget_online", "benign_regression"]
+    },
+    {
+      "id": "local-ollama-deepseek-r1-1.5b",
+      "provider": "ollama",
+      "guardx_model": "local-ollama-deepseek-r1-1_5b",
+      "ollama_model": "deepseek-r1:1.5b",
+      "modalities": ["text"],
+      "suites": ["budget_online", "benign_regression", "public_benchmark_safe"]
+    },
+    {
+      "id": "local-ollama-qwen2.5-coder-1.5b",
+      "provider": "ollama",
+      "guardx_model": "local-ollama-qwen2_5-coder-1_5b",
+      "ollama_model": "qwen2.5-coder:1.5b",
+      "modalities": ["text", "code"],
+      "suites": ["budget_online", "benign_regression", "public_benchmark_safe"]
+    }
+  ]
+}

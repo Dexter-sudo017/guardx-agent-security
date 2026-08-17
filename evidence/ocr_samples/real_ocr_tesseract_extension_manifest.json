@@ -1,0 +1,112 @@
+{
+  "schema_version": "guardx-real-ocr-evidence-manifest-v1",
+  "generated_at": "2026-06-02T13:20:29.423517+00:00",
+  "source_fixture_manifest": "evidence/ocr_samples/manifest.json",
+  "sample_filter": [
+    "source-cord-style-receipt-qr-note-002",
+    "source-docvqa-style-watermark-002",
+    "source-funsd-style-table-safe-002"
+  ],
+  "privacy_policy": "synthetic_images_only_no_real_pii_store_ocr_text_and_hashes",
+  "tesseract_tessdata_dir_policy": "local_tool_cache_not_committed",
+  "engine_summary": {
+    "tesseract": "captured",
+    "paddleocr": "unavailable"
+  },
+  "records": [
+    {
+      "sample_id": "ocr_fixture_docvqa_watermark_002",
+      "image_id": "source-docvqa-style-watermark-002",
+      "expected_case_id": "source_ocr_docvqa_watermark_policy_trace",
+      "synthetic": true,
+      "contains_real_pii": false,
+      "render": {
+        "render_engine": "microsoft_edge_headless",
+        "render_engine_version": "Microsoft Edge 148.0.3967.96",
+        "rendered_image_path": "evidence/ocr_samples/rendered/source-docvqa-style-watermark-002.edge.png",
+        "rendered_image_sha256": "55ee51d686961c1f082be7ed4b88cd6a6910d01e70ea925f8fdd400e0de7f0b2",
+        "viewport": {
+          "width": 960,
+          "height": 620
+        }
+      },
+      "ocr_runs": [
+        {
+          "engine": "tesseract",
+          "engine_version": "tesseract v5.4.0.20240606",
+          "languages": "chi_sim+eng",
+          "available_languages": [
+            "chi_sim",
+            "eng"
+          ],
+          "ocr_output_path": "evidence/ocr_samples/ocr_real/tesseract/source-docvqa-style-watermark-002.tesseract.txt",
+          "ocr_output_sha256": "e630a097acf34718de2b1abf3edb213302029c3ca0c4a1fc98b81b1147af1481",
+          "command": "tesseract <rendered_png> stdout --tessdata-dir <local_tessdata> -l <languages> --psm 6"
+        }
+      ]
+    },
+    {
+      "sample_id": "ocr_fixture_cord_qr_note_002",
+      "image_id": "source-cord-style-receipt-qr-note-002",
+      "expected_case_id": "source_ocr_cord_qr_note_network_export",
+      "synthetic": true,
+      "contains_real_pii": false,
+      "render": {
+        "render_engine": "microsoft_edge_headless",
+        "render_engine_version": "Microsoft Edge 148.0.3967.96",
+        "rendered_image_path": "evidence/ocr_samples/rendered/source-cord-style-receipt-qr-note-002.edge.png",
+        "rendered_image_sha256": "40b77f60aba7d7ec8f3ebfbe1a552b58fd82d357fa0ab9d06ebe6e7069e38c61",
+        "viewport": {
+          "width": 560,
+          "height": 780
+        }
+      },
+      "ocr_runs": [
+        {
+          "engine": "tesseract",
+          "engine_version": "tesseract v5.4.0.20240606",
+          "languages": "chi_sim+eng",
+          "available_languages": [
+            "chi_sim",
+            "eng"
+          ],
+          "ocr_output_path": "evidence/ocr_samples/ocr_real/tesseract/source-cord-style-receipt-qr-note-002.tesseract.txt",
+          "ocr_output_sha256": "75be1d6d48e26e1cf90f30a98f029ad8bdf76680905270bc775e3db8c55a41ff",
+          "command": "tesseract <rendered_png> stdout --tessdata-dir <local_tessdata> -l <languages> --psm 6"
+        }
+      ]
+    },
+    {
+      "sample_id": "ocr_fixture_funsd_table_safe_002",
+      "image_id": "source-funsd-style-table-safe-002",
+      "expected_case_id": "source_ocr_funsd_table_safe_privacy",
+      "synthetic": true,
+      "contains_real_pii": false,
+      "render": {
+        "render_engine": "microsoft_edge_headless",
+        "render_engine_version": "Microsoft Edge 148.0.3967.96",
+        "rendered_image_path": "evidence/ocr_samples/rendered/source-funsd-style-table-safe-002.edge.png",
+        "rendered_image_sha256": "138ae903442aca1040dbad8712c1bae37dd81aad2ecba50b0c580ef5995a107d",
+        "viewport": {
+          "width": 820,
+          "height": 560
+        }
+      },
+      "ocr_runs": [
+        {
+          "engine": "tesseract",
+          "engine_version": "tesseract v5.4.0.20240606",
+          "languages": "chi_sim+eng",
+          "available_languages": [
+            "chi_sim",
+            "eng"
+          ],
+          "ocr_output_path": "evidence/ocr_samples/ocr_real/tesseract/source-funsd-style-table-safe-002.tesseract.txt",
+          "ocr_output_sha256": "dc308bb1ae64d5bd49b575e76c14f4215a37245e899f4a16a38e179d069160c5",
+          "command": "tesseract <rendered_png> stdout --tessdata-dir <local_tessdata> -l <languages> --psm 6"
+        }
+      ]
+    }
+  ],
+  "unavailable_engines": []
+}

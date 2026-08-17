@@ -1,0 +1,5 @@
+{
+  "schema_version": "guardx-capability-store-v1",
+  "store_id": "provisioned_by_trusted_control_plane",
+  "grants": []
+}

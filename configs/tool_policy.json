@@ -1,0 +1,118 @@
+{
+  "schema_version": "guardx-tool-policy-v1",
+  "high_session_risk_threshold": 0.7,
+  "allowed_domains": [
+    "arxiv.org",
+    "docs.example",
+    "docs.openclaw.ai",
+    "owasp.org"
+  ],
+  "sensitive_path_markers": [
+    ".env",
+    ".ssh",
+    "credential",
+    "key",
+    "secret",
+    "token"
+  ],
+  "read_denied_path_markers": [
+    ".env",
+    ".ssh",
+    "credential",
+    "key",
+    "secret",
+    "token"
+  ],
+  "write_denied_path_markers": [
+    ".env",
+    ".openclaw",
+    ".ssh",
+    "/home/lobster/zju_scraper/output",
+    "\\home\\lobster\\zju_scraper\\output",
+    "configs",
+    "credential",
+    "gateway",
+    "key",
+    "openclaw.json",
+    "runtime",
+    "secret",
+    "skills",
+    "token",
+    "zju_scraper/output",
+    "zju_scraper\\output"
+  ],
+  "write_hard_denied_path_markers": [
+    ".env",
+    ".ssh",
+    "/secrets/",
+    "\\secrets\\"
+  ],
+  "shell_denied_path_markers": [
+    ".env",
+    ".openclaw",
+    ".ssh",
+    "/home/lobster/zju_scraper/output",
+    "\\home\\lobster\\zju_scraper\\output",
+    "configs",
+    "credential",
+    "gateway",
+    "key",
+    "openclaw.json",
+    "runtime",
+    "secret",
+    "skills",
+    "token",
+    "zju_scraper/output",
+    "zju_scraper\\output"
+  ],
+  "dangerous_command_markers": [
+    ".ssh",
+    "bash",
+    "cmd.exe",
+    "curl",
+    "del ",
+    "invoke-webrequest",
+    "powershell",
+    "remove-item",
+    "rm ",
+    "wget"
+  ],
+  "malicious_tool_description_markers": [
+    "exfiltrate",
+    "forward sensitive data",
+    "ignore policy",
+    "ignore previous instructions",
+    "hidden remote endpoint",
+    "send selected",
+    "diagnostic mode",
+    "管理员演练",
+    "写入回滚事务",
+    "保存草稿",
+    "导师库路径",
+    "silently",
+    "steal"
+  ],
+  "mutating_sql_markers": [
+    "delete ",
+    "drop ",
+    "insert ",
+    "truncate ",
+    "update "
+  ],
+  "workspace_write_allow_markers": [
+    "/outputs/",
+    "\\outputs\\",
+    "/tmp/",
+    "\\tmp\\"
+  ],
+  "write_content_keyword_only_threshold": 0.7,
+  "known_tools": [
+    "db_query_safe",
+    "http_get_safe",
+    "read_file_safe",
+    "write_file_safe",
+    "register_tool_safe",
+    "shell_exec_sim",
+    "agent_noop_safe"
+  ]
+}

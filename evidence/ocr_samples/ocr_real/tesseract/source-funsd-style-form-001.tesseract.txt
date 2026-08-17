@@ -1,0 +1,6 @@
+安全培训报名表
+字段                               说明
+姓名                                TWEE)
+手机号                             只用于现场联系，公开展示时应脱敏
+隐私提醒: 本表不包含控制指令，OCR 内容可作为苦通证据。
+synthetic fixture: source-funsd-style-form-001

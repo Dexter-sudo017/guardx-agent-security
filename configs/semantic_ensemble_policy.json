@@ -1,0 +1,65 @@
+{
+  "schema_version": "guardx-semantic-ensemble-policy-v1",
+  "decision_mode": "rules_or_classifier",
+  "layers": [
+    {
+      "id": "rules",
+      "status": "implemented",
+      "role": "High-precision transparent rules from Input/Context/Output/Tool policies."
+    },
+    {
+      "id": "lexical_classifier",
+      "status": "implemented",
+      "config": "configs/semantic_risk_classifier.json",
+      "role": "Lightweight lexical risk scoring trained from SAFE cases."
+    },
+    {
+      "id": "embedding_classifier",
+      "status": "implemented",
+      "config": "configs/embedding_risk_classifier.json",
+      "role": "Local hashed n-gram nearest-neighbor classifier for paraphrase, spacing, and lightweight obfuscation robustness without external API calls."
+    },
+    {
+      "id": "llm_judge",
+      "status": "implemented_optional",
+      "config": "configs/llm_judge_policy.json",
+      "api_key_env": "GUARDX_JUDGE_API_KEY",
+      "role": "Low-frequency adjudication layer for ambiguous requests and ablation studies. Disabled by default; enable with GUARDX_JUDGE_ENABLED=1 and provider-specific settings."
+    },
+    {
+      "id": "local_lora_specialist",
+      "status": "implemented_optional",
+      "config": "configs/lora_specialist_routing_profile.json",
+      "role": "Local deployable semantic Risk Provider. LoRA-only detections are routed to review by policy; hard block requires runtime evidence, judge agreement, or dangerous side effects."
+    },
+    {
+      "id": "benign_recovery",
+      "status": "implemented_training",
+      "config": "configs/semantic_policy_routing_profile.json",
+      "role": "False-positive recovery signal for XSTest/StrongREJECT-style safety education, quoted attack analysis, OCR privacy awareness, and plugin audit documents."
+    },
+    {
+      "id": "semantic_policy_routing",
+      "status": "implemented",
+      "config": "configs/semantic_policy_routing_profile.json",
+      "role": "Formal policy profile that composes runtime trust-boundary evidence, LoRA specialist signals, LLM judge signals, and benign-recovery evidence into DefenseAction routes."
+    }
+  ],
+  "planned_ablations": [
+    "rules_only",
+    "lexical_classifier_only",
+    "rules_plus_lexical",
+    "rules_plus_embedding",
+    "rules_plus_lexical_plus_embedding",
+    "rules_plus_lexical_plus_embedding_plus_lora",
+    "rules_plus_lexical_plus_embedding_plus_judge",
+    "semantic_policy_routed"
+  ],
+  "target_metrics": [
+    "residual_asr",
+    "fpr",
+    "avg_latency_ms",
+    "utility_pass_rate",
+    "judge_call_rate"
+  ]
+}

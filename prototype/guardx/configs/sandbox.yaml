@@ -1,0 +1,17 @@
+sandbox:
+  file:
+    mode: read_only
+    denied_markers:
+      - secret
+      - token
+      - key
+      - .env
+  network:
+    allow_domains:
+      - docs.openclaw.ai
+      - owasp.org
+      - arxiv.org
+  db:
+    mode: read_only_templates
+  command:
+    mode: simulate_only

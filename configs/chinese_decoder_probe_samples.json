@@ -1,0 +1,74 @@
+{
+  "schema_version": "guardx-chinese-decoder-probe-samples-v1",
+  "updated_at": "2026-06-02",
+  "eval_only": true,
+  "production_routing": false,
+  "text_hash_policy": "store_sha256_and_aggregate_metrics_only",
+  "sample_builder": "prototype/guardx/backend/scripts/build_chinese_decoder_probe_samples.py",
+  "source_candidates": [
+    {
+      "source_id": "src_clue",
+      "name": "CLUE benchmark",
+      "url": "https://github.com/CLUEbenchmark/CLUE",
+      "intended_use": "Chinese embedding and decoder baseline after license review."
+    },
+    {
+      "source_id": "src_cmrc2018",
+      "name": "CMRC 2018",
+      "url": "https://hfl-rc.github.io/cmrc2018/",
+      "intended_use": "Chinese paragraph-level decoder probe after license review."
+    },
+    {
+      "source_id": "guardx_synthetic_cn_security",
+      "name": "GuardX synthetic Chinese security notes",
+      "url": "local:guardx",
+      "intended_use": "Safe smoke set for decoder contract without external dataset dependency."
+    }
+  ],
+  "synthetic_smoke_samples": [
+    {
+      "sample_id": "cn_decoder_rag_boundary_001",
+      "topic": "rag_trust_boundary",
+      "dataset_source_id": "guardx_synthetic_cn_security",
+      "text_sha256": "26f4bb17ba9bf31ec8365ef10f5f85394e696b0c2c47b95f437542e1162f7b60",
+      "char_count": 64,
+      "contains_real_pii": false,
+      "contains_secret": false,
+      "storage_policy": "hash_only_in_reports"
+    },
+    {
+      "sample_id": "cn_decoder_tool_audit_001",
+      "topic": "tool_audit",
+      "dataset_source_id": "guardx_synthetic_cn_security",
+      "text_sha256": "0e4bc5ec6902a4cd668b7558fc95bd5ace698a75a4aedbd04ea6322ae150386c",
+      "char_count": 66,
+      "contains_real_pii": false,
+      "contains_secret": false,
+      "storage_policy": "hash_only_in_reports"
+    },
+    {
+      "sample_id": "cn_decoder_ocr_privacy_001",
+      "topic": "ocr_privacy_redaction",
+      "dataset_source_id": "guardx_synthetic_cn_security",
+      "text_sha256": "a2796732edc8cbe74acded2a0456dc49dc43049bf35f02ba31d80e08d4d90c58",
+      "char_count": 66,
+      "contains_real_pii": false,
+      "contains_secret": false,
+      "storage_policy": "hash_only_in_reports"
+    }
+  ],
+  "reporting_fields": [
+    "run_id",
+    "dataset_source_id",
+    "embedding_variant",
+    "decoder_kind",
+    "train_size",
+    "eval_size",
+    "max_token_f1",
+    "exact_match_rate",
+    "sensitive_case_hit_rate",
+    "contains_raw_text",
+    "eval_only",
+    "production_routing"
+  ]
+}

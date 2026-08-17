@@ -1,0 +1,76 @@
+{
+  "schema_version": "guardx-executor-capabilities-v1",
+  "default_runner": "simulated_safe_tool",
+  "capabilities": [
+    {
+      "tool_name": "read_file_safe",
+      "runner": "local_readonly_sandbox",
+      "surfaces": ["agent_tool", "file", "file_read"],
+      "side_effects": "read",
+      "requires_precheck": true,
+      "dry_run": false,
+      "rollback_supported": false,
+      "constraints": {"filesystem": "guardx_demo_sandbox_read_only", "root": "sandbox/demo"}
+    },
+    {
+      "tool_name": "write_file_safe",
+      "runner": "simulated_safe_tool",
+      "surfaces": ["agent_tool", "file_write", "file_edit"],
+      "side_effects": "write",
+      "requires_precheck": true,
+      "dry_run": true,
+      "rollback_supported": true,
+      "constraints": {"filesystem": "workspace_output_only"}
+    },
+    {
+      "tool_name": "http_get_safe",
+      "runner": "simulated_safe_tool",
+      "surfaces": ["agent_tool", "network", "http", "browser"],
+      "side_effects": "network",
+      "requires_precheck": true,
+      "dry_run": true,
+      "rollback_supported": false,
+      "constraints": {"network": "domain_allowlist"}
+    },
+    {
+      "tool_name": "db_query_safe",
+      "runner": "simulated_safe_tool",
+      "surfaces": ["agent_tool", "db", "database", "sql"],
+      "side_effects": "read",
+      "requires_precheck": true,
+      "dry_run": true,
+      "rollback_supported": false,
+      "constraints": {"sql": "read_only"}
+    },
+    {
+      "tool_name": "shell_exec_sim",
+      "runner": "simulated_safe_tool",
+      "surfaces": ["agent_tool", "command", "bash", "shell", "ipython"],
+      "side_effects": "compute",
+      "requires_precheck": true,
+      "dry_run": true,
+      "rollback_supported": false,
+      "constraints": {"shell": "simulate_only"}
+    },
+    {
+      "tool_name": "register_tool_safe",
+      "runner": "simulated_safe_tool",
+      "surfaces": ["agent_tool", "mcp", "plugin", "tool_registration"],
+      "side_effects": "registration",
+      "requires_precheck": true,
+      "dry_run": true,
+      "rollback_supported": true,
+      "constraints": {"manifest": "description_review_required"}
+    },
+    {
+      "tool_name": "agent_noop_safe",
+      "runner": "simulated_safe_tool",
+      "surfaces": ["agent_tool", "tool", "tool_call"],
+      "side_effects": "none",
+      "requires_precheck": true,
+      "dry_run": true,
+      "rollback_supported": false,
+      "constraints": {"execution": "noop"}
+    }
+  ]
+}

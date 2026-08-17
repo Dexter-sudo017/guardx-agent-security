@@ -1,0 +1,49 @@
+{
+  "schema_version": "guardx-competition-submission-readiness-audit-v1",
+  "ready": true,
+  "check_count": 8,
+  "failed_count": 0,
+  "claim_boundary": "This audit checks local repository evidence and source package completeness only.",
+  "checks": [
+    {
+      "item": "runtime_source_present",
+      "status": "pass",
+      "evidence": "prototype/guardx/backend/app"
+    },
+    {
+      "item": "policy_configs_present",
+      "status": "pass",
+      "evidence": "configs"
+    },
+    {
+      "item": "attack_cases_present",
+      "status": "pass",
+      "evidence": "attack_cases"
+    },
+    {
+      "item": "core_evidence_present",
+      "status": "pass",
+      "evidence": "evidence"
+    },
+    {
+      "item": "no_external_secret_required_for_smoke",
+      "status": "pass",
+      "evidence": "README.md"
+    },
+    {
+      "item": "benchmark_traceability_ready",
+      "status": "pass",
+      "evidence": "evidence/benchmark_traceability_matrix.json"
+    },
+    {
+      "item": "multi_surface_cases_ready",
+      "status": "pass",
+      "evidence": "evidence/agent_vlm_realism_cases_latest.json"
+    },
+    {
+      "item": "task_graph_replay_ready",
+      "status": "pass",
+      "evidence": "evidence/agentdojo_injecagent_task_graph_replay_alignment.json"
+    }
+  ]
+}

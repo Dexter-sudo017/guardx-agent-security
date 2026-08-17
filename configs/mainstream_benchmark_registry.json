@@ -1,0 +1,94 @@
+{
+  "schema_version": "guardx-mainstream-benchmark-registry-v1",
+  "updated_at": "2026-06-17",
+  "purpose": "Track mainstream benchmarks and baselines that GuardX uses for comparison, safe-abstraction mapping, or future official-subset evaluation.",
+  "raw_payload_policy": "Do not commit raw high-risk prompts unless license and safety review pass. Prefer metadata-only or safe-abstraction cases in this repository.",
+  "benchmarks": [
+    {
+      "name": "JailbreakBench",
+      "category": "LLM jailbreak benchmark",
+      "official_url": "https://github.com/JailbreakBench/jailbreakbench",
+      "primary_surface": ["LLM input", "LLM output"],
+      "typical_metrics": ["ASR", "robust refusal", "attack/defense success"],
+      "guardx_mapping": "OFF-JH metadata-only cases in guardx_official_semantic_subset_v1",
+      "current_status": "safe-abstraction subset connected to semantic matrix",
+      "next_step": "License-review official prompts and run a small external heldout subset without storing raw high-risk text in reports."
+    },
+    {
+      "name": "HarmBench",
+      "category": "LLM harmful-behavior and refusal benchmark",
+      "official_url": "https://github.com/centerforaisafety/HarmBench",
+      "primary_surface": ["LLM input", "LLM output"],
+      "typical_metrics": ["ASR", "DSR", "robust refusal"],
+      "guardx_mapping": "OFF-JH metadata-only harmful request abstractions",
+      "current_status": "safe-abstraction subset connected to semantic matrix",
+      "next_step": "Run licensed behavior categories as route-level tests and compare output guard refusal behavior."
+    },
+    {
+      "name": "XSTest",
+      "category": "false-positive and exaggerated-safety benchmark",
+      "official_url": "https://github.com/paul-rottger/xstest",
+      "primary_surface": ["LLM input", "LLM output"],
+      "typical_metrics": ["FPR", "safe compliance", "unsafe refusal"],
+      "guardx_mapping": "OFF-XS benign safety education and refusal-boundary cases",
+      "current_status": "safe-abstraction subset connected to semantic matrix and false-positive probe",
+      "next_step": "Expand benign security-education cases so GuardX does not over-block defensive learning."
+    },
+    {
+      "name": "StrongREJECT",
+      "category": "jailbreak evaluation and refusal-boundary benchmark",
+      "official_url": "https://github.com/alexandrasouly/strongreject",
+      "primary_surface": ["LLM input", "LLM output"],
+      "typical_metrics": ["jailbreak success score", "ASR", "refusal quality"],
+      "guardx_mapping": "OFF-XS refusal-boundary and harmful-framing abstractions",
+      "current_status": "safe-abstraction subset connected to semantic matrix",
+      "next_step": "Use LLM-as-judge only for aggregate evaluation, with raw prompts excluded from repository artifacts."
+    },
+    {
+      "name": "AgentDojo",
+      "category": "agent prompt-injection benchmark",
+      "official_url": "https://github.com/ethz-spylab/agentdojo",
+      "primary_surface": ["RAG", "tool output", "tool calls", "agent tasks"],
+      "typical_metrics": ["utility", "security", "task success under injection"],
+      "guardx_mapping": "OFF-AI RAG, tool output, plugin, and tool-sequence cases",
+      "current_status": "safe-abstraction subset connected to semantic matrix; replay/evidence chain available",
+      "next_step": "Map a small Inspect/AgentDojo-compatible task into executor lifecycle replay."
+    },
+    {
+      "name": "InjecAgent",
+      "category": "tool-integrated indirect prompt-injection benchmark",
+      "official_url": "https://github.com/uiuc-kang-lab/InjecAgent",
+      "primary_surface": ["RAG", "agent tools", "data exfiltration"],
+      "typical_metrics": ["attack success", "private data exfiltration", "tool misuse"],
+      "guardx_mapping": "OFF-AI indirect data exfiltration, sensitive file, network export, OCR hidden instruction cases",
+      "current_status": "safe-abstraction subset connected to semantic matrix",
+      "next_step": "Add tool/user-tool separation metadata to provenance and executor replay reports."
+    }
+  ],
+  "baseline_models": [
+    {
+      "name": "Meta Prompt Guard / Llama Prompt Guard",
+      "official_url": "https://www.llama.com/docs/model-cards-and-prompt-formats/prompt-guard/",
+      "comparison_role": "text-level prompt-injection and jailbreak classifier",
+      "guardx_status": "Prompt-Guard-style HF classifier baseline is supported; gated Meta weights require local access."
+    },
+    {
+      "name": "ProtectAI DeBERTa prompt-injection classifier",
+      "official_url": "https://huggingface.co/protectai/deberta-v3-base-prompt-injection",
+      "comparison_role": "open HF Transformer classifier baseline",
+      "guardx_status": "HF transformer classifier is runnable locally and included in semantic matrix reports."
+    },
+    {
+      "name": "Llama Guard",
+      "official_url": "https://github.com/meta-llama/PurpleLlama",
+      "comparison_role": "input/output safety classifier and LLM-style guard",
+      "guardx_status": "readiness tracked; gated/model access and hardware determine whether full baseline can run locally."
+    },
+    {
+      "name": "LLM-as-judge",
+      "official_url": "https://strong-reject.readthedocs.io/",
+      "comparison_role": "semantic safety judge for uncertain or disagreement cases",
+      "guardx_status": "runner and preflight are implemented; real API runs require GUARDX_JUDGE_* environment variables."
+    }
+  ]
+}

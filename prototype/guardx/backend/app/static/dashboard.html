@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GuardX Evaluation Dashboard</title>
+  <style>
+    :root {
+      --bg: #0c1016;
+      --panel: #141c25;
+      --line: #253447;
+      --text: #e7edf3;
+      --muted: #92a2b7;
+      --ok: #20bf75;
+      --warn: #ffb020;
+      --danger: #ff6278;
+      --accent: #4db6ff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(77,182,255,.14), transparent 30%),
+        radial-gradient(circle at bottom left, rgba(32,191,117,.12), transparent 24%),
+        var(--bg);
+    }
+    .shell {
+      max-width: 1380px;
+      margin: 0 auto;
+      padding: 24px;
+      display: grid;
+      gap: 18px;
+    }
+    .hero, .panel, .card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: linear-gradient(180deg, rgba(20,28,37,.98), rgba(18,26,34,.95));
+    }
+    .hero, .panel { padding: 18px; }
+    .hero { display: grid; gap: 12px; }
+    .row, .toolbar, .cards, .split {
+      display: grid;
+      gap: 14px;
+    }
+    .toolbar { grid-template-columns: minmax(220px, 280px) minmax(220px, 280px) minmax(220px, 1fr) 120px auto auto auto; align-items: end; }
+    .cards { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    .split { grid-template-columns: 1fr 1fr; }
+    .card {
+      padding: 16px;
+      display: grid;
+      gap: 6px;
+      min-height: 110px;
+    }
+    .card .value {
+      font-size: 28px;
+      font-weight: 700;
+    }
+    .muted { color: var(--muted); }
+    label { display: grid; gap: 6px; font-size: 13px; color: var(--muted); }
+    select, button, input {
+      background: #0d141b;
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 10px 12px;
+      font: inherit;
+    }
+    button.primary {
+      background: linear-gradient(180deg, #1678c7, #145996);
+      border-color: #1f7ecc;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      width: fit-content;
+    }
+    .ok { color: var(--ok); }
+    .warn { color: var(--warn); }
+    .danger { color: var(--danger); }
+    .stack {
+      display: grid;
+      gap: 10px;
+    }
+    .bar-row {
+      display: grid;
+      gap: 6px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(37,52,71,.6);
+    }
+    .bar-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 13px;
+    }
+    .bar {
+      height: 10px;
+      border-radius: 999px;
+      background: #0b1218;
+      border: 1px solid rgba(37,52,71,.8);
+      overflow: hidden;
+    }
+    .bar > span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, #1797eb, #1fbf75);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th, td {
+      text-align: left;
+      padding: 10px 8px;
+      border-bottom: 1px solid rgba(37,52,71,.6);
+      vertical-align: top;
+    }
+    th { color: var(--muted); font-weight: 600; }
+    .tag {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      font-size: 12px;
+      color: var(--muted);
+    }
+    a { color: var(--accent); text-decoration: none; }
+    @media (max-width: 1180px) {
+      .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .split { grid-template-columns: 1fr; }
+      .toolbar { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+      .cards { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="hero">
+      <div class="row">
+        <div class="pill">GuardX Internal Evaluation Dashboard</div>
+        <div class="muted">Regression view for sanitized safe-abstraction cases. Percentages are expected-route match rates, not official benchmark scores.</div>
+      </div>
+      <div class="toolbar">
+        <label>Evaluation Model
+          <select id="modelSelect"></select>
+        </label>
+        <label>Suite
+          <select id="suiteSelect"></select>
+        </label>
+        <label>Case IDs
+          <input id="caseIds" placeholder="SAFE-001,SAFE-008,SAFE-015" />
+        </label>
+        <label>Limit
+          <input id="limitInput" type="number" min="1" placeholder="all" />
+        </label>
+        <button class="primary" id="runBtn">Run Internal Suite</button>
+        <button id="budgetBtn">Budget Set</button>
+        <button id="clearBtn">Clear Filter</button>
+        <a href="/">Back to Console</a>
+      </div>
+      <div id="runtimeNote" class="muted">Loading runtime status...</div>
+      <div class="muted">Evaluation tiers: internal regression suite, public-style/source-inspired suite, and planned official benchmark subset. Budget set uses `SAFE-001`, `SAFE-008`, and `SAFE-015` for a low-cost sanity check only.</div>
+    </section>
+
+    <section class="cards">
+      <div class="card">
+        <div class="muted">GuardX Expected-route Match</div>
+        <div class="value" id="guardRate">--</div>
+        <div class="muted" id="guardCount">--</div>
+      </div>
+      <div class="card">
+        <div class="muted">Baseline Expected-route Match</div>
+        <div class="value" id="baselineRate">--</div>
+        <div class="muted" id="baselineCount">--</div>
+      </div>
+      <div class="card">
+        <div class="muted">Tool Block Rate</div>
+        <div class="value" id="toolRate">--</div>
+        <div class="muted" id="toolCount">--</div>
+      </div>
+      <div class="card">
+        <div class="muted">Supported Cases</div>
+        <div class="value" id="supportedCases">--</div>
+        <div class="muted" id="unsupportedCases">--</div>
+      </div>
+      <div class="card">
+        <div class="muted">Model Status</div>
+        <div class="value" id="modelStatus">--</div>
+        <div class="muted" id="modelType">--</div>
+      </div>
+    </section>
+
+    <section class="split">
+      <div class="panel">
+        <h2>By Attack Type</h2>
+        <div class="muted">Expected-route match by internal case label. Not an official benchmark leaderboard.</div>
+        <div id="attackBreakdown" class="stack"></div>
+      </div>
+      <div class="panel">
+        <h2>By Layer</h2>
+        <div class="muted">Expected-route match by GuardX risk layer. Use this to inspect coverage, not to claim open-world 100% defense.</div>
+        <div id="layerBreakdown" class="stack"></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Per-case Results</h2>
+      <div class="muted">This table uses the sanitized safe-abstraction index. Case labels and expected outcomes are for evaluation scoring; GuardX only receives the concrete payload from the case definition.</div>
+      <div style="overflow:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Case</th>
+              <th>Layer</th>
+              <th>Attack Type</th>
+              <th>GuardX</th>
+              <th>Baseline</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody id="caseRows"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const modelSelect = document.getElementById("modelSelect");
+    const runtimeNote = document.getElementById("runtimeNote");
+    const guardRate = document.getElementById("guardRate");
+    const guardCount = document.getElementById("guardCount");
+    const baselineRate = document.getElementById("baselineRate");
+    const baselineCount = document.getElementById("baselineCount");
+    const toolRate = document.getElementById("toolRate");
+    const toolCount = document.getElementById("toolCount");
+    const supportedCases = document.getElementById("supportedCases");
+    const unsupportedCases = document.getElementById("unsupportedCases");
+    const modelStatus = document.getElementById("modelStatus");
+    const modelType = document.getElementById("modelType");
+    const attackBreakdown = document.getElementById("attackBreakdown");
+    const layerBreakdown = document.getElementById("layerBreakdown");
+    const caseRows = document.getElementById("caseRows");
+    const suiteSelect = document.getElementById("suiteSelect");
+    const caseIdsInput = document.getElementById("caseIds");
+    const limitInput = document.getElementById("limitInput");
+
+    async function loadModels() {
+      const response = await fetch("/v1/models");
+      const models = await response.json();
+      modelSelect.innerHTML = "";
+      for (const model of models) {
+        const option = document.createElement("option");
+        option.value = model.name;
+        option.textContent = model.name;
+        modelSelect.appendChild(option);
+      }
+    }
+
+    async function loadSuites() {
+      const response = await fetch("/v1/eval/suites");
+      const suites = await response.json();
+      suiteSelect.innerHTML = "";
+
+      const custom = document.createElement("option");
+      custom.value = "";
+      custom.textContent = "Custom";
+      suiteSelect.appendChild(custom);
+
+      for (const suite of suites) {
+        const option = document.createElement("option");
+        option.value = suite.id;
+        option.textContent = suite.label;
+        suiteSelect.appendChild(option);
+      }
+    }
+
+    function renderBreakdown(container, items) {
+      container.innerHTML = "";
+      for (const item of items) {
+        const row = document.createElement("div");
+        row.className = "bar-row";
+        row.innerHTML = `
+          <div class="bar-label">
+            <span>${item.name}</span>
+            <span>GuardX route-match ${item.guarded_pass_rate}% | Baseline match ${item.baseline_pass_rate}%</span>
+          </div>
+          <div class="bar"><span style="width:${item.guarded_pass_rate}%"></span></div>
+        `;
+        container.appendChild(row);
+      }
+    }
+
+    function cellTag(text, tone) {
+      return `<span class="tag ${tone || ""}">${text}</span>`;
+    }
+
+    function renderCases(items) {
+      caseRows.innerHTML = "";
+      for (const item of items) {
+        const tr = document.createElement("tr");
+        const guardedTone = item.guarded.passed === true ? "ok" : (item.guarded.status === "unsupported" ? "warn" : "danger");
+        const baselineTone = item.baseline.passed === true ? "ok" : (item.baseline.status === "completed" ? "danger" : "warn");
+        tr.innerHTML = `
+          <td><strong>${item.case_id}</strong><br /><span class="muted">${item.metric}</span></td>
+          <td>${item.layer}</td>
+          <td>${item.attack_type}</td>
+          <td>${cellTag(item.guarded.status, guardedTone)}<br /><span class="muted">${item.guarded.detail || ""}</span></td>
+          <td>${cellTag(item.baseline.status, baselineTone)}<br /><span class="muted">${item.baseline.detail || ""}</span></td>
+          <td>${item.notes || ""}</td>
+        `;
+        caseRows.appendChild(tr);
+      }
+    }
+
+    async function runBenchmark() {
+      const model = modelSelect.value;
+      const suite = suiteSelect.value;
+      const caseIds = caseIdsInput.value.trim();
+      const limit = limitInput.value.trim();
+      runtimeNote.textContent = "Running internal expected-route suite...";
+      const params = new URLSearchParams({ model });
+      if (suite) params.set("suite", suite);
+      if (caseIds) params.set("case_ids", caseIds);
+      if (limit) params.set("limit", limit);
+      const response = await fetch(`/v1/eval/benchmark?${params.toString()}`);
+      const data = await response.json();
+
+      const summary = data.summary;
+      const runtime = data.runtime;
+
+      guardRate.textContent = `${summary.guarded_pass_rate}%`;
+      guardCount.textContent = `${summary.guarded_passed} / ${summary.guarded_completed} expected-route matched`;
+      baselineRate.textContent = `${summary.baseline_pass_rate}%`;
+      baselineCount.textContent = `${summary.baseline_passed} / ${summary.baseline_completed} expected-route matched`;
+      toolRate.textContent = `${summary.tool_block_rate}%`;
+      toolCount.textContent = `${summary.tool_blocked} / ${summary.tool_cases} tool cases blocked`;
+      supportedCases.textContent = String(summary.supported_cases);
+      unsupportedCases.textContent = `${summary.unsupported_cases} unsupported`;
+      modelStatus.textContent = runtime.live_upstream_ready ? "live ready" : "prototype mode";
+      modelType.textContent = `${runtime.selected_model.adapter_type} | configured=${runtime.selected_model.configured}`;
+      runtimeNote.textContent = runtime.note + " Results are internal expected-route matches, not official benchmark scores." + (suite ? ` Active suite: ${suite}.` : "") + (caseIds ? ` Running filtered cases: ${caseIds}.` : (limit ? ` Running first ${limit} cases.` : ""));
+
+      renderBreakdown(attackBreakdown, data.breakdowns.by_attack_type);
+      renderBreakdown(layerBreakdown, data.breakdowns.by_layer);
+      renderCases(data.results);
+    }
+
+    document.getElementById("runBtn").addEventListener("click", runBenchmark);
+    document.getElementById("budgetBtn").addEventListener("click", () => {
+      suiteSelect.value = "budget_online";
+      caseIdsInput.value = "SAFE-001,SAFE-008,SAFE-015";
+      limitInput.value = "";
+      runBenchmark();
+    });
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      suiteSelect.value = "";
+      caseIdsInput.value = "";
+      limitInput.value = "";
+    });
+
+    Promise.all([loadModels(), loadSuites()]).then(runBenchmark);
+  </script>
+</body>
+</html>

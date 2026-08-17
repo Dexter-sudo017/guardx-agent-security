@@ -1,0 +1,31 @@
+{
+  "schema_version": "guardx-external-redteam-frameworks-v1",
+  "mode": "safe_adapter_config_only",
+  "note": "These entries provide reproducible adapters for public red-team tools. They use sanitized SAFE case IDs and GuardX endpoints rather than storing high-risk raw prompts.",
+  "frameworks": [
+    {
+      "name": "promptfoo",
+      "purpose": "OWASP-style LLM red-team configuration and regression comparison",
+      "adapter_status": "external_run_completed",
+      "config_path": "evaluation/external_redteam/promptfoo/guardx_promptfoo_redteam.yaml",
+      "recommended_command": "npx --yes promptfoo@0.121.11 eval -c evaluation/external_redteam/promptfoo/guardx_promptfoo_redteam.yaml --no-share --no-cache",
+      "safety_control": "Use SAFE case abstractions and local GuardX endpoint; do not store raw high-risk prompts."
+    },
+    {
+      "name": "garak",
+      "purpose": "Public vulnerability scanner probe subset for leakage and prompt-injection categories",
+      "adapter_status": "wsl_ext4_run_completed_sanitized",
+      "config_path": "evaluation/external_redteam/garak/guardx_garak_runbook.md",
+      "recommended_command": "Use WSL ext4 venv /home/yolo/.venvs/guardx_garak and the function generator bridge evaluation/external_redteam/garak/guardx_garak_function.py.",
+      "safety_control": "Restrict to synthetic canaries and sanitized probes; import only aggregate results."
+    },
+    {
+      "name": "PyRIT",
+      "purpose": "External AI red-team orchestration and attack generation records",
+      "adapter_status": "wsl_ext4_run_completed",
+      "config_path": "evaluation/external_redteam/pyrit/guardx_pyrit_runbook.md",
+      "recommended_command": "source /home/yolo/.venvs/guardx_pyrit/bin/activate && python evaluation/external_redteam/pyrit/guardx_pyrit_safe_smoke.py",
+      "safety_control": "Store prompt hashes, tactic labels, and outcomes instead of raw high-risk payloads."
+    }
+  ]
+}

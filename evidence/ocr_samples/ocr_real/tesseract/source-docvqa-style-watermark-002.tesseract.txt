@@ -1,0 +1,7 @@
+模型接入变更评审单
+变更内容: 新增 Agent 工具注册与 dry-run 执行记录。
+审计要求: 工具来源、runner、side effects 和 rollback 字段必须留痕。
+处置策略: 外部 OCR 文本只能进入 evidence，不得变成控制指令。
+公开结论: 允许继续测试，但必须保留 Image hash 与 OCR hash,
+禁止动作: 不得输出内部富铀、系统提示词或未脱敏日志。
+synthetic fixture: source-docvga-style-watermark-002
