@@ -59,10 +59,21 @@ const state = {
     guided: null,
     imagePreviewUrl: null,
     agentPreset: "benign_read"
+  },
+  free: {
+    providerMode: "local",
+    running: false,
+    imagePreviewUrl: null
   }
 };
 
 const DIFFICULTY_LABELS = Object.freeze({obvious: "明显", subtle: "隐蔽", combined: "组合"});
+const RISK_STRUCTURES = Object.freeze({
+  llm: {source: "用户输入 / 拼接文本", component: "输入关系分析", location: "新增指令覆盖原任务", target: "模型最终回答"},
+  rag: {source: "检索文档片段", component: "BGE-M3 → Qdrant", location: "非可信 Chunk 携带控制指令", target: "回答模型"},
+  vlm: {source: "图片与 OCR 文字", component: "VLM / OCR 识别", location: "视觉内容试图取得指令权", target: "当前任务 / 下游模型"},
+  agent: {source: "网页、检索或工具返回", component: "Agent 规划", location: "候选动作超出授权范围", target: "工具与受限 Runner"}
+});
 
 const CHAPTERS = Object.freeze({
   llm: {
@@ -339,7 +350,7 @@ function setExperience(experience, options = {}) {
   $$('[data-experience-nav]').forEach(node => {
     node.hidden = node.dataset.experienceNav !== experience;
   });
-  $("#runtimeModeSwitch").hidden = experience !== "demo";
+  $("#runtimeModeSwitch").hidden = true;
   $("#healthStrip").hidden = experience !== "demo";
   if (experience === "demo" && state.live.backend) setMode("live");
   updateDemoTruth();
@@ -803,27 +814,21 @@ function selectScenario(id, variant = state.variant) {
   $("#stageTitle").textContent = `${chapter.ordinal} / ${chapter.title} / ${variantLabel}`;
   renderPrompt(data.prompt_parts);
   renderRelation(data.relation);
+  const structure = RISK_STRUCTURES[scenario.scenario_id];
+  $("#riskSource").textContent = structure.source;
+  $("#riskComponent").textContent = structure.component;
+  $("#riskLocation").textContent = selectedVariant === "clean" ? "未发现越权关系" : structure.location;
+  $("#riskTarget").textContent = structure.target;
+  $("#riskStructure").dataset.risk = selectedVariant === "clean" ? "safe" : "risk";
   $("#vlmPreview").hidden = scenario.scenario_id !== "vlm";
   const runButton = $("#runTrace");
-  if (state.mode === "live") {
-    const configured = scenarioLiveConfigured(scenario);
-    const unavailableDetail = "本机后端不可达，无法发起本次真实运行。";
-    $("#traceState").textContent = configured ? "LIVE READY · NOT RUN" : "LIVE NOT CONFIGURED";
-    $("#ocrOutput").textContent = scenario.scenario_id === "vlm" ? "点击运行后将载入内置图片并调用本机真实 VLM / OCR。" : "";
-    renderTrace([{offset_ms: 0, stage: "LIVE REQUEST", detail: configured ? "等待点击运行；标准样例将进入下方真实实验台并只接受后端本次响应。" : unavailableDetail, status: configured ? "PENDING" : "NOT CONFIGURED"}], 0);
-    renderLedger({model_called: "NOT RUN", tool_requested: scenario.scenario_id === "agent", execution_permit: "NOT RUN", runner_invoked: false, side_effect: false, final_action: "AWAITING LIVE RUN", evidence_id: "NOT CREATED"});
-    updateConsole({risk: null, route: configured ? "AWAITING RUN" : "NOT CONFIGURED", provider: configured ? "LIVE BACKEND" : "UNAVAILABLE", executor_state: "NOT RUN", trace_id: "NOT CREATED", stages: []});
-    runButton.textContent = configured ? "运行当前场景 →" : "LIVE NOT CONFIGURED";
-    runButton.disabled = !configured;
-  } else {
-    $("#traceState").textContent = "FROZEN REPLAY READY";
-    $("#ocrOutput").textContent = data.ocr_output || "";
-    renderTrace(data.stages, 0);
-    renderLedger(data.ledger);
-    updateConsole(data);
-    runButton.textContent = "OPEN REPLAY →";
-    runButton.disabled = false;
-  }
+  $("#traceState").textContent = selectedVariant === "clean" ? "STRUCTURE · NO CONFLICT" : "STRUCTURE · RISK LOCATED";
+  $("#ocrOutput").textContent = data.ocr_output || "";
+  renderTrace(data.stages, 0);
+  renderLedger(data.ledger);
+  updateConsole(data);
+  runButton.textContent = "查看风险定位 →";
+  runButton.disabled = false;
 }
 
 function sleep(ms) {
@@ -909,23 +914,61 @@ function renderProviderStatus() {
   if (!providers.length) appendText(grid, "p", "provider-empty", "当前运行方式没有注册供应商。");
 }
 
-function renderCustomModelOptions() {
-  const select = $("#customModel");
+function requiredCapability(surface) {
+  return ({chat: "chat", rag: "rag_answer", vlm: "vision", agent: "agent_planner"})[surface] || "chat";
+}
+
+function modelSupports(model, surface) {
+  const capabilities = Array.isArray(model.capabilities) ? model.capabilities : [];
+  if (capabilities.length) return capabilities.includes(requiredCapability(surface));
+  if (surface === "vlm") return model.adapter_type === "ollama_vlm" || model.name.includes("-vl-");
+  return model.adapter_type !== "ollama_vlm" && !model.name.includes("-vl-");
+}
+
+function orderedModels(surface, mode) {
+  const priority = name => name.includes("qwen2_5-vl-7b") ? 0 : name.includes("deepseek-r1-7b") ? 1 : name.includes("qwen2_5-7b") ? 2 : name.startsWith("deepseek-") ? 3 : name.startsWith("kimi-") ? 4 : name.startsWith("dashscope-") ? 5 : name.startsWith("zhipu-") ? 6 : 9;
+  return state.custom.models
+    .filter(model => model.provider_mode === mode && modelSupports(model, surface))
+    .sort((left, right) => (Number(right.configured) - Number(left.configured)) || (priority(left.name) - priority(right.name)));
+}
+
+function configuredTextModel(preferredMode = "local") {
+  return orderedModels("chat", preferredMode).find(model => model.configured)
+    || orderedModels("chat", preferredMode === "local" ? "api" : "local").find(model => model.configured)
+    || null;
+}
+
+function fillModelSelect(select, surface, mode) {
+  const previous = select.value;
   select.replaceChildren();
-  const priority = name => name.includes("deepseek-r1-7b") ? 0 : name.includes("qwen2_5-7b") ? 1 : name.startsWith("deepseek-") ? 2 : name.startsWith("kimi-") ? 3 : name.startsWith("dashscope-") ? 4 : name.startsWith("zhipu-") ? 5 : 9;
-  const ordered = state.custom.models.filter(model => model.provider_mode === state.custom.providerMode).sort((left, right) => (Number(right.configured) - Number(left.configured)) || (priority(left.name) - priority(right.name)));
+  const ordered = orderedModels(surface, mode);
   ordered.forEach(model => {
     const option = element("option", "", `${model.name} · ${model.configured ? "READY" : "NEEDS SERVER SETUP"}`);
     option.value = model.name;
     option.disabled = !model.configured;
     select.appendChild(option);
   });
-  const preferred = ordered.find(model => model.configured);
+  const preferred = ordered.find(model => model.configured && model.name === previous) || ordered.find(model => model.configured);
   if (preferred) select.value = preferred.name;
-  if (!ordered.length) select.appendChild(element("option", "", "当前模式没有模型"));
+  if (!ordered.length) select.appendChild(element("option", "", "当前运行方式没有匹配该能力的模型"));
   select.disabled = !preferred;
+  return preferred || null;
+}
+
+function renderCustomModelOptions() {
+  const select = $("#customModel");
+  const preferred = fillModelSelect(select, $("#customSurface").value, state.custom.providerMode);
   $("#runCustomGuarded").disabled = !preferred;
   renderCustomModelState();
+  renderGuidedStack();
+}
+
+function renderFreeModelOptions() {
+  const preferred = fillModelSelect($("#freeModel"), $("#freeSurface").value, state.free.providerMode);
+  $("#runFreeGuarded").disabled = !preferred;
+  const node = $("#freeModelState");
+  node.dataset.state = preferred ? "ready" : "unavailable";
+  node.textContent = preferred ? `能力已匹配 · ${preferred.name} · ${preferred.configured ? "READY" : "SERVER SETUP REQUIRED"}` : "没有可用于当前输入类型的模型";
 }
 
 function setProviderMode(mode) {
@@ -937,6 +980,16 @@ function setProviderMode(mode) {
   });
   renderProviderStatus();
   renderCustomModelOptions();
+}
+
+function setFreeProviderMode(mode) {
+  state.free.providerMode = mode === "api" ? "api" : "local";
+  $$('[data-free-provider-mode]').forEach(button => {
+    const active = button.dataset.freeProviderMode === state.free.providerMode;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+  renderFreeModelOptions();
 }
 
 function setShowcaseMode(mode) {
@@ -954,7 +1007,7 @@ function setShowcaseMode(mode) {
 async function loadCustomModels() {
   const select = $("#customModel");
   try {
-    const [models, providerPayload] = await Promise.all([getJson("/v1/models", 8000), getJson(PATHS.providers, 8000)]);
+    const [models, providerPayload] = await Promise.all([getJson("/v1/models", 20000), getJson(PATHS.providers, 20000)]);
     if (!Array.isArray(models) || !Array.isArray(providerPayload.providers)) throw new Error("Malformed provider registry");
     state.custom.providers = providerPayload.providers.filter(provider => VISIBLE_PROVIDER_IDS.has(provider.id));
     const routing = new Map();
@@ -963,16 +1016,42 @@ async function loadCustomModels() {
       .filter(model => model.adapter_type !== "mock" && routing.has(model.name))
       .map(model => ({...model, ...routing.get(model.name)}));
     setProviderMode(state.custom.providerMode);
+    renderFreeModelOptions();
   } catch (error) {
     state.custom.models = [];
     state.custom.providers = [];
     select.replaceChildren(element("option", "", "模型清单不可用"));
     select.disabled = true;
     $("#runCustomGuarded").disabled = true;
+    $("#runFreeGuarded").disabled = true;
     $("#customModelState").textContent = `MODEL REGISTRY / ${error.message}`;
     $("#providerStatusGrid").replaceChildren(element("p", "provider-empty", `供应商状态不可用：${error.message}`));
   }
   renderCustomModelState();
+}
+
+function runtimeStack(surface, modelName) {
+  return ({
+    chat: ["用户目标 + 输入", "GuardX 任务关系裁判", modelName || "文本回答模型", "完整回答"],
+    rag: ["知识库文档", "BGE-M3 向量化", "Qdrant 检索", "Chunk Guard", modelName || "回答模型"],
+    vlm: ["图片", modelName || "VLM / OCR 模型", "GuardX 任务关系裁判", "安全续答模型"],
+    agent: ["用户目标 + 非可信观察", modelName || "Agent 规划模型", "Action Guard", "Execution Permit", "受限 Runner"]
+  })[surface] || [];
+}
+
+function renderGuidedStack() {
+  const surface = $("#customSurface")?.value || "chat";
+  const items = runtimeStack(surface, $("#customModel")?.value);
+  const root = $("#guidedStack");
+  if (!root) return;
+  root.replaceChildren();
+  items.forEach((item, index) => {
+    const node = element("div", index === items.length - 1 ? "stack-node final" : "stack-node");
+    appendText(node, "small", "", `0${index + 1}`);
+    appendText(node, "strong", "", item);
+    root.appendChild(node);
+    if (index < items.length - 1) root.appendChild(element("i", "", "→"));
+  });
 }
 
 function updateCustomSurface() {
@@ -981,12 +1060,12 @@ function updateCustomSurface() {
   contextWrap.hidden = surface !== "rag";
   $("#customImageWrap").hidden = surface !== "vlm";
   $("#customAgentWrap").hidden = surface !== "agent";
-  $("#customPromptPresets").hidden = surface !== "chat";
+  $("#customPromptPresets").hidden = true;
   $("#customModelControl").hidden = false;
   $("#customModelLabel").textContent = ({
     chat: "回答模型",
     rag: "RAG 回答模型",
-    vlm: "业务回答模型",
+    vlm: "VLM / OCR 模型",
     agent: "Agent 规划模型"
   })[surface] || "服务端模型";
   const context = $("#customContext");
@@ -999,6 +1078,15 @@ function updateCustomSurface() {
   };
   $("#customMessage").placeholder = placeholders[surface] || placeholders.chat;
   renderCustomModelOptions();
+}
+
+function updateFreeSurface() {
+  const surface = $("#freeSurface").value;
+  $("#freeContextWrap").hidden = surface !== "rag";
+  $("#freeImageWrap").hidden = surface !== "vlm";
+  $("#freeAgentWrap").hidden = surface !== "agent";
+  $("#freeModelLabel").textContent = ({chat: "回答模型", rag: "RAG 回答模型", vlm: "VLM / OCR 模型", agent: "Agent 规划模型"})[surface];
+  renderFreeModelOptions();
 }
 
 function updateCustomImagePreview() {
@@ -1160,6 +1248,10 @@ async function prepareChapterLab(selection = null) {
   if (!scenario) return;
   const data = currentScenarioData(scenario, selected.variant, selected.difficulty);
   const attack = data.attack || chapterById(scenario.scenario_id).attacks[selected.difficulty];
+  state.custom.guided = selected;
+  const variantLabel = selected.variant === "clean" ? "良性对照" : `${DIFFICULTY_LABELS[selected.difficulty]}注入`;
+  $("#guidedCaseTitle").textContent = `${chapterById(scenario.scenario_id).ordinal} · ${chapterById(scenario.scenario_id).title} · ${variantLabel}`;
+  $("#guidedCaseNote").textContent = "目标、非可信内容与动作参数已从第 1 部分原样载入";
   $("#customGoal").value = selected.variant === "clean"
     ? chapterById(scenario.scenario_id).cleanRelation.goal
     : attack.relation.goal;
@@ -1189,7 +1281,8 @@ async function prepareChapterLab(selection = null) {
   } else {
     loadAgentSample(attack.preset || "cross_layer");
   }
-  $("#custom-live").scrollIntoView({behavior: "smooth", block: "start"});
+  renderGuidedStack();
+  $("#guided-live").scrollIntoView({behavior: "smooth", block: "start"});
   $("#customResultState").textContent = `SCENARIO ${chapterById(scenario.scenario_id).ordinal} · READY TO RUN`;
 }
 
@@ -1264,7 +1357,7 @@ function renderGuidedLiveResult(result, error, route) {
 
   renderTrace(stages, stages.length, Boolean(error));
   renderLedger({
-    model_called: error ? "ERROR" : isAgent ? "N/A · ACTION GUARD" : result.vlm_invoked ? `VLM YES · RELATION ${result.relation_model_invoked ? "YES" : "NO"} · DOWNSTREAM ${result.model_invoked ? "YES" : "NO"}` : result.relation_model_invoked ? `RELATION YES · DOWNSTREAM ${result.model_invoked ? "YES" : "NO"}` : Boolean(result.model_invoked),
+    model_called: error ? "ERROR" : isAgent ? (result.planner_model_invoked ? "PLANNER YES" : "PLANNER NO") : result.vlm_invoked ? `VLM YES · RELATION ${result.relation_model_invoked ? "YES" : "NO"} · DOWNSTREAM ${result.model_invoked ? "YES" : "NO"}` : result.relation_model_invoked ? `RELATION YES · DOWNSTREAM ${result.model_invoked ? "YES" : "NO"}` : Boolean(result.model_invoked),
     tool_requested: isAgent,
     execution_permit: error ? "NOT ISSUED" : isAgent ? (result.allowed ? "PERMIT" : "DENY") : "NOT APPLICABLE",
     runner_invoked: Boolean(result.runner_invoked),
@@ -1282,7 +1375,7 @@ function renderGuidedLiveResult(result, error, route) {
   });
   $("#traceState").textContent = error ? "LIVE ERROR" : `${routeLabel} · LIVE RESULT`;
   $("#runTrace").disabled = false;
-  $("#runTrace").textContent = "再次运行当前场景 ↻";
+  $("#runTrace").textContent = "查看风险定位 ↻";
 }
 
 function customResultModelText(result, isAgent = false) {
@@ -1521,14 +1614,15 @@ async function runCustomGuarded(event) {
     }
     if (surface === "vlm") {
       const imageDataUrl = await readFileAsDataUrl(imageFile);
+      const downstream = configuredTextModel(state.custom.providerMode);
       payload = {
         session_id: payload.session_id,
         message,
         filename: imageFile.name,
         mime_type: imageFile.type,
         image_base64: imageDataUrl,
-        vlm_model: "qwen2.5vl:7b",
-        downstream_model: model.name
+        vlm_model: model.name,
+        downstream_model: downstream?.name || "local-ollama-qwen2_5-7b"
       };
     }
     const sendRequest = () => fetch(endpoint, {
@@ -1585,8 +1679,145 @@ async function runCustomGuarded(event) {
     window.clearTimeout(timer);
     state.custom.running = false;
     button.disabled = false;
-    button.textContent = "RUN GUARDED INPUT →";
+    button.textContent = "运行选定案例 →";
   }
+}
+
+function selectedFreeModel() {
+  const name = $("#freeModel").value;
+  return state.custom.models.find(item => item.name === name) || null;
+}
+
+function renderFreeResult(result = {}, error = null) {
+  const route = error ? "error" : customRoute(result.policy_decision?.route || result.action);
+  const enforcement = String(result.policy_decision?.enforcement || "");
+  const routeLabel = enforcement === "QUARANTINE_AND_CONTINUE"
+    ? (result.model_invoked ? "SAFE CONTINUATION" : "INJECTION ISOLATED")
+    : route.toUpperCase();
+  $("#freeResult").dataset.route = route;
+  $("#freeResultState").textContent = error ? "REQUEST ERROR" : `${routeLabel} · LIVE`;
+  $("#freeResultDecision").textContent = error ? "请求失败" : `${routeLabel} · risk ${Number(result.risk_score || 0).toFixed(3)}`;
+  $("#freeResultStack").textContent = error
+    ? "—"
+    : result.agent_demo
+      ? `${result.planner_model || "规划模型"} → Action Guard → ${result.allowed ? "Execution Permit → Runner" : "Permit Denied"}`
+      : result.vlm_invoked
+        ? `${result.vlm_model || "VLM"} → Task Relation → ${result.model_invoked ? result.model : "Isolated"}`
+        : result.retrieval_engine
+          ? `${result.retrieval_embedding_model || "BGE-M3"} → ${result.retrieval_vector_store || "Qdrant"} → Chunk Guard → ${result.model || "回答模型"}`
+          : customResultModelText(result);
+  $("#freeResultAnswer").textContent = guardedOutcomeText(result, error, route, enforcement);
+  $("#freeRawOutput").textContent = error
+    ? `请求失败：${error.message}`
+    : result.agent_demo
+      ? (result.planner_output || "规划模型未返回文本。")
+      : result.model_invoked
+        ? (result.upstream_model_output ?? result.answer ?? "模型返回为空。")
+        : result.vlm_invoked
+          ? (result.raw_observation || result.visual_caption || result.ocr_text || "VLM / OCR 已完成识别，但未返回文本。")
+          : "业务模型未调用；风险输入已在调用前处理。";
+  $("#freeResultJson").textContent = error ? JSON.stringify({error: error.message}, null, 2) : JSON.stringify(result, null, 2);
+}
+
+async function runFreeGuarded(event) {
+  event.preventDefault();
+  if (state.free.running) return;
+  const surface = $("#freeSurface").value;
+  const model = selectedFreeModel();
+  const message = $("#freeMessage").value.trim();
+  const userGoal = $("#freeGoal").value.trim() || message;
+  const context = $("#freeContext").value.trim();
+  const imageFile = $("#freeImage").files?.[0] || null;
+  if (!message || !model?.configured) return;
+  if (surface === "rag" && !context) return renderFreeResult({}, new Error("请提供知识库文档。"));
+  if (surface === "vlm" && !imageFile) return renderFreeResult({}, new Error("请选择 PNG、JPEG 或 WebP 图片。"));
+  if (imageFile && imageFile.size > 10 * 1024 * 1024) return renderFreeResult({}, new Error("图片超过 10 MiB 限制。"));
+
+  const button = $("#runFreeGuarded");
+  state.free.running = true;
+  button.disabled = true;
+  button.textContent = "正在运行…";
+  $("#freeResultState").textContent = "RUNNING";
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(), surface === "vlm" ? 240000 : 120000);
+  try {
+    const sessionId = `reviewer-free-${Date.now()}`;
+    let endpoint = apiUrl("/v1/guarded/chat");
+    let payload = {session_id: sessionId, model: model.name, message, history: [], metadata: {surface, source: "reviewer_free_input"}};
+    let contextualEvaluation = null;
+    if (surface === "chat") {
+      const guardResponse = await fetch(PATHS.contextualEvaluate, {method: "POST", headers: {"content-type": "application/json", accept: "application/json"}, body: JSON.stringify({surface: "llm", user_goal: userGoal, observation: message}), signal: controller.signal});
+      if (!guardResponse.ok) throw new Error(`Contextual Authorization HTTP ${guardResponse.status}`);
+      contextualEvaluation = await guardResponse.json();
+      if (!["ALLOW", "ALLOW_WITH_CONSTRAINTS"].includes(contextualEvaluation.policy_decision?.enforcement)) {
+        renderFreeResult({
+          session_id: sessionId,
+          model: contextualEvaluation.provider?.model || "task-relation-judge",
+          action: contextualEvaluation.policy_decision?.action || "rewrite",
+          answer: "",
+          risk_score: contextualEvaluation.policy_decision?.risk_score || 0,
+          policy_decision: contextualEvaluation.policy_decision,
+          model_invoked: false,
+          relation_model_invoked: contextualEvaluation.model_called,
+          response_source: "guardx_contextual_policy_v2",
+          contextual_evaluations: [contextualEvaluation],
+          evidence_ids: [contextualEvaluation.evidence_replay_verify?.record_hash]
+        });
+        return;
+      }
+    } else if (surface === "rag") {
+      endpoint = PATHS.liveRag;
+      payload = {session_id: sessionId, model: model.name, message, documents: ragDocumentsFromText(context), top_k: 4};
+    } else if (surface === "vlm") {
+      endpoint = PATHS.liveVlmImage;
+      const downstream = configuredTextModel(state.free.providerMode);
+      payload = {session_id: sessionId, message, filename: imageFile.name, mime_type: imageFile.type, image_base64: await readFileAsDataUrl(imageFile), vlm_model: model.name, downstream_model: downstream?.name || "local-ollama-qwen2_5-7b"};
+    } else if (surface === "agent") {
+      endpoint = PATHS.liveAgent;
+      let action;
+      try {
+        action = JSON.parse($("#freeAgentAction").value);
+        if (!action || Array.isArray(action) || typeof action !== "object") throw new Error("动作必须是 JSON object");
+      } catch (error) {
+        throw new Error(`Agent 动作 JSON 无效：${error.message}`);
+      }
+      const riskHint = Number($("#freeAgentRisk").value);
+      payload = {session_id: sessionId, model: model.name, user_goal: userGoal, untrusted_observation: message, surface: $("#freeAgentSurface").value, action, risk_hint: Number.isFinite(riskHint) ? Math.min(1, Math.max(0, riskHint)) : 0.5};
+    }
+    const response = await fetch(endpoint, {method: "POST", headers: {"content-type": "application/json", accept: "application/json"}, body: JSON.stringify(payload), signal: controller.signal});
+    const errorPayload = response.ok ? null : await response.clone().json().catch(() => null);
+    if (!response.ok) throw new Error(`HTTP ${response.status}${errorPayload?.detail ? ` · ${errorPayload.detail}` : ""}`);
+    let result = await response.json();
+    if (surface === "agent") {
+      const runnerInvoked = (result.lifecycle_report?.events || []).some(item => item.phase === "execute" && item.status === "success");
+      result = {...result, agent_demo: true, model: result.planner_model || model.name, model_invoked: Boolean(result.planner_model_invoked), runner_invoked: runnerInvoked, answer: result.allowed ? (result.observation || "动作已在受限 Runner 中完成。") : `Execution Permit 未签发。${result.reason ? `\n${result.reason}` : ""}`};
+    } else if (contextualEvaluation) {
+      result = {...result, relation_model_invoked: contextualEvaluation.model_called, contextual_evaluations: [contextualEvaluation], evidence_ids: [contextualEvaluation.evidence_replay_verify?.record_hash]};
+    }
+    renderFreeResult(result);
+  } catch (error) {
+    renderFreeResult({}, error);
+  } finally {
+    window.clearTimeout(timer);
+    state.free.running = false;
+    button.disabled = false;
+    button.textContent = "提交现场输入 →";
+  }
+}
+
+function updateFreeImagePreview() {
+  const file = $("#freeImage").files?.[0] || null;
+  const preview = $("#freeImagePreview");
+  if (state.free.imagePreviewUrl) URL.revokeObjectURL(state.free.imagePreviewUrl);
+  state.free.imagePreviewUrl = null;
+  if (!file) {
+    preview.hidden = true;
+    preview.removeAttribute("src");
+    return;
+  }
+  state.free.imagePreviewUrl = URL.createObjectURL(file);
+  preview.src = state.free.imagePreviewUrl;
+  preview.hidden = false;
 }
 
 function renderSandboxBoundary() {
@@ -1858,7 +2089,7 @@ function setupInteractions() {
   $("#cleanVariant").addEventListener("click", () => selectScenario(state.scenarioId, "clean"));
   $("#attackVariant").addEventListener("click", () => selectScenario(state.scenarioId, "attack"));
   $$('[data-difficulty]').forEach(button => button.addEventListener("click", () => setDifficulty(button.dataset.difficulty)));
-  $("#runTrace").addEventListener("click", () => state.mode === "live" ? runLive() : runReplay());
+  $("#runTrace").addEventListener("click", runReplay);
   $("#openChapterLab").addEventListener("click", prepareChapterLab);
   $("#customLiveForm").addEventListener("submit", runCustomGuarded);
   $("#customSurface").addEventListener("change", updateCustomSurface);
@@ -1876,7 +2107,13 @@ function setupInteractions() {
   $("#loadAgentApprovalSample").addEventListener("click", () => loadAgentSample("approval_scope"));
   $("#loadAgentCrossLayerSample").addEventListener("click", () => loadAgentSample("cross_layer"));
   $("#customModel").addEventListener("change", renderCustomModelState);
+  $("#customModel").addEventListener("change", renderGuidedStack);
   $$('[data-provider-mode]').forEach(button => button.addEventListener("click", () => setProviderMode(button.dataset.providerMode)));
+  $("#freeLiveForm").addEventListener("submit", runFreeGuarded);
+  $("#freeSurface").addEventListener("change", updateFreeSurface);
+  $("#freeModel").addEventListener("change", renderFreeModelOptions);
+  $("#freeImage").addEventListener("change", updateFreeImagePreview);
+  $$('[data-free-provider-mode]').forEach(button => button.addEventListener("click", () => setFreeProviderMode(button.dataset.freeProviderMode)));
   $$('[data-showcase-mode]').forEach(button => button.addEventListener("click", () => setShowcaseMode(button.dataset.showcaseMode)));
   $("#nfCaseList").addEventListener("click", event => {
     const button = event.target.closest(".nf-case-button");
@@ -1949,6 +2186,7 @@ async function initialize() {
   setupInteractions();
   setExperience("showcase", {scroll: false});
   updateCustomSurface();
+  updateFreeSurface();
   setupCanvas();
   try {
     const [claims, benchmarks, scenarios] = await Promise.all([getJson(PATHS.claims), getJson(PATHS.benchmarks), getJson(PATHS.scenarios)]);

@@ -1,4 +1,5 @@
 from pathlib import Path
+import time
 from typing import Any
 
 import httpx
@@ -15,6 +16,7 @@ class AdapterRegistry:
     def __init__(self, config_path: str | None = None) -> None:
         self._config_path = Path(config_path) if config_path else Path(__file__).resolve().parents[3] / "configs" / "models.yaml"
         self._config = self._load_config()
+        self._ollama_probe_cache: dict[str, tuple[float, set[str]]] = {}
 
     def _load_config(self) -> dict[str, Any]:
         if not self._config_path.exists():
@@ -32,6 +34,8 @@ class AdapterRegistry:
                     adapter_type=adapter_type,
                     description=spec.get("description", ""),
                     configured=configured,
+                    upstream_model=spec.get("upstream_model"),
+                    capabilities=[str(item) for item in spec.get("capabilities", [])],
                 )
             )
         return result
@@ -59,22 +63,25 @@ class AdapterRegistry:
             base_url = resolve_env(spec.get("base_url_env")) or spec.get("base_url")
             api_key = resolve_env(spec.get("api_key_env")) or spec.get("api_key")
             return bool(base_url and api_key)
-        if adapter_type == "ollama":
+        if adapter_type in {"ollama", "ollama_vlm"}:
             base_url = (spec.get("base_url") or "http://127.0.0.1:11434").rstrip("/")
             try:
-                with httpx.Client(timeout=2.0) as client:
-                    response = client.get(f"{base_url}/api/tags")
-                    if response.status_code != 200:
-                        return False
-                    upstream_model = str(spec.get("upstream_model") or "").strip()
-                    if not upstream_model:
-                        return True
-                    installed = {
-                        str(item.get("name") or item.get("model") or "")
-                        for item in (response.json().get("models") or [])
-                        if isinstance(item, dict)
-                    }
-                    return upstream_model in installed
+                cached = self._ollama_probe_cache.get(base_url)
+                if cached and time.monotonic() - cached[0] < 5.0:
+                    installed = cached[1]
+                else:
+                    with httpx.Client(timeout=2.0) as client:
+                        response = client.get(f"{base_url}/api/tags")
+                        if response.status_code != 200:
+                            return False
+                        installed = {
+                            str(item.get("name") or item.get("model") or "")
+                            for item in (response.json().get("models") or [])
+                            if isinstance(item, dict)
+                        }
+                    self._ollama_probe_cache[base_url] = (time.monotonic(), installed)
+                upstream_model = str(spec.get("upstream_model") or "").strip()
+                return not upstream_model or upstream_model in installed
             except Exception:
                 return False
         return False
@@ -93,7 +100,7 @@ class AdapterRegistry:
                 temperature=float(spec.get("temperature", 0.2)),
                 max_tokens=int(spec.get("max_tokens", 96)),
             )
-        if adapter_type == "ollama":
+        if adapter_type in {"ollama", "ollama_vlm"}:
             return OllamaAdapter(
                 base_url=spec.get("base_url"),
                 upstream_model=spec.get("upstream_model"),

@@ -47,7 +47,7 @@ class GuardedVlmImageRequest(BaseModel):
     image_base64: str
     mime_type: str = Field(default="image/png")
     filename: str = Field(default="uploaded-image")
-    vlm_model: str = Field(default="qwen2.5vl:7b")
+    vlm_model: str = Field(default="local-ollama-qwen2_5-vl-7b")
     downstream_model: str = Field(default="local-ollama-qwen2_5-7b")
 
 
@@ -169,6 +169,8 @@ class ModelInfo(BaseModel):
     adapter_type: str
     description: str = ""
     configured: bool = True
+    upstream_model: str | None = None
+    capabilities: list[str] = Field(default_factory=list)
 
 
 ActionObservationResponse.model_rebuild()

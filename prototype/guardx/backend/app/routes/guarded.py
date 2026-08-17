@@ -9,7 +9,8 @@ from app.services.guarded_runtime import (
     audit_store,
     session_risk_state,
 )
-from app.services.live_vlm_ocr import analyze_image_with_local_vlm
+from app.services.guarded_runtime import adapter_registry
+from app.services.live_vlm_ocr import analyze_image_with_registered_vlm as analyze_image_with_local_vlm
 from app.services.live_rag import retrieve_qdrant_bge
 
 router = APIRouter()
@@ -192,12 +193,13 @@ def guarded_vlm_image_analyze(request: GuardedVlmImageRequest, raw_request: Requ
             image_base64=request.image_base64,
             mime_type=request.mime_type,
             user_prompt=request.message,
-            model=request.vlm_model,
+            model_name=request.vlm_model,
+            registry=adapter_registry,
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
-        raise HTTPException(status_code=503, detail=f"local VLM failed: {exc}") from exc
+        raise HTTPException(status_code=503, detail=f"VLM failed: {exc}") from exc
 
     contextual_evaluation = _portal_contextual_evaluate(
         raw_request,

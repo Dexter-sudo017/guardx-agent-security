@@ -97,7 +97,7 @@ def list_models() -> list[dict[str, Any]]:
 
 
 def _provider_identity(model_name: str, adapter_type: str) -> tuple[str, str, str]:
-    if adapter_type == "ollama":
+    if adapter_type in {"ollama", "ollama_vlm"}:
         return "ollama", "本地 Ollama", "local"
     if model_name.startswith("deepseek-"):
         return "deepseek", "DeepSeek API", "api"
@@ -145,6 +145,7 @@ def provider_status() -> dict[str, Any]:
                 "description": model.description,
                 "configured": model.configured,
                 "upstream_model": spec.get("upstream_model"),
+                "capabilities": model.capabilities,
             }
         )
         entry["configured"] = bool(entry["configured"] or model.configured)
