@@ -113,22 +113,16 @@
     }
     .topbar.scrolled { border-color: var(--line); background: rgba(5, 10, 18, .88); }
     .nav { height: 74px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
-    .brand { display: inline-flex; align-items: center; gap: 11px; font-weight: 760; letter-spacing: .04em; }
-    .brand-mark {
-      position: relative;
-      width: 34px;
-      height: 34px;
-      display: grid;
-      place-items: center;
-      border: 1px solid rgba(102, 245, 230, .48);
-      border-radius: 10px;
-      color: var(--cyan);
-      background: linear-gradient(145deg, rgba(102, 245, 230, .14), rgba(156, 131, 255, .08));
-      box-shadow: inset 0 0 18px rgba(102, 245, 230, .08), 0 0 26px rgba(102, 245, 230, .09);
-      font: 700 12px/1 var(--mono);
+    .brand { display: inline-flex; align-items: center; gap: 9px; min-width: 250px; font-weight: 700; letter-spacing: .04em; }
+    .brand-logo {
+      width: 168px;
+      height: 45px;
+      flex: 0 0 auto;
+      background: #050a12 url("brand/guardx-lockup-dark.png") center / 178px 79px no-repeat;
+      border-radius: 8px;
+      filter: saturate(.9) brightness(1.04);
     }
-    .brand-mark::after { content: ""; position: absolute; inset: 5px; border: 1px solid rgba(156, 131, 255, .35); border-radius: 6px; }
-    .brand em { color: var(--muted); font-style: normal; font-weight: 500; }
+    .brand-context { color: #8196aa; font: 500 10px/1.2 var(--mono); letter-spacing: .08em; white-space: nowrap; }
     .nav-links { display: flex; align-items: center; gap: 26px; color: #a9bac9; font-size: 13px; }
     .nav-links a { transition: color .2s ease; }
     .nav-links a:hover { color: var(--cyan); }
@@ -461,7 +455,9 @@
     @media (max-width: 720px) {
       .shell { width: min(100% - 26px, 1180px); }
       .nav { height: 66px; }
-      .brand em, .live-chip { display: none; }
+      .brand { min-width: auto; }
+      .brand-logo { width: 142px; height: 39px; background-size: 152px 68px; }
+      .brand-context, .live-chip { display: none; }
       .nav-portal { padding: 8px 10px; }
       .hero { padding: 64px 0 50px; gap: 45px; }
       h1 { font-size: clamp(40px, 13vw, 58px); }

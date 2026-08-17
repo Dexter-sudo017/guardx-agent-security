@@ -46,3 +46,7 @@ prototype/guardx/backend/output/
 attack_cases/restricted_raw/
 attack_cases/external_jailbreak_benchmarks/raw/
 attack_cases/public_benchmark_metadata_mirror/
+
+# Local image-generation drafts; the selected production lockup is tracked.
+reviewer_console/assets/brand/guardx-lockup.png
+reviewer_console/assets/brand/guardx-mark.png
