@@ -1,0 +1,2 @@
+# OCR evidence hashes are defined over the captured byte stream.
+evidence/ocr_samples/ocr_real/**/*.txt -text
