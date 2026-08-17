@@ -39,7 +39,7 @@ jobs:
           MOONSHOT_API_KEY: ""
           ZHIPU_API_KEY: ""
           DASHSCOPE_API_KEY: ""
-        run: python -m pytest tests/test_contracts.py tests/test_live_rag.py -q
+        run: python -m pytest tests/test_contracts.py tests/test_live_rag.py tests/test_reviewer_model_routing.py tests/test_web_access_fail_closed.py -q
 
       - name: Verify deployable container
         run: docker build -f prototype/guardx/backend/Dockerfile -t guardx-reviewer:verify .

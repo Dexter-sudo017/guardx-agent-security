@@ -18,6 +18,7 @@ class GenerationResult(BaseModel):
     action: str
     guarded_message: str
     answer: str
+    upstream_model_output: str | None = None
     output_analysis: AnalysisResult
     source: str = "model"
     adapter_error: bool = False
@@ -63,11 +64,13 @@ def _model_generation(
     output_context: str | None = None,
 ) -> GenerationResult:
     answer, adapter_error = generate_with_guard_fallback(adapter, generation_prompt, history, model)
+    upstream_model_output = answer
     if adapter_error is not None:
         return GenerationResult(
             action="block",
             guarded_message=guarded_message,
             answer=answer,
+            upstream_model_output=upstream_model_output,
             output_analysis=adapter_error,
             source="adapter_error",
             adapter_error=True,
@@ -93,6 +96,7 @@ def _model_generation(
         action=action,
         guarded_message=guarded_message,
         answer=answer,
+        upstream_model_output=upstream_model_output,
         output_analysis=output_guard.analyze(answer, context=output_context or message),
         source=source,
         recovered_refusal=recovered_refusal,

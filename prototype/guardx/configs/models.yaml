@@ -9,6 +9,7 @@ models:
     base_url: https://api.deepseek.com/v1
     api_key_env: DEEPSEEK_API_KEY
     upstream_model: deepseek-chat
+    max_tokens: 2048
   deepseek-official-reasoner:
     type: openai_compatible
     description: DeepSeek-compatible reasoning model
@@ -16,18 +17,21 @@ models:
     base_url: https://api.deepseek.com/v1
     api_key_env: DEEPSEEK_API_KEY
     upstream_model: deepseek-reasoner
+    max_tokens: 2048
   dashscope-qwen-plus:
     type: openai_compatible
     description: DashScope-compatible Qwen text model
     base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
     api_key_env: DASHSCOPE_API_KEY
     upstream_model: qwen-plus
+    max_tokens: 2048
   dashscope-qwen-vl-plus:
     type: openai_compatible
     description: DashScope-compatible Qwen multimodal model
     base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
     api_key_env: DASHSCOPE_API_KEY
     upstream_model: qwen-vl-plus
+    max_tokens: 2048
   kimi-cn:
     type: openai_compatible
     description: Moonshot/Kimi-compatible model
@@ -71,7 +75,7 @@ models:
     base_url: http://127.0.0.1:11434
     upstream_model: qwen2.5:7b
     temperature: 0.2
-    num_predict: 384
+    num_predict: 1024
     timeout_seconds: 90
     system_prompt: >
       You are the downstream model behind GuardX. Answer allowed requests
@@ -84,7 +88,7 @@ models:
     upstream_model: deepseek-r1:7b
     think: false
     temperature: 0.2
-    num_predict: 512
+    num_predict: 1024
     timeout_seconds: 150
     system_prompt: >
       You are the downstream reasoning model behind GuardX. Answer allowed

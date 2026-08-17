@@ -12,6 +12,12 @@
 </head>
 <body data-experience="showcase">
   <a class="skip-link" href="#main">跳到主要内容</a>
+  <div class="file-launch-gate" id="fileLaunchGate" hidden role="alert">
+    <div>
+      <strong>请通过 GuardX 演示服务打开本页面</strong>
+      <p>直接双击 HTML 会被浏览器限制，场景数据、模型状态和实时接口无法加载。请双击仓库根目录的 <code>START_GUARDX_DEMO.cmd</code>，然后访问 <code>http://127.0.0.1:8021/final/</code>。</p>
+    </div>
+  </div>
   <div class="pointer-aura" aria-hidden="true"></div>
   <div class="ambient-orb one" aria-hidden="true"></div>
   <div class="ambient-orb two" aria-hidden="true"></div>
@@ -29,9 +35,9 @@
         <a href="#evidence-center">证据中心</a>
       </div>
       <div class="nav-links" data-experience-nav="demo" hidden>
-        <a href="#demo-top">演示控制台</a>
-        <a href="#scenarios">01–04 场景</a>
-        <a href="#custom-live">自主输入</a>
+        <a href="#scenarios">1 验证</a>
+        <a href="#runtime-routing">2 接入</a>
+        <a href="#custom-live">3 自主输入</a>
         <a href="#replay-verify">运行证据</a>
       </div>
       <div class="nav-actions">
@@ -206,15 +212,20 @@
           <div><span>RESULT POLICY</span><strong>NO SILENT REPLAY FALLBACK</strong></div>
           <p id="demoTruthNote">LIVE 模式直接请求本机后端，运行结果不以回放数据替代。</p>
         </div>
+        <div class="demo-journey" aria-label="实时演示三步路径">
+          <a href="#scenarios"><b>1</b><span><strong>四类递进验证</strong><small>对照输入、风险发现、策略与证据</small></span></a>
+          <a href="#runtime-routing"><b>2</b><span><strong>接入真实模型</strong><small>本地模型与四家国内 API</small></span></a>
+          <a href="#custom-live"><b>3</b><span><strong>自主输入</strong><small>完整展示模型输出与执行结果</small></span></a>
+        </div>
       </div>
     </section>
 
     <section id="scenarios" data-experience="demo" hidden>
       <div class="shell">
         <div class="section-head reveal">
-          <div class="section-kicker">GUIDED DEMO / 01–04</div>
+          <div class="section-kicker">1 / VERIFIED PROTECTION PATH</div>
           <h2>四类输入的递进验证</h2>
-          <p>按 LLM、RAG、VLM/OCR、Agent 顺序验证。每类提供明显、隐蔽、组合三档样例，也可载入下方实验台修改后运行。</p>
+          <p>每类都以良性对照和注入输入运行同一条真实防护链，逐项展示来源、任务关系、RiskFinding、策略结果与证据编号。</p>
         </div>
         <div class="story-rail reveal" aria-label="四类演示路径">
           <span><b>01</b> LLM 任务劫持</span><i>→</i><span><b>02</b> RAG 间接注入</span><i>→</i><span><b>03</b> VLM 多模态</span><i>→</i><span><b>04</b> Agent 执行边界</span>
@@ -263,12 +274,12 @@
       </div>
     </section>
 
-    <section id="custom-live" class="custom-live-section" data-experience="demo" hidden>
+    <section id="runtime-routing" class="runtime-routing-section" data-experience="demo" hidden>
       <div class="shell">
         <div class="section-head reveal">
-          <div class="section-kicker">LIVE LAB / Presets + custom input</div>
-          <h2>标准场景与自主输入</h2>
-          <p>可载入上方 01–04 场景，也可直接输入 Prompt、文档、图片或 Agent 动作。模型从服务端已配置清单中选择。</p>
+          <div class="section-kicker">2 / REAL MODEL ROUTING</div>
+          <h2>快速接入真实模型</h2>
+          <p>服务端统一管理本地 Ollama 与 DeepSeek、Kimi、智谱 GLM、阿里百炼 Qwen。页面只显示可用状态，不接触 API 密钥。</p>
         </div>
         <div class="provider-console reveal" aria-label="模型供应商状态与运行模式">
           <div class="provider-console-head">
@@ -279,7 +290,17 @@
             </div>
           </div>
           <div class="provider-status-grid" id="providerStatusGrid"><p>正在读取服务端供应商状态…</p></div>
-          <p class="credential-note">凭据策略：仅检测服务端环境变量是否已配置；浏览器不接收、不读取、不显示任何 API Key。</p>
+          <p class="credential-note">RAG 的检索链固定为 Qdrant + BGE-M3，回答模型可在本地和国内 API 间切换。Agent 的规划模型同样可切换，最终执行许可始终由独立 Action Guard 签发。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="custom-live" class="custom-live-section" data-experience="demo" hidden>
+      <div class="shell">
+        <div class="section-head reveal">
+          <div class="section-kicker">3 / FREE INPUT + COMPLETE OUTPUT</div>
+          <h2>自主输入与完整结果</h2>
+          <p>选择 LLM、RAG、VLM/OCR 或 Agent，既可载入标准样例，也可修改为现场输入。页面完整保留本次模型返回，不做省略或截断。</p>
         </div>
         <div class="custom-live-grid reveal">
           <form class="custom-live-form" id="customLiveForm">
@@ -292,7 +313,7 @@
                   <option value="agent">Agent 动作执行</option>
                 </select>
               </label>
-              <label id="customModelControl">服务端模型
+              <label id="customModelControl"><span id="customModelLabel">回答模型</span>
                 <select id="customModel"><option value="">读取模型状态…</option></select>
               </label>
             </div>
@@ -331,7 +352,7 @@
               </span>
             </div>
             <div class="custom-agent-wrap" id="customAgentWrap" hidden>
-              <span class="field-label">本地 Agent / Action Guard 真实输入</span>
+              <span class="field-label">Agent 规划模型 → Action Guard → 受限 Runner</span>
               <span class="agent-sample-actions" aria-label="Agent 真实演示样例">
                 <button type="button" id="loadAgentBenignSample">允许只读动作</button>
                 <button type="button" id="loadAgentCapabilitySample">伪造 Capability</button>
@@ -355,7 +376,7 @@
               <label>Agent 拟议动作 / JSON
                 <textarea id="customAgentAction" rows="7" maxlength="10000" spellcheck="false">{"name":"read","path":"sandbox/demo/quarterly-summary.txt"}</textarea>
               </label>
-              <p>该 JSON 会提交给本机 Action Guard；只有产生 Execution Permit 才会进入受限 Runner，任意 Shell 不会在浏览器执行。</p>
+              <p>所选模型只负责生成只读规划说明，不持有工具。候选 JSON 随后提交给 Action Guard；只有取得 Execution Permit 才能进入受限 Runner。</p>
             </div>
             <div class="custom-live-actions">
               <button class="run-button" id="runCustomGuarded" type="submit">RUN GUARDED INPUT →</button>
@@ -372,6 +393,10 @@
               <div><small>响应来源</small><strong id="customResultSource">—</strong></div>
             </div>
             <div class="custom-answer"><small>业务输出 / 风险说明</small><pre id="customResultAnswer">输入内容后运行，结果会在这里显示。</pre></div>
+            <div class="custom-raw-output">
+              <small>原始模型输出 / COMPLETE UPSTREAM OUTPUT</small>
+              <pre id="customRawOutput">尚未调用模型。</pre>
+            </div>
             <div class="vlm-live-observation" id="vlmLiveObservation" hidden>
               <div><small>REAL VLM PROVIDER</small><strong id="vlmLiveProvider">—</strong></div>
               <div><small>IMAGE SHA-256</small><strong id="vlmLiveImageHash">—</strong></div>
@@ -396,7 +421,7 @@
         </div>
         <details class="model-boundary reveal">
           <summary>真实模型接入说明</summary>
-          <p>实时实验台支持本地 Ollama，以及 DeepSeek、Kimi、阿里百炼 Qwen、智谱 GLM 四家云端服务端适配器。未配置模型会留在列表中但不可选择；凭据只由服务端进程环境读取，页面不接收、不显示也不保存密钥。Agent 动作由本机 Action Guard 与受限 Runner 执行，不依赖浏览器端密钥。</p>
+          <p>实时实验台支持本地 Ollama，以及 DeepSeek、Kimi、阿里百炼 Qwen、智谱 GLM 四家云端服务端适配器。RAG 先用 Qdrant + BGE-M3 真实召回，再调用所选回答模型；Agent 先调用所选规划模型，再由独立 Action Guard 和受限 Runner 处理候选动作。</p>
         </details>
       </div>
     </section>

@@ -1070,3 +1070,35 @@ body.presenter-mode #presenterRunbook { display: block; }
   .difficulty-switch { flex-wrap: wrap; }
   .execution-ledger { grid-template-columns: repeat(2, minmax(0,1fr)); }
 }
+
+.file-launch-gate {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(2, 6, 12, .94);
+  backdrop-filter: blur(12px);
+}
+.file-launch-gate[hidden] { display: none; }
+.file-launch-gate > div { width: min(680px, 100%); padding: 30px; border: 1px solid var(--line-strong); border-radius: 20px; background: #08131f; box-shadow: var(--shadow); }
+.file-launch-gate strong { display: block; color: var(--cyan); font-size: 22px; }
+.file-launch-gate p { margin: 14px 0 0; color: #adc1ce; line-height: 1.8; }
+.file-launch-gate code { padding: 2px 6px; border: 1px solid var(--line); border-radius: 5px; color: #d8eaff; background: #02070d; }
+
+.demo-intro-grid .demo-journey { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.demo-journey a { display: flex; align-items: center; gap: 13px; padding: 15px; border: 1px solid var(--line); border-radius: 14px; color: inherit; background: rgba(7,16,27,.72); text-decoration: none; }
+.demo-journey a:hover { border-color: var(--line-strong); transform: translateY(-1px); }
+.demo-journey b { display: grid; flex: 0 0 34px; height: 34px; place-items: center; border: 1px solid rgba(156,131,255,.4); border-radius: 10px; color: var(--purple); font: 700 11px/1 var(--mono); }
+.demo-journey span, .demo-journey strong, .demo-journey small { display: block; }
+.demo-journey strong { color: #d8e9f1; font-size: 12px; }
+.demo-journey small { margin-top: 4px; color: #7890a2; font-size: 9px; }
+.runtime-routing-section { border-top: 1px solid var(--line); background: radial-gradient(circle at 14% 30%, rgba(98,166,255,.07), transparent 28rem); }
+.custom-raw-output { padding: 16px; border-top: 1px solid var(--line); background: rgba(3, 10, 17, .66); }
+.custom-raw-output small { display: block; color: var(--cyan); font: 700 8px/1 var(--mono); letter-spacing: .08em; }
+.custom-raw-output pre { min-height: 110px; margin: 10px 0 0; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; color: #c7dbe6; font: 11px/1.7 var(--mono); }
+
+@media (max-width: 720px) {
+  .demo-intro-grid .demo-journey { grid-template-columns: 1fr; }
+}

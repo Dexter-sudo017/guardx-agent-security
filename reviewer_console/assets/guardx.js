@@ -17,7 +17,7 @@ const PATHS = Object.freeze({
   legacyVlmOcrText: apiUrl("/v1/guarded/vlm_ocr_chat"),
   liveVlmImage: apiUrl("/v1/guarded/vlm_image_analyze"),
   liveRag: apiUrl("/v1/guarded/rag_demo_query"),
-  liveAgent: apiUrl("/v1/action_guard/request"),
+  liveAgent: apiUrl("/v1/agent/plan_and_guard"),
   contextualEvaluate: apiUrl("/v1/portal/contextual/evaluate"),
   providers: apiUrl("/v1/providers/status")
 });
@@ -245,7 +245,7 @@ function shortCommit(value) {
   return typeof value === "string" && value.length >= 8 ? value.slice(0, 8) : "—";
 }
 
-async function getJson(url, timeoutMs = 3000) {
+async function getJson(url, timeoutMs = 15000) {
   const controller = new AbortController();
   const timer = window.setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -879,11 +879,6 @@ function selectedCustomModel() {
 
 function renderCustomModelState() {
   const node = $("#customModelState");
-  if ($("#customSurface").value === "agent") {
-    node.dataset.state = "ready";
-    node.textContent = "LOCAL ACTION GUARD / EXECUTION PERMIT + RESTRICTED RUNNER";
-    return;
-  }
   const model = selectedCustomModel();
   if (!model) {
     node.dataset.state = "unavailable";
@@ -928,9 +923,8 @@ function renderCustomModelOptions() {
   const preferred = ordered.find(model => model.configured);
   if (preferred) select.value = preferred.name;
   if (!ordered.length) select.appendChild(element("option", "", "当前模式没有模型"));
-  const agentMode = $("#customSurface").value === "agent";
-  select.disabled = agentMode || !preferred;
-  $("#runCustomGuarded").disabled = agentMode ? false : !preferred;
+  select.disabled = !preferred;
+  $("#runCustomGuarded").disabled = !preferred;
   renderCustomModelState();
 }
 
@@ -988,7 +982,13 @@ function updateCustomSurface() {
   $("#customImageWrap").hidden = surface !== "vlm";
   $("#customAgentWrap").hidden = surface !== "agent";
   $("#customPromptPresets").hidden = surface !== "chat";
-  $("#customModelControl").hidden = surface === "agent";
+  $("#customModelControl").hidden = false;
+  $("#customModelLabel").textContent = ({
+    chat: "回答模型",
+    rag: "RAG 回答模型",
+    vlm: "业务回答模型",
+    agent: "Agent 规划模型"
+  })[surface] || "服务端模型";
   const context = $("#customContext");
   context.placeholder = "粘贴知识库文档；多个文档可用 ---DOC--- 分隔，其中的指令默认不具备授权。";
   const placeholders = {
@@ -1135,6 +1135,7 @@ function loadAgentSample(kind) {
   if (!sample) return;
   state.custom.agentPreset = kind;
   $("#customSurface").value = "agent";
+  $("#customGoal").value = sample.message.split("。", 1)[0].replace(/^用户目标：/, "");
   $("#customMessage").value = sample.message;
   $("#customAgentSurface").value = sample.surface;
   $("#customAgentRisk").value = String(sample.risk);
@@ -1286,10 +1287,11 @@ function renderGuidedLiveResult(result, error, route) {
 
 function customResultModelText(result, isAgent = false) {
   if (isAgent || result.agent_demo) {
-    if (!result.allowed) return "LOCAL ACTION GUARD · RUNNER NOT INVOKED";
+    const planner = result.planner_model || "POWERLESS PLANNER";
+    if (!result.allowed) return `${planner} → ACTION GUARD · RUNNER NOT INVOKED`;
     const events = result.lifecycle_report?.events || [];
     const precheck = events.find(item => item.phase === "precheck") || {};
-    return `LOCAL ACTION GUARD → ${String(precheck.metadata?.runner_id || "RESTRICTED RUNNER").toUpperCase()}`;
+    return `${planner} → ACTION GUARD → ${String(precheck.metadata?.runner_id || "RESTRICTED RUNNER").toUpperCase()}`;
   }
   if (result.vlm_invoked) return `${result.vlm_model || "VLM"} → ${result.model || "GuardX"}`;
   const judge = result.contextual_evaluations?.[0]?.provider?.model || (result.relation_model_invoked ? "qwen2.5:7b" : null);
@@ -1345,9 +1347,18 @@ function renderCustomResult(result, error = null) {
   $("#customResultModel").textContent = error ? "—" : customResultModelText(result);
   $("#customResultRoute").textContent = routeLabel;
   $("#customResultRisk").textContent = error ? "—" : Number(result.risk_score || 0).toFixed(3);
-  $("#customResultModelCalled").textContent = error ? "—" : result.agent_demo ? `N/A · RUNNER ${result.runner_invoked ? "YES" : "NO"}` : result.vlm_invoked ? `VLM YES · RELATION ${result.relation_model_invoked ? "YES" : "NO"} · DOWNSTREAM ${result.model_invoked ? "YES" : "NO"}` : result.relation_model_invoked ? `RELATION YES · DOWNSTREAM ${result.model_invoked ? "YES" : "NO"}` : result.model_invoked ? "YES" : "NO";
+  $("#customResultModelCalled").textContent = error ? "—" : result.agent_demo ? `PLANNER ${result.planner_model_invoked ? "YES" : "NO"} · RUNNER ${result.runner_invoked ? "YES" : "NO"}` : result.vlm_invoked ? `VLM YES · RELATION ${result.relation_model_invoked ? "YES" : "NO"} · DOWNSTREAM ${result.model_invoked ? "YES" : "NO"}` : result.relation_model_invoked ? `RELATION YES · DOWNSTREAM ${result.model_invoked ? "YES" : "NO"}` : result.model_invoked ? "YES" : "NO";
   $("#customResultSource").textContent = error ? "—" : String(result.response_source || "—").replaceAll("_", " ").toUpperCase();
   $("#customResultAnswer").textContent = guardedOutcomeText(result, error, route, enforcement);
+  $("#customRawOutput").textContent = error
+    ? `请求失败：${error.message}`
+    : result.agent_demo
+      ? (result.planner_output || "规划模型未返回文本。")
+      : result.model_invoked
+        ? (result.upstream_model_output ?? result.answer ?? "模型返回为空。")
+        : result.vlm_invoked
+          ? (result.visual_caption || result.ocr_text || "VLM / OCR 已完成识别，但未返回可展示文本。")
+        : "业务模型未调用；GuardX 在模型调用前完成了隔离或阻断。";
   const vlmObservation = $("#vlmLiveObservation");
   const showVlm = !error && Boolean(result.vlm_invoked);
   vlmObservation.hidden = !showVlm;
@@ -1421,7 +1432,7 @@ async function runCustomGuarded(event) {
   const userGoal = $("#customGoal").value.trim() || message;
   const surface = $("#customSurface").value;
   const context = $("#customContext").value.trim();
-  if (!message || (surface !== "agent" && !model?.configured)) return;
+  if (!message || !model?.configured) return;
   const imageFile = $("#customImage").files?.[0] || null;
   if (surface === "rag" && !context) {
     renderCustomResult({}, new Error("请粘贴知识库文档或载入一个 RAG 样例。"));
@@ -1463,18 +1474,12 @@ async function runCustomGuarded(event) {
     }
     const riskHint = Number($("#customAgentRisk").value);
     payload = {
-      schema_version: "guardx-agent-action-v1",
-      replay_id: `reviewer-agent-${Date.now()}`,
       session_id: payload.session_id,
-      agent: "guardx-local-demo-agent",
+      model: model.name,
+      user_goal: userGoal,
+      untrusted_observation: message,
       surface: $("#customAgentSurface").value,
       action,
-      task_context: {
-        user_goal: message,
-        attack_vector: state.custom.agentPreset,
-        trust_boundary: state.custom.agentPreset === "benign_read" ? "user_authorized_local_file" : "untrusted_content_to_agent_action",
-        expected_defense_action: state.custom.agentPreset === "benign_read" ? "allow_read_only" : "deny_tool_and_preserve_evidence"
-      },
       risk_hint: Number.isFinite(riskHint) ? Math.min(1, Math.max(0, riskHint)) : 0.5
     };
   }
@@ -1554,10 +1559,10 @@ async function runCustomGuarded(event) {
       renderCustomResult({
         ...rawResult,
         agent_demo: true,
-        model: "LOCAL ACTION GUARD",
-        model_invoked: false,
+        model: rawResult.planner_model || model.name,
+        model_invoked: Boolean(rawResult.planner_model_invoked),
         runner_invoked: runnerInvoked,
-        response_source: "guardx_action_guard",
+        response_source: rawResult.response_source || "guardx_agent_planner_then_action_guard",
         answer: rawResult.allowed
           ? `只读文件访问已取得 Execution Permit。受限 Runner ${runnerInvoked ? "已执行" : "未执行"}。\n\n真实返回：\n${rawResult.observation || "—"}`
           : `Execution Permit 未签发，Runner 未执行。\n\n问题定位：${({
@@ -1935,6 +1940,11 @@ async function runXssProbeIfRequested() {
 }
 
 async function initialize() {
+  if (window.location.protocol === "file:") {
+    $("#fileLaunchGate").hidden = false;
+    document.body.dataset.launch = "file-blocked";
+    return;
+  }
   renderHealthStrip();
   setupInteractions();
   setExperience("showcase", {scroll: false});

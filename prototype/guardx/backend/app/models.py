@@ -69,6 +69,16 @@ class ActionGuardRequest(BaseModel):
     risk_hint: float | None = None
 
 
+class AgentGuardedDemoRequest(BaseModel):
+    session_id: str = Field(default="default-agent-demo-session")
+    model: str
+    user_goal: str = Field(min_length=1, max_length=6000)
+    untrusted_observation: str = Field(default="", max_length=10000)
+    surface: str = Field(default="tool")
+    action: dict[str, Any] = Field(default_factory=dict)
+    risk_hint: float | None = None
+
+
 class ActionGuardResponse(BaseModel):
     schema_version: str = Field(default="guardx-agent-action-decision-v1")
     replay_id: str
@@ -130,6 +140,7 @@ class GuardedResponse(BaseModel):
     model: str
     action: str
     answer: str
+    upstream_model_output: str | None = None
     risk_score: float
     input_analysis: AnalysisResult
     embedding_analysis: AnalysisResult | None = None

@@ -156,6 +156,7 @@ def run_guarded_vlm_flow(request: GuardedVlmOcrRequest) -> GuardedRouteResult:
         model=model,
         action=final_policy.action,
         answer=answer,
+        upstream_model_output=generation.upstream_model_output,
         risk_score=total_risk,
         input_analysis=input_analysis,
         embedding_analysis=embedding_analysis,

@@ -29,12 +29,16 @@ def _unauthenticated_local_access_allowed(raw_request: Request) -> bool:
     return enabled and host in {"127.0.0.1", "::1", "localhost", "testclient"}
 
 
+def _unauthenticated_public_demo_allowed() -> bool:
+    return os.environ.get("GUARDX_WEB_ALLOW_UNAUTHENTICATED_PUBLIC_DEMO", "0").strip().lower() in {"1", "true", "yes", "on"}
+
+
 def web_access_allowed(raw_request: Request) -> bool:
     expected = web_token()
     if not expected:
-        # Missing credentials never expose the web/API surface to a remote peer.
-        # Localhost remains usable for the offline competition demo and tests.
-        return _unauthenticated_local_access_allowed(raw_request)
+        # Remote anonymous access is opt-in and used only by the short-lived
+        # competition tunnel script. Every other deployment remains fail-closed.
+        return _unauthenticated_local_access_allowed(raw_request) or _unauthenticated_public_demo_allowed()
     supplied = raw_request.cookies.get("guardx_web_token", "")
     if not supplied:
         supplied = raw_request.headers.get("x-guardx-web-token", "")
