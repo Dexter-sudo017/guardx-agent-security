@@ -19,6 +19,8 @@ http://127.0.0.1:8021/final/
 
 前端运行地址独立配置在 `reviewer_console/assets/runtime-config.js`。同源部署保持空值；前后端分离时只修改 `apiBaseUrl`，不需要改动业务脚本。容器启动端口读取标准 `PORT` 环境变量，可接入基于 GitHub 主分支的自动部署与预览环境。
 
+每次推送或提交 Pull Request 后，GitHub Actions 会自动检查前端 JavaScript、运行后端合同测试并构建部署容器。前端修改可以先在分支预览，确认后合并到 `main` 发布正式版本。
+
 ## 核心能力
 
 | 入口 | 运行组件 | 演示结果 |
