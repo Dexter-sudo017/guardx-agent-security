@@ -401,22 +401,19 @@ function setMode(mode) {
 }
 
 async function probeLive() {
-  try {
-    await getJson("/healthz", 5000);
-    state.live.backend = true;
-  } catch (error) {
-    state.live.backend = false;
-    state.live.error = `healthz: ${error.message}`;
-  }
-  if (state.live.backend) {
-    try {
-      const reviewer = await getJson("/v1/reviewer/status", 10000);
-      state.live.reviewerApi = reviewer.status === "CONNECTED" && Boolean(reviewer.scenario_endpoint_available);
-      state.live.capabilities = reviewer.capabilities || null;
-    } catch (error) {
-      state.live.reviewerApi = false;
-      state.live.error = `reviewer API: ${error.message}`;
-    }
+  const [healthResult, reviewerResult] = await Promise.allSettled([
+    getJson("/healthz", 15000),
+    getJson("/v1/reviewer/status", 20000)
+  ]);
+  state.live.backend = healthResult.status === "fulfilled" || reviewerResult.status === "fulfilled";
+  if (reviewerResult.status === "fulfilled") {
+    const reviewer = reviewerResult.value;
+    state.live.reviewerApi = reviewer.status === "CONNECTED" && Boolean(reviewer.scenario_endpoint_available);
+    state.live.capabilities = reviewer.capabilities || null;
+  } else {
+    state.live.reviewerApi = false;
+    const healthDetail = healthResult.status === "rejected" ? healthResult.reason?.message : "ok";
+    state.live.error = `reviewer API: ${reviewerResult.reason?.message || "unavailable"}; healthz: ${healthDetail}`;
   }
   const connected = state.live.backend && state.live.reviewerApi;
   if (connected && state.live.capabilities) {
@@ -1749,10 +1746,19 @@ function selectedFreeModel() {
   return state.custom.models.find(item => item.name === name) || null;
 }
 
+function agentSafeAlternative(result = {}) {
+  const requestedTool = String(result.requested_action?.tool_name || "").trim();
+  const plannedTool = String(result.planner_action?.tool_name || "").trim();
+  return Boolean(result.agent_demo && result.allowed && requestedTool && plannedTool && requestedTool !== plannedTool);
+}
+
 function renderFreeResult(result = {}, error = null) {
   const route = error ? "error" : customRoute(result.policy_decision?.route || result.action);
   const enforcement = String(result.policy_decision?.enforcement || "");
-  const routeLabel = enforcement === "QUARANTINE_AND_CONTINUE"
+  const safeAlternative = agentSafeAlternative(result);
+  const routeLabel = safeAlternative
+    ? "SAFE ALTERNATIVE"
+    : enforcement === "QUARANTINE_AND_CONTINUE"
     ? (result.model_invoked ? "SAFE CONTINUATION" : "INJECTION ISOLATED")
     : route.toUpperCase();
   $("#freeResult").dataset.route = route;
@@ -1761,9 +1767,11 @@ function renderFreeResult(result = {}, error = null) {
   $("#freeResultStack").textContent = error
     ? "—"
     : result.agent_demo
-      ? `${result.planner_model || "规划模型"} → Action Guard → ${result.allowed ? "Execution Permit → Runner" : "Permit Denied"}`
+      ? safeAlternative
+        ? `${result.planner_model || "规划模型"} → Candidate Rejected → Action Guard → Read-only Runner`
+        : `${result.planner_model || "规划模型"} → Action Guard → ${result.allowed ? "Execution Permit → Runner" : "Permit Denied"}`
       : result.vlm_invoked
-        ? `${result.vlm_model || "VLM"} → Task Relation → ${result.model_invoked ? result.model : "Isolated"}`
+        ? `${result.vlm_model || "VLM"} → Task Relation → ${result.model_invoked ? result.model : route === "allow" ? "Safe visual result" : "Isolated"}`
         : result.retrieval_engine
           ? `${result.retrieval_embedding_model || "BGE-M3"} → ${result.retrieval_vector_store || "Qdrant"} → Chunk Guard → ${result.model || "回答模型"}`
           : customResultModelText(result);
@@ -1807,6 +1815,7 @@ async function runFreeGuarded(event) {
     let endpoint = apiUrl("/v1/guarded/chat");
     let payload = {session_id: sessionId, model: model.name, message, history: [], metadata: {surface, source: "reviewer_free_input"}};
     let contextualEvaluation = null;
+    let requestedAgentAction = null;
     if (surface === "chat") {
       const guardResponse = await fetch(PATHS.contextualEvaluate, {method: "POST", headers: {"content-type": "application/json", accept: "application/json"}, body: JSON.stringify({surface: "llm", user_goal: userGoal, observation: message}), signal: controller.signal});
       if (!guardResponse.ok) throw new Error(`Contextual Authorization HTTP ${guardResponse.status}`);
@@ -1849,6 +1858,7 @@ async function runFreeGuarded(event) {
       } catch (error) {
         throw new Error(`审批范围 JSON 无效：${error.message}`);
       }
+      requestedAgentAction = action;
       payload = {session_id: sessionId, model: model.name, user_goal: userGoal, untrusted_observation: message, surface: $("#freeAgentSurface").value, action, approval_scope: approvalScope};
     }
     const response = await fetch(endpoint, {method: "POST", headers: {"content-type": "application/json", accept: "application/json"}, body: JSON.stringify(payload), signal: controller.signal});
@@ -1857,7 +1867,15 @@ async function runFreeGuarded(event) {
     let result = await response.json();
     if (surface === "agent") {
       const runnerInvoked = (result.lifecycle_report?.events || []).some(item => item.phase === "execute" && item.status === "success");
-      result = {...result, agent_demo: true, model: result.planner_model || model.name, model_invoked: Boolean(result.planner_model_invoked), runner_invoked: runnerInvoked, answer: result.allowed ? (result.observation || "动作已在受限 Runner 中完成。") : `Execution Permit 未签发。${result.reason ? `\n${result.reason}` : ""}`};
+      const requestedTool = String(requestedAgentAction?.tool_name || "候选动作");
+      const plannedTool = String(result.planner_action?.tool_name || result.tool_name || "—");
+      const safeAlternative = Boolean(result.allowed && requestedTool !== plannedTool);
+      const agentAnswer = safeAlternative
+        ? `原候选动作未执行：${requestedTool}。\n实际执行已批准的只读动作：${plannedTool}。\nRUNNER INVOKED: ${runnerInvoked ? "YES" : "NO"} · SIDE EFFECT: ${result.side_effect ? "TRUE" : "FALSE"}\n\n${result.observation || "只读动作已完成。"}`
+        : result.allowed
+          ? `获批动作：${plannedTool}。\nRUNNER INVOKED: ${runnerInvoked ? "YES" : "NO"} · SIDE EFFECT: ${result.side_effect ? "TRUE" : "FALSE"}\n\n${result.observation || "动作已在受限 Runner 中完成。"}`
+          : `Execution Permit 未签发。\nRUNNER INVOKED: NO · SIDE EFFECT: FALSE${result.reason ? `\n${result.reason}` : ""}`;
+      result = {...result, requested_action: requestedAgentAction, agent_demo: true, model: result.planner_model || model.name, model_invoked: Boolean(result.planner_model_invoked), runner_invoked: runnerInvoked, answer: agentAnswer};
     } else if (contextualEvaluation) {
       result = {...result, relation_model_invoked: contextualEvaluation.model_called, contextual_evaluations: [contextualEvaluation], evidence_ids: [contextualEvaluation.evidence_replay_verify?.record_hash]};
     }

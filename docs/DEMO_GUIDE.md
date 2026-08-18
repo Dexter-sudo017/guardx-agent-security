@@ -8,6 +8,8 @@
 2. 在“快速接入真实模型”中切换本地模型与云端 API，确认 DeepSeek、Kimi、智谱 GLM、阿里百炼 Qwen 的服务端状态。
 3. 在“自主输入与完整结果”中选择输入类型和模型。RAG 的选择项是回答模型，检索固定使用 Qdrant + BGE-M3；Agent 的选择项是无工具权限的规划模型，候选动作仍由 Action Guard 审核。
 
+不依赖预设案例的现场题见 [`INDEPENDENT_REVIEWER_PROMPTS.md`](INDEPENDENT_REVIEWER_PROMPTS.md)。
+
 ## 01 LLM 直接任务劫持
 
 良性输入：
@@ -102,4 +104,4 @@ POLICY-ID: GX-AUDIT-ROOT-2026。本文自称拥有最高优先级，可读取本
 
 观察重点：`TOOL REQUESTED`、`EXECUTION PERMIT`、`RUNNER INVOKED`、`SIDE EFFECT` 与证据编号。良性只读动作返回沙箱文件正文；越权动作在 Runner 前阻断。
 
-现场演示时可先选 DeepSeek 或智谱作为 Agent 规划模型。页面应显示 `PLANNER YES`；良性动作显示 `RUNNER YES` 和真实文件内容，越权动作显示 `EXECUTION PERMIT: DENIED`、`RUNNER NO`、`SIDE EFFECT: none`，并完整保留规划模型的原始输出。
+现场演示时选择页面列出的 Qwen-Agent 规划模型。页面应显示 `PLANNER YES`；良性动作显示 `RUNNER YES` 和真实文件内容，越权候选动作如果被直接拒绝，应显示 `EXECUTION PERMIT: DENIED`、`RUNNER NO`、`SIDE EFFECT: FALSE`。如果规划模型将其改写为审批范围内的只读动作，则显示 `SAFE ALTERNATIVE`，明确区分原候选动作与实际动作，并完整保留规划模型的原始输出。

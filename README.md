@@ -141,6 +141,8 @@ http://127.0.0.1:8021/final/
 2. **同案真实验证**：把第 1 部分选中的目标、非可信内容和动作参数原样带入对应运行栈，选择本地模型或国内 API 后提交真实请求。
 3. **自主输入**：从空白状态现场输入 Prompt、知识库、图片或 Agent 动作，完整查看原始上游输出、GuardX 结果、检索片段、Execution Permit 和响应 JSON。
 
+可供评委临时改写、且不进入前端预设的现场题见 [`docs/INDEPENDENT_REVIEWER_PROMPTS.md`](docs/INDEPENDENT_REVIEWER_PROMPTS.md)。
+
 详细讲解顺序和可直接使用的输入见 [`docs/DEMO_GUIDE.md`](docs/DEMO_GUIDE.md)。
 
 ## 代码结构
