@@ -14,9 +14,38 @@ LOCAL_MODEL = Path(os.environ.get("GUARDX_RAG_RERANKER_PATH", r"E:\GuardX\models
 
 def _load_model():
     import torch
-    from FlagEmbedding import FlagReranker
 
     location = str(LOCAL_MODEL) if (LOCAL_MODEL / "config.json").is_file() else MODEL_ID
+    if not torch.cuda.is_available() and os.environ.get("GUARDX_RERANKER_LOW_MEMORY", "1").strip().lower() not in {"0", "false", "no", "off"}:
+        from transformers import AutoModelForSequenceClassification, AutoTokenizer
+
+        torch.set_num_threads(max(1, min(2, int(os.environ.get("GUARDX_RERANKER_CPU_THREADS", "2")))))
+        tokenizer = AutoTokenizer.from_pretrained(location, local_files_only=LOCAL_MODEL.is_dir())
+        model = AutoModelForSequenceClassification.from_pretrained(
+            location,
+            dtype=torch.float16,
+            low_cpu_mem_usage=True,
+            local_files_only=LOCAL_MODEL.is_dir(),
+        ).eval()
+
+        class _LowMemoryReranker:
+            def compute_score(self, pairs, normalize=True):
+                encoded = tokenizer(
+                    pairs,
+                    padding=True,
+                    truncation=True,
+                    max_length=int(os.environ.get("GUARDX_RERANKER_MAX_LENGTH", "384")),
+                    return_tensors="pt",
+                )
+                with torch.inference_mode():
+                    logits = model(**encoded).logits.reshape(-1).float()
+                    scores = torch.sigmoid(logits) if normalize else logits
+                return scores.tolist()
+
+        return _LowMemoryReranker()
+
+    from FlagEmbedding import FlagReranker
+
     with contextlib.redirect_stdout(sys.stderr):
         return FlagReranker(location, use_fp16=bool(torch.cuda.is_available()))
 

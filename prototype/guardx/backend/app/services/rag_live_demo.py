@@ -30,8 +30,11 @@ def run_rag_demo(request: GuardedRagDemoRequest, raw_request: Request, *, retrie
     except Exception as exc:
         raise HTTPException(status_code=503, detail=f"Qdrant + BGE-M3 retrieval failed: {exc}") from exc
     contexts = [f"[source={item['source']} chunk={item['chunk_id']} score={item['score']}]\n{item['text']}" for item in retrieval["chunks"]]
-    guarded_candidates = retrieval.get("candidate_chunks", retrieval["chunks"])
-    evaluations = [evaluate_context(raw_request, {"surface": "rag", "user_goal": request.message, "observation": item["text"], "session_context": f"retrieved candidate {item['chunk_id']} from {item['source']}"}) for item in guarded_candidates]
+    # Only reranked chunks passed to the answer model can influence generation.
+    # Earlier vector candidates remain visible as retrieval evidence but do not
+    # participate in the final policy route or consume semantic-judge calls.
+    guarded_chunks = retrieval["chunks"]
+    evaluations = [evaluate_context(raw_request, {"surface": "rag", "user_goal": request.message, "observation": item["text"], "session_context": f"retrieved top-k chunk {item['chunk_id']} from {item['source']}"}) for item in guarded_chunks]
     strongest = strongest_result(evaluations)
     retrieval_payload = _retrieval_payload(retrieval)
     if strongest is not None:
@@ -53,4 +56,5 @@ def run_rag_files(request: GuardedRagFileRequest, raw_request: Request, *, retri
     except Exception as exc:
         raise HTTPException(status_code=503, detail=f"Docling file parsing failed: {exc}") from exc
     payload = run_rag_demo(GuardedRagDemoRequest(session_id=request.session_id, model=request.model, message=request.message, documents=[RagDemoDocument(**item) for item in documents], top_k=request.top_k), raw_request, retrieve=retrieve, rag_flow=rag_flow)
-    return {**payload, "document_manifest": manifest, "document_parser": "docling"}
+    parsers = sorted({str(item.get("parser") or "unknown") for item in manifest})
+    return {**payload, "document_manifest": manifest, "document_parser": " + ".join(parsers)}

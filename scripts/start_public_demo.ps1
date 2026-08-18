@@ -21,6 +21,79 @@ function Test-GuardXReviewer {
     }
 }
 
+function Test-GuardXQdrant {
+    try {
+        $response = Invoke-WebRequest -Uri "http://127.0.0.1:6333/collections" -Method Get -TimeoutSec 3 -UseBasicParsing
+        return $response.StatusCode -eq 200
+    }
+    catch {
+        return $false
+    }
+}
+
+function Resolve-GuardXDocker {
+    $command = Get-Command docker -ErrorAction SilentlyContinue
+    if ($command) {
+        return $command.Source
+    }
+    $knownDocker = "D:\Docker\resources\bin\docker.exe"
+    if (Test-Path -LiteralPath $knownDocker) {
+        return $knownDocker
+    }
+    return $null
+}
+
+function Start-GuardXQdrant {
+    if (Test-GuardXQdrant) {
+        return
+    }
+
+    $dockerPath = Resolve-GuardXDocker
+    if (-not $dockerPath) {
+        throw "Qdrant is unavailable and Docker could not be found. Start the GuardX Qdrant service before publishing the demo."
+    }
+
+    $dockerReady = $false
+    & $dockerPath info *> $null
+    if ($LASTEXITCODE -eq 0) {
+        $dockerReady = $true
+    }
+    else {
+        $desktopCandidates = @(
+            "D:\Docker\Docker Desktop.exe",
+            "C:\Program Files\Docker\Docker\Docker Desktop.exe"
+        )
+        $desktopPath = $desktopCandidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
+        if (-not $desktopPath) {
+            throw "Qdrant is unavailable and Docker Desktop is not running."
+        }
+        Start-Process -FilePath $desktopPath -WindowStyle Hidden
+        for ($attempt = 0; $attempt -lt 45; $attempt++) {
+            Start-Sleep -Seconds 1
+            & $dockerPath info *> $null
+            if ($LASTEXITCODE -eq 0) {
+                $dockerReady = $true
+                break
+            }
+        }
+    }
+    if (-not $dockerReady) {
+        throw "Docker Desktop did not become ready; the public demo was not published."
+    }
+
+    $qdrantContainer = & $dockerPath ps -a --filter "name=guardx-qdrant" --format "{{.Names}}" | Select-Object -First 1
+    if (-not $qdrantContainer) {
+        throw "No GuardX Qdrant container was found. Run the enterprise demo setup before publishing."
+    }
+    & $dockerPath start $qdrantContainer *> $null
+    for ($attempt = 0; $attempt -lt 30 -and -not (Test-GuardXQdrant); $attempt++) {
+        Start-Sleep -Seconds 1
+    }
+    if (-not (Test-GuardXQdrant)) {
+        throw "Qdrant did not become ready; the public demo was not published."
+    }
+}
+
 function Stop-GuardXTrackedProcess {
     param(
         [string]$PidPath,
@@ -60,6 +133,8 @@ if (-not (Test-Path -LiteralPath $CloudflaredPath)) {
 New-Item -ItemType Directory -Path $runtimeRoot -Force | Out-Null
 $serverPidPath = Join-Path $runtimeRoot "guardx-server.pid"
 $tunnelPidPath = Join-Path $runtimeRoot "cloudflared.pid"
+
+Start-GuardXQdrant
 
 Stop-GuardXTrackedProcess -PidPath $tunnelPidPath -Kind tunnel
 Stop-GuardXTrackedProcess -PidPath $serverPidPath -Kind server

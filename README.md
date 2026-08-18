@@ -110,7 +110,7 @@ GuardX 的方法创新集中在五个方面：
 | 入口 | 检测与运行组件 | 可核验结果 |
 | --- | --- | --- |
 | LLM | Input Guard、规则/语义 Risk Providers、任务关系裁判、本地/国内 API | 良性请求返回真实模型答案；任务劫持在下游调用前隔离 |
-| RAG | Docling、Qdrant、BGE-M3、BGE Reranker、chunk 级 Context Guard、可切换回答模型 | 真实文件解析、候选召回、重排、来源追踪、逐段判断和安全回答 |
+| RAG | PDF 文本层解析、Docling、Qdrant、BGE-M3 混合重排、chunk 级 Context Guard、可切换回答模型 | 真实文件解析、候选召回、重排、来源追踪、逐段判断和安全回答 |
 | VLM/OCR | Qwen2.5-VL、OCR 忠实转写、视觉事实与指令关系判断 | 区分业务祈使句、视觉事实和面向模型的输出控制 |
 | Agent | Qwen-Agent、Action Guard、Execution Permit、受限 Runner | 良性只读动作真实执行；唯一受控写动作需要审批；越权动作在 Runner 前拒绝且副作用为零 |
 
@@ -119,7 +119,7 @@ GuardX 的方法创新集中在五个方面：
 | 演示类型 | 实际数据流 | 可切换部分 |
 | --- | --- | --- |
 | LLM | 输入 → 任务关系裁判 → 策略 → 文本回答模型 | 本地/API 文本模型 |
-| RAG | PDF/DOCX/XLSX/TXT → Docling → BGE-M3 → Qdrant → BGE Reranker → 候选 Chunk Guard → 回答模型 | 只切换最后的回答模型；解析、检索、重排和安全扫描不由 LLM 替代 |
+| RAG | PDF 文本层 / Docling（DOCX、XLSX）/ UTF-8（TXT）→ BGE-M3 → Qdrant → BGE-M3 混合重排 → 候选 Chunk Guard → 回答模型 | 只切换最后的回答模型；解析、检索、重排和安全扫描不由 LLM 替代 |
 | VLM/OCR | 图片 → Qwen2.5-VL / Qwen-VL API → OCR 观察 → 任务关系裁判 → 安全续答 | 只允许选择带 `vision` 能力的模型 |
 | Agent | 用户目标 + 非可信观察 → Qwen-Agent → Action Guard → Permit → Runner | 规划模型只允许本地 Qwen2.5 7B 或通义千问 API；Action Guard 和 Runner 不由 LLM 替代 |
 
@@ -182,7 +182,7 @@ http://127.0.0.1:8021/final/
 | `GET /v1/providers/status` | 返回本地/国内 API 服务端状态 |
 | `POST /v1/portal/contextual/evaluate` | 只读任务关系判断与 RiskFinding 生成 |
 | `POST /v1/guarded/chat` | LLM 输入防护与安全续答 |
-| `POST /v1/guarded/rag_file_query` | Docling + BGE-M3 + Qdrant + BGE 重排、候选 chunk 判断与回答 |
+| `POST /v1/guarded/rag_file_query` | PDF 文本层 / Docling 文件解析 + BGE-M3 + Qdrant + 混合重排、候选 chunk 判断与回答 |
 | `POST /v1/guarded/vlm_image_analyze` | 真实 VLM/OCR、任务关系与安全续答 |
 | `POST /v1/agent/plan_and_guard` | Qwen-Agent 规划、Action Guard、Permit 与 Runner 生命周期 |
 | `GET /v1/demo/enterprise-rag/manifest` | 返回内置企业文件对照样本清单，不包含凭据 |
@@ -223,7 +223,7 @@ docker run -d --name guardx-qdrant -p 6333:6333 qdrant/qdrant
 - `ZHIPU_API_KEY`
 - `DASHSCOPE_API_KEY`
 
-前端不会接收、读取或显示 API Key。RAG 的 Docling 解析、Qdrant + BGE-M3 检索、BGE 重排与回答模型解耦；Agent 规划范围固定为本地 Qwen2.5 7B 或通义千问 API，Action Guard/Runner 仍保持独立，因此切换规划模型不会改变执行边界。
+前端不会接收、读取或显示 API Key。RAG 的文件解析、Qdrant + BGE-M3 检索、混合重排与回答模型解耦；Agent 规划范围固定为本地 Qwen2.5 7B 或通义千问 API，Action Guard/Runner 仍保持独立，因此切换规划模型不会改变执行边界。
 
 ## 临时公网演示
 
@@ -233,7 +233,7 @@ docker run -d --name guardx-qdrant -p 6333:6333 qdrant/qdrant
 START_GUARDX_PUBLIC_DEMO.cmd
 ```
 
-脚本使用独立的 `8023` 端口启动公网评审实例，生成临时 `https://*.trycloudflare.com` 地址并自动打开页面。评委拿到网址即可直接进入，不需要账号或访问码。地址同时保存在 `E:\GuardX\runtime\public-demo\public-url.txt`；本机维护版仍运行在 `8021`，两者互不影响。免登录只对该临时实例显式开启，链接会随隧道退出而失效。
+脚本会先检查并启动 Docker/Qdrant，再使用独立的 `8023` 端口启动公网评审实例；向量库未就绪时不会发布一个不可用的网址。脚本生成临时 `https://*.trycloudflare.com` 地址并自动打开页面。评委拿到网址即可直接进入，不需要账号或访问码。地址同时保存在 `E:\GuardX\runtime\public-demo\public-url.txt`；本机维护版仍运行在 `8021`，两者互不影响。免登录只对该临时实例显式开启，链接会随隧道退出而失效。
 
 ## 验证与持续集成
 

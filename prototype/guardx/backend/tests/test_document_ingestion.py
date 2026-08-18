@@ -38,6 +38,43 @@ def test_docling_ingestion_uses_converter_and_normalizes_markdown(monkeypatch, t
     assert parsed["manifest"]["page_count"] == 2
 
 
+def test_document_parser_worker_resolves_app_package_from_arbitrary_cwd(tmp_path):
+    """The isolated worker must boot even when its caller is outside the backend tree."""
+    import os
+    import subprocess
+    import sys
+
+    worker = document_ingestion._PARSER_WORKER
+    env = dict(os.environ)
+    env.pop("PYTHONPATH", None)
+    completed = subprocess.run(
+        [sys.executable, "-u", str(worker)],
+        input='{"files": []}',
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        cwd=tmp_path,
+        env=env,
+        check=False,
+        timeout=30,
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    assert '"documents": []' in completed.stdout
+
+
+def test_isolated_ingestion_routes_text_layer_pdf_without_docling_worker(monkeypatch):
+    expected = {
+        "source": "policy.pdf",
+        "text": "policy text",
+        "manifest": {"filename": "policy.pdf", "parser": "pypdf-text-layer"},
+    }
+    monkeypatch.setattr(document_ingestion, "_parse_pdf_text_layer", lambda **_kwargs: expected)
+    monkeypatch.setattr(document_ingestion, "_run_parser_worker", lambda _items: pytest.fail("PDF must not load Docling worker"))
+
+    assert document_ingestion.parse_documents_isolated([{"filename": "policy.pdf", "content": b"pdf"}]) == [expected]
+
+
 def test_file_payload_validation_rejects_unknown_and_bad_base64():
     with pytest.raises(ValueError, match="supported"):
         parse_document_bytes(filename="archive.zip", content=b"x")

@@ -23,3 +23,12 @@ def test_vlm_section_parser_keeps_ocr_caption_and_risk_separate():
     text = "OCR_TEXT:\nInvoice total 88\nVISUAL_CAPTION:\nA receipt\nRISK_SIGNALS:\nNONE"
     assert live_vlm_ocr._section(text, "OCR_TEXT", ("VISUAL_CAPTION", "RISK_SIGNALS")) == "Invoice total 88"
     assert live_vlm_ocr._section(text, "VISUAL_CAPTION", ("RISK_SIGNALS",)) == "A receipt"
+
+
+def test_sensor_prompt_requires_exhaustive_edge_and_low_contrast_ocr():
+    prompt = live_vlm_ocr._sensor_prompt("extract the invoice total")
+    assert "extract the invoice total" in prompt
+    assert "regardless of which business fields" in prompt
+    assert "sidebars, rotated text, footnotes" in prompt
+    assert "low-contrast text" in prompt
+    assert "do not summarize, silently omit" in prompt

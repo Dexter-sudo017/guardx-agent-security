@@ -92,7 +92,7 @@ function initialTheme() {
 }
 const RISK_STRUCTURES = Object.freeze({
   llm: {source: "用户输入 / 拼接文本", component: "输入关系分析", location: "新增指令覆盖原任务", target: "模型最终回答"},
-  rag: {source: "PDF / DOCX / XLSX / TXT", component: "Docling → BGE-M3 → Qdrant → BGE Reranker", location: "非可信候选 Chunk 携带控制指令", target: "回答模型"},
+  rag: {source: "PDF / DOCX / XLSX / TXT", component: "PDF Text Layer / Docling → BGE-M3 → Qdrant → BGE Reranker", location: "非可信候选 Chunk 携带控制指令", target: "回答模型"},
   vlm: {source: "图片与 OCR 文字", component: "VLM / OCR 识别", location: "视觉内容试图取得指令权", target: "当前任务 / 下游模型"},
   agent: {source: "网页、检索或工具返回", component: "Agent 规划", location: "候选动作超出授权范围", target: "工具与受限 Runner"}
 });
@@ -1055,7 +1055,7 @@ async function loadCustomModels() {
 function runtimeStack(surface, modelName) {
   return ({
     chat: ["用户目标 + 输入", "GuardX 任务关系裁判", modelName || "文本回答模型", "完整回答"],
-    rag: ["PDF / DOCX / XLSX / TXT", "Docling 解析", "BGE-M3 + Qdrant", "BGE Reranker", "Chunk Guard", modelName || "回答模型"],
+    rag: ["PDF / DOCX / XLSX / TXT", "PDF Text Layer / Docling", "BGE-M3 + Qdrant", "BGE Reranker", "Chunk Guard", modelName || "回答模型"],
     vlm: ["图片", modelName || "VLM / OCR 模型", "GuardX 任务关系裁判", "安全续答模型"],
     agent: ["用户目标 + 非可信观察", modelName || "Agent 规划模型", "Action Guard", "Execution Permit", "受限 Runner"]
   })[surface] || [];
@@ -1561,6 +1561,13 @@ function renderCustomResult(result, error = null) {
   renderGuidedLiveResult(result, error, route);
 }
 
+function lockCustomRunControls() {
+  const controls = $$("#customLiveForm button, #customLiveForm select, #customLiveForm textarea, #customLiveForm input");
+  const prior = controls.map(control => ({control, disabled: control.disabled}));
+  controls.forEach(control => { control.disabled = true; });
+  return () => prior.forEach(({control, disabled}) => { control.disabled = disabled; });
+}
+
 async function runCustomGuarded(event) {
   event.preventDefault();
   if (state.custom.running) return;
@@ -1631,8 +1638,8 @@ async function runCustomGuarded(event) {
     };
   }
   const button = $("#runCustomGuarded");
+  const unlockControls = lockCustomRunControls();
   state.custom.running = true;
-  button.disabled = true;
   button.textContent = "GUARDX + MODEL RUNNING…";
   $("#customResultState").textContent = "RUNNING";
   const controller = new AbortController();
@@ -1732,7 +1739,7 @@ async function runCustomGuarded(event) {
   } finally {
     window.clearTimeout(timer);
     state.custom.running = false;
-    button.disabled = false;
+    unlockControls();
     button.textContent = "运行选定案例 →";
   }
 }

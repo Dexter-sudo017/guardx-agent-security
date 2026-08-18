@@ -74,3 +74,31 @@ def test_untrusted_output_rewrite_overrides_erroneous_allow() -> None:
     assert finding.decision == "QUARANTINE_AND_CONTINUE"
     assert finding.task_alignment is False
     assert finding.evidence["deterministic_relation_constraints"] == ["untrusted_output_or_authority_control"]
+
+
+def test_safe_policy_heading_overrides_internally_inconsistent_quarantine() -> None:
+    provider = TaskRelationJudgingProvider(
+        FakeAdapter(
+            {
+                "text_role": "security_example",
+                "addresses_current_model": False,
+                "is_quoted_or_task_content": False,
+                "conflicts_with_user_goal": False,
+                "alters_facts_or_authority": False,
+                "recommended_decision": "QUARANTINE_AND_CONTINUE",
+                "confidence": 0.9,
+            }
+        )
+    )
+    finding = provider.analyze(
+        _request(
+            goal="总结供应商付款和验收风险。",
+            observation="供应商准入与持续审查政策",
+            source="rag_document",
+        )
+    )
+    assert finding.decision == "ALLOW"
+    assert finding.task_alignment is True
+    assert finding.evidence["deterministic_relation_constraints"] == [
+        "safe_relation_fields_override_restrictive_model_advice"
+    ]

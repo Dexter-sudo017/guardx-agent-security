@@ -8,7 +8,7 @@ import httpx
 
 
 DEFAULT_OLLAMA_BASE_URL = "http://127.0.0.1:11434"
-DEFAULT_CONTEXTUAL_MODEL = "qwen2.5:7b"
+DEFAULT_CONTEXTUAL_MODEL = "qwen2.5:3b"
 FROZEN_OUTPUT_KEYS = (
     "source_authority",
     "task_alignment",

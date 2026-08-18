@@ -1,7 +1,7 @@
 {
   "schema_version": "guardx-guarded-generation-policy-v1",
   "adapter_fallback": {
-    "enabled": true,
+    "enabled": false,
     "max_attempts": 2,
     "candidate_models": [
       "dashscope-qwen-plus",

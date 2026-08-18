@@ -4,6 +4,15 @@ import base64
 import contextlib
 import json
 import sys
+from pathlib import Path
+
+
+# This worker is launched by absolute script path in an isolated Python process.
+# Add the backend root explicitly so the `app` package resolves independently
+# of the caller's current working directory or inherited PYTHONPATH.
+BACKEND_ROOT = Path(__file__).resolve().parents[2]
+if str(BACKEND_ROOT) not in sys.path:
+    sys.path.insert(0, str(BACKEND_ROOT))
 
 from app.services.document_ingestion import parse_document_bytes, release_document_parser
 

@@ -14,6 +14,9 @@ $env:GUARDX_RUNTIME_TEMP = "E:\GuardX\runtime\tmp"
 $env:GUARDX_RAG_RERANKER_PATH = "E:\GuardX\models\bge-reranker-v2-m3"
 $env:GUARDX_AGENT_TICKET_ROOT = "E:\GuardX\runtime\agent-tickets"
 $env:PYTHONUTF8 = "1"
+if (-not $env:GUARDX_CONTEXTUAL_JUDGE_MODEL) {
+    $env:GUARDX_CONTEXTUAL_JUDGE_MODEL = "qwen2.5:3b"
+}
 
 foreach ($variableName in @("DEEPSEEK_API_KEY", "MOONSHOT_API_KEY", "ZHIPU_API_KEY", "DASHSCOPE_API_KEY")) {
     $userValue = [Environment]::GetEnvironmentVariable($variableName, "User")

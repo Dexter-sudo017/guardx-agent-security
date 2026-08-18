@@ -9,6 +9,7 @@ import subprocess
 import tempfile
 import unicodedata
 from functools import lru_cache
+from io import BytesIO
 from pathlib import Path
 from typing import Any
 
@@ -80,12 +81,46 @@ def _run_parser_worker(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
         check=False,
     )
     if completed.returncode != 0:
-        detail = completed.stderr.strip().splitlines()[-1] if completed.stderr.strip() else f"exit {completed.returncode}"
-        raise RuntimeError(f"Docling parser worker failed: {detail}")
+        error_lines = [line.strip() for line in completed.stderr.splitlines() if line.strip()]
+        detail = " | ".join(error_lines[-8:]) if error_lines else "no stderr"
+        raise RuntimeError(f"Docling parser worker exited {completed.returncode}: {detail}")
     response = json.loads(completed.stdout)
     if response.get("error"):
         raise RuntimeError(f"Docling parser worker failed: {response['error']}")
     return list(response["documents"])
+
+
+def _parse_pdf_text_layer(*, filename: str, content: bytes) -> dict[str, Any]:
+    """Extract a business PDF's existing text layer without loading a layout model.
+
+    Scanned/image-only PDFs intentionally belong to the VLM/OCR path. Keeping
+    text-layer PDF ingestion lightweight prevents native layout-model crashes
+    from taking down the live RAG request on Windows.
+    """
+    try:
+        from pypdf import PdfReader
+    except ImportError as exc:
+        raise RuntimeError("pypdf is required for text-layer PDF ingestion") from exc
+
+    reader = PdfReader(BytesIO(content))
+    text = "\n\n".join(str(page.extract_text() or "") for page in reader.pages)
+    normalized = _normalize_text(text)
+    if not normalized:
+        raise ValueError(f"{filename} has no extractable text layer; use the VLM/OCR input path")
+    return {
+        "source": filename,
+        "text": normalized,
+        "manifest": {
+            "filename": filename,
+            "extension": ".pdf",
+            "mime_family": "pdf",
+            "sha256": hashlib.sha256(content).hexdigest(),
+            "bytes": len(content),
+            "characters": len(normalized),
+            "page_count": len(reader.pages),
+            "parser": "pypdf-text-layer",
+        },
+    }
 
 
 def parse_documents_isolated(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -97,6 +132,8 @@ def parse_documents_isolated(items: list[dict[str, Any]]) -> list[dict[str, Any]
         extension = Path(str(item["filename"])).suffix.lower()
         if extension == ".txt":
             results[index] = parse_document_bytes(filename=item["filename"], content=item["content"])
+        elif extension == ".pdf":
+            results[index] = _parse_pdf_text_layer(filename=Path(str(item["filename"])).name, content=item["content"])
         else:
             groups.setdefault(extension, []).append((index, item))
     for group in groups.values():

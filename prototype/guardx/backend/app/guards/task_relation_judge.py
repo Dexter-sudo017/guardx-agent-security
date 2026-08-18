@@ -157,7 +157,21 @@ def _apply_trusted_relation_constraints(
         )
         applied.append("untrusted_output_or_authority_control")
     elif request.requested_capability == "respond" and request.source_trust in {"bounded", "untrusted"}:
-        if constrained["recommended_decision"] == "DENY_ACTION":
+        safe_relation_fields = not any(
+            (
+                constrained["addresses_current_model"],
+                constrained["conflicts_with_user_goal"],
+                constrained["alters_facts_or_authority"],
+            )
+        )
+        if safe_relation_fields and constrained["recommended_decision"] in {
+            "QUARANTINE_AND_CONTINUE",
+            "REQUIRE_APPROVAL",
+            "DENY_ACTION",
+        }:
+            constrained["recommended_decision"] = "ALLOW"
+            applied.append("safe_relation_fields_override_restrictive_model_advice")
+        elif constrained["recommended_decision"] == "DENY_ACTION":
             constrained["recommended_decision"] = "QUARANTINE_AND_CONTINUE"
             applied.append("read_only_task_preserved_after_restrictive_model_advice")
     return constrained, applied
