@@ -1493,3 +1493,42 @@ body.presenter-mode #presenterRunbook { display: block; }
 [data-theme="light"] .evidence-table th { color: #526b80; background: #f3f6f8; }
 [data-theme="light"] .method-table tr,
 [data-theme="light"] .evidence-table tr { border-color: #e3e9ee; }
+
+/* Close the last dark-theme islands in the public showcase. */
+[data-theme="light"] .provider-note {
+  border-color: #d8e2ea;
+  background: #ffffff;
+  box-shadow: 0 14px 38px rgba(31, 65, 96, .07);
+}
+[data-theme="light"] .provider-note strong { color: #087f96; }
+[data-theme="light"] .provider-note p { color: #566d82; }
+[data-theme="light"] .provider-badges span {
+  border-color: #cfdce6;
+  color: #536b80;
+  background: #f5f8fa;
+}
+[data-theme="light"] .status-badge {
+  border-color: #d3dee7;
+  color: #526a7e;
+  background: #f3f6f8;
+}
+[data-theme="light"] .status-badge:is([data-level="FORMAL BENCHMARK"],[data-level="FORMAL"]) {
+  border-color: #add4df;
+  color: #08758a;
+  background: #eef8fa;
+}
+[data-theme="light"] .status-badge:is([data-level="REAL SANDBOX"],[data-level="REAL_SANDBOX"]) {
+  border-color: #abd5c5;
+  color: #17715a;
+  background: #eff9f5;
+}
+[data-theme="light"] .status-badge:is([data-level="BLOCKED"],[data-level="PENDING"]) {
+  border-color: #e4c992;
+  color: #875912;
+  background: #fff8e9;
+}
+[data-theme="light"] .status-badge:is([data-level="DEVELOPMENT"],[data-level="LOCAL REGRESSION"],[data-level="LOCAL_REGRESSION"],[data-level="PROJECT_EXTENSION"],[data-level="DIAGNOSTIC_ONLY"]) {
+  border-color: #c9c5e8;
+  color: #5554af;
+  background: #f5f3fc;
+}
