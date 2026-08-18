@@ -6,9 +6,45 @@
 
 <p align="center"><strong>让生成模型负责理解与规划，让独立控制面负责授权、执行与举证。</strong></p>
 
+<p align="center">
+  <a href="https://github.com/Dexter-sudo017/guardx-agent-security/actions/workflows/verify.yml"><img src="https://github.com/Dexter-sudo017/guardx-agent-security/actions/workflows/verify.yml/badge.svg" alt="GuardX verification"></a>
+  <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white" alt="Python 3.11+">
+  <img src="https://img.shields.io/badge/Frontend-Vanilla_JS-F7DF1E?logo=javascript&logoColor=111" alt="Vanilla JavaScript">
+  <img src="https://img.shields.io/badge/Models-Local_%2B_Domestic_API-00A6A6" alt="Local and domestic API models">
+</p>
+
 GuardX 是面向 LLM、RAG、VLM/OCR 与 Agent 的统一安全控制面。它不把“模型拒答”当作防护结果，而是在模型与工具执行链之外建立可验证的控制路径：识别输入来源和任务关系，形成统一 `RiskFinding`，由确定性策略完成路由，在工具调用前签发 `Execution Permit`，并把输入、判断、执行与副作用证据关联到同一条可回放记录。
 
 仓库包含完整前后端源代码、策略与模型路由配置、RAG/VLM/Agent 运行组件、评审控制台、演示样例、合同测试和部署文件。模型权重、API 密钥、运行数据库及本机缓存不进入版本库。
+
+## 评审入口
+
+| 想了解的内容 | 直接入口 |
+| --- | --- |
+| 先看系统如何工作 | [核心命题](#核心命题) · [方法设计](#方法设计) · [四类保护面](#四类保护面) |
+| 在本机启动完整演示 | [评审演示](#评审演示) · [`START_GUARDX_DEMO.cmd`](START_GUARDX_DEMO.cmd) |
+| 按讲解顺序完成现场演示 | [`docs/DEMO_GUIDE.md`](docs/DEMO_GUIDE.md) |
+| 使用非预设输入检验泛化能力 | [`docs/INDEPENDENT_REVIEWER_PROMPTS.md`](docs/INDEPENDENT_REVIEWER_PROMPTS.md) |
+| 查看本轮逐项验收结果 | [`docs/REVIEWER_ACCEPTANCE.md`](docs/REVIEWER_ACCEPTANCE.md) |
+| 复核评测证据与原始记录 | [`evidence/`](evidence/) · [可复核证据](#可复核证据) |
+| 查看接口和模型边界 | [主要接口](#主要接口) · [模型路由](#模型路由) · [安全边界](#安全边界) |
+
+### 三分钟评审路径
+
+1. 在第 1 部分选择 01–04 任一案例及良性、明显、隐蔽或组合难度，查看风险在原始输入中的位置和受影响对象。
+2. 点击“载入下方实验”，第 2 部分会原样继承当前目标、非可信内容、文件、图片或候选动作；选择本地模型或国内 API 后真实运行。
+3. 在第 3 部分清空预设，上传现场文件或图片、改写 Prompt 或 Agent 参数，检查完整上游输出、GuardX 决策与执行生命周期。
+
+### 当前验收快照
+
+| 检查项 | 结果 | 验证内容 |
+| --- | ---: | --- |
+| 第 1 部分到第 2 部分案例代入 | **16 / 16** | 四类入口 × 良性/明显/隐蔽/组合；目标、内容、输入类型、文件/图片/动作及模型能力一致 |
+| 第 2 部分真实运行 | **8 / 8** | 四类入口的良性与组合案例均经过真实后端；良性返回业务结果，攻击进入隔离、阻断或安全替代路径 |
+| 第 3 部分独立自由输入 | **4 / 4** | 临时数字、临时 RAG 文件、非样例图片、独立 Agent 只读请求均真实运行 |
+| 本地/API 模型能力过滤 | **8 / 8** | 四类入口在本地与国内 API 模式下只显示具有相应能力的路由 |
+
+验收步骤、期望状态和复现方式记录在 [`docs/REVIEWER_ACCEPTANCE.md`](docs/REVIEWER_ACCEPTANCE.md)。这些结果用于确认当前演示链路，不替代仓库中的冻结 benchmark 与证据文件。
 
 ## 核心命题
 
@@ -241,10 +277,10 @@ START_GUARDX_PUBLIC_DEMO.cmd
 
 ```powershell
 cd prototype\guardx\backend
-python -m pytest -q
+python -m pytest tests/test_contracts.py tests/test_live_rag.py tests/test_live_vlm_ocr.py tests/test_document_ingestion.py tests/test_rag_reranker.py tests/test_model_capabilities.py tests/test_reviewer_model_routing.py tests/test_qwen_agent_boundary.py tests/test_secure_sandbox_runners.py tests/test_web_access_fail_closed.py -q
 ```
 
-GitHub Actions 在每次推送和 Pull Request 上检查前端 JavaScript、运行后端测试并构建容器。实时页面显示模型调用状态、响应来源、Qdrant/BGE-M3 召回、Execution Permit、Runner、Side Effect 和 Evidence ID；LIVE 模式不会用回放数据替代新的后端结果。
+该命令覆盖当前评审链路的合同、文件解析、RAG、VLM/OCR、模型能力、Agent 边界、沙箱 Runner 和 Web fail-closed 行为。GitHub Actions 在每次推送和 Pull Request 上检查前端 JavaScript、运行发布合同并构建容器。实时页面显示模型调用状态、响应来源、Qdrant/BGE-M3 召回、Execution Permit、Runner、Side Effect 和 Evidence ID；LIVE 模式不会用回放数据替代新的后端结果。
 
 ## 安全边界
 
