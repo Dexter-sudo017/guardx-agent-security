@@ -24,6 +24,7 @@ GuardX 是面向 LLM、RAG、VLM/OCR 与 Agent 的统一安全控制面。它不
 | 先看系统如何工作 | [核心命题](#核心命题) · [方法设计](#方法设计) · [四类保护面](#四类保护面) |
 | 在本机启动完整演示 | [评审演示](#评审演示) · [`START_GUARDX_DEMO.cmd`](START_GUARDX_DEMO.cmd) |
 | 按讲解顺序完成现场演示 | [`docs/DEMO_GUIDE.md`](docs/DEMO_GUIDE.md) |
+| 使用 10 分钟评审讲稿 | [`docs/PRESENTATION_SCRIPT_10MIN.md`](docs/PRESENTATION_SCRIPT_10MIN.md) |
 | 使用非预设输入检验泛化能力 | [`docs/INDEPENDENT_REVIEWER_PROMPTS.md`](docs/INDEPENDENT_REVIEWER_PROMPTS.md) |
 | 查看本轮逐项验收结果 | [`docs/REVIEWER_ACCEPTANCE.md`](docs/REVIEWER_ACCEPTANCE.md) |
 | 复核评测证据与原始记录 | [`evidence/`](evidence/) · [可复核证据](#可复核证据) |
