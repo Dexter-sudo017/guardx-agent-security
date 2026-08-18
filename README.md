@@ -110,18 +110,18 @@ GuardX 的方法创新集中在五个方面：
 | 入口 | 检测与运行组件 | 可核验结果 |
 | --- | --- | --- |
 | LLM | Input Guard、规则/语义 Risk Providers、任务关系裁判、本地/国内 API | 良性请求返回真实模型答案；任务劫持在下游调用前隔离 |
-| RAG | Qdrant、BGE-M3、chunk 级 Context Guard、可切换回答模型 | 真实 Top-K 召回、来源追踪、逐段判断和安全回答 |
+| RAG | Docling、Qdrant、BGE-M3、BGE Reranker、chunk 级 Context Guard、可切换回答模型 | 真实文件解析、候选召回、重排、来源追踪、逐段判断和安全回答 |
 | VLM/OCR | Qwen2.5-VL、OCR 忠实转写、视觉事实与指令关系判断 | 区分业务祈使句、视觉事实和面向模型的输出控制 |
-| Agent | 可切换规划模型、Action Guard、Execution Permit、受限 Runner | 良性只读动作真实执行；越权动作在 Runner 前拒绝且副作用为零 |
+| Agent | Qwen-Agent、Action Guard、Execution Permit、受限 Runner | 良性只读动作真实执行；唯一受控写动作需要审批；越权动作在 Runner 前拒绝且副作用为零 |
 
 ### 真实运行栈不是同义替换
 
 | 演示类型 | 实际数据流 | 可切换部分 |
 | --- | --- | --- |
 | LLM | 输入 → 任务关系裁判 → 策略 → 文本回答模型 | 本地/API 文本模型 |
-| RAG | 文档 → BGE-M3 → Qdrant → Top-K Chunk Guard → 回答模型 | 只切换最后的回答模型；检索仍是 BGE-M3 + Qdrant |
+| RAG | PDF/DOCX/XLSX/TXT → Docling → BGE-M3 → Qdrant → BGE Reranker → 候选 Chunk Guard → 回答模型 | 只切换最后的回答模型；解析、检索、重排和安全扫描不由 LLM 替代 |
 | VLM/OCR | 图片 → Qwen2.5-VL / Qwen-VL API → OCR 观察 → 任务关系裁判 → 安全续答 | 只允许选择带 `vision` 能力的模型 |
-| Agent | 用户目标 + 非可信观察 → 规划模型 → Action Guard → Permit → Runner | 规划模型可切换；Action Guard 和 Runner 不由 LLM 替代 |
+| Agent | 用户目标 + 非可信观察 → Qwen-Agent → Action Guard → Permit → Runner | 规划模型只允许本地 Qwen2.5 7B 或通义千问 API；Action Guard 和 Runner 不由 LLM 替代 |
 
 模型注册表为每条路由声明 `chat`、`rag_answer`、`vision`、`ocr` 或 `agent_planner` 能力。前端按当前任务过滤模型，后端再次验证，防止组件错配。
 
@@ -167,8 +167,12 @@ http://127.0.0.1:8021/final/
 | Runner invocation violations | 0 / 24 | 拒绝案例没有误入 Runner |
 | Side-effect violations | 0 / 24 | 拒绝案例没有记录到副作用 |
 | Raw response identity | 450 / 450 | 展示的原始回答与封存响应保持一致 |
+| Enterprise RAG attack recall | 100% | PDF、DOCX、XLSX、TXT 攻击样本进入风险路径 |
+| Enterprise RAG benign false positive | 0% | 四种格式的匹配良性样本均未误报 |
+| Enterprise fixture SHA-256 | 100% | 真实文件输入与清单哈希一致 |
+| Qwen-Agent boundary | PASS | 只读工具、审批工单、Runner 与副作用符合预期 |
 
-这些数字对应仓库内指定快照与运行条件；评审者可在证据中心继续查看记录哈希，而无需信任页面文案。
+企业 RAG 与 Agent 结果保存在 [`evidence/enterprise_rag_agent_eval.json`](evidence/enterprise_rag_agent_eval.json)；PDF 深度召回检查保存在 [`evidence/enterprise_rag_pdf_depth6_eval.json`](evidence/enterprise_rag_pdf_depth6_eval.json)。这些数字对应仓库内指定快照与运行条件；评审者可在证据中心继续查看记录哈希，而无需信任页面文案。
 
 ## 主要接口
 
@@ -176,11 +180,12 @@ http://127.0.0.1:8021/final/
 | --- | --- |
 | `GET /v1/models` | 返回模型类型、配置状态与能力标签，不返回密钥 |
 | `GET /v1/providers/status` | 返回本地/国内 API 服务端状态 |
-| `POST /v1/contextual/evaluate` | 只读任务关系判断与 RiskFinding 生成 |
+| `POST /v1/portal/contextual/evaluate` | 只读任务关系判断与 RiskFinding 生成 |
 | `POST /v1/guarded/chat` | LLM 输入防护与安全续答 |
-| `POST /v1/guarded/rag_demo` | BGE-M3 + Qdrant 召回、chunk 判断与回答 |
+| `POST /v1/guarded/rag_file_query` | Docling + BGE-M3 + Qdrant + BGE 重排、候选 chunk 判断与回答 |
 | `POST /v1/guarded/vlm_image_analyze` | 真实 VLM/OCR、任务关系与安全续答 |
-| `POST /v1/guarded/agent_demo` | 规划、Action Guard、Permit 与 Runner 生命周期 |
+| `POST /v1/agent/plan_and_guard` | Qwen-Agent 规划、Action Guard、Permit 与 Runner 生命周期 |
+| `GET /v1/demo/enterprise-rag/manifest` | 返回内置企业文件对照样本清单，不包含凭据 |
 
 ## 策略不变量
 
@@ -192,9 +197,11 @@ http://127.0.0.1:8021/final/
 
 ## 本地运行
 
-前置条件：Python 3.11+、Ollama、Docker。
+前置条件：Python 3.11+、Ollama、Docker。推荐把模型和运行时放在空间充足的 `E:\GuardX`；安装脚本会建立 Docling/Qwen-Agent 主环境与隔离的 BGE Reranker 环境，避免 Transformers 版本冲突。
 
 ```powershell
+.\scripts\setup_enterprise_demo.ps1
+
 ollama pull qwen2.5:7b
 ollama pull qwen2.5vl:7b
 ollama pull bge-m3
@@ -202,13 +209,10 @@ ollama pull deepseek-r1:7b
 
 docker run -d --name guardx-qdrant -p 6333:6333 qdrant/qdrant
 
-cd prototype\guardx\backend
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
-cd ..\..\..
 .\scripts\start_reviewer_server.ps1 -Port 8021
 ```
+
+企业 RAG 对照文件位于 `prototype/guardx/backend/fixtures/enterprise_rag/`，覆盖真实 PDF、DOCX、XLSX 与 TXT。Qwen-Agent 只暴露 `read_enterprise_document`、`search_enterprise_knowledge` 两个只读函数，以及必须带审批编号的 `create_review_ticket` 受控副作用函数。
 
 ## 模型路由
 
@@ -219,7 +223,7 @@ cd ..\..\..
 - `ZHIPU_API_KEY`
 - `DASHSCOPE_API_KEY`
 
-前端不会接收、读取或显示 API Key。RAG 的 Qdrant + BGE-M3 检索与回答模型解耦；Agent 的规划模型与 Action Guard/Runner 解耦，因此同一条安全链可以切换本地或 API 模型而不改变执行边界。
+前端不会接收、读取或显示 API Key。RAG 的 Docling 解析、Qdrant + BGE-M3 检索、BGE 重排与回答模型解耦；Agent 规划范围固定为本地 Qwen2.5 7B 或通义千问 API，Action Guard/Runner 仍保持独立，因此切换规划模型不会改变执行边界。
 
 ## 临时公网演示
 

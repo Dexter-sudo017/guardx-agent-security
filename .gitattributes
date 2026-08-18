@@ -1,2 +1,8 @@
 # OCR evidence hashes are defined over the captured byte stream.
 evidence/ocr_samples/ocr_real/**/*.txt -text
+
+# Preserve binary demo artifacts byte-for-byte across Windows checkouts.
+*.pdf binary
+*.docx binary
+*.xlsx binary
+*.png binary

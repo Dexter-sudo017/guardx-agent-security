@@ -23,6 +23,26 @@
       "constraints": {"filesystem": "workspace_output_only"}
     },
     {
+      "tool_name": "enterprise_search_safe",
+      "runner": "enterprise_knowledge_search",
+      "surfaces": ["agent_tool"],
+      "side_effects": "read",
+      "requires_precheck": true,
+      "dry_run": false,
+      "rollback_supported": false,
+      "constraints": {"knowledge_base": "guardx_demo_read_only"}
+    },
+    {
+      "tool_name": "create_review_ticket_safe",
+      "runner": "controlled_review_ticket",
+      "surfaces": ["agent_tool"],
+      "side_effects": "write",
+      "requires_precheck": true,
+      "dry_run": false,
+      "rollback_supported": true,
+      "constraints": {"filesystem": "guardx_review_ticket_root", "approval_required": true}
+    },
+    {
       "tool_name": "http_get_safe",
       "runner": "simulated_safe_tool",
       "surfaces": ["agent_tool", "network", "http", "browser"],

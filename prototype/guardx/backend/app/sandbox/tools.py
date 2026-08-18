@@ -1,9 +1,9 @@
 import json
 from typing import Any
-
 from app.guards.side_effect_metadata_guard import analyze_case_metadata_signal
 from app.models import ToolDecision
 from app.sandbox.tool_policy import load_tool_policy
+from app.sandbox.agent_tool_review import review_create_review_ticket, review_enterprise_search
 from app.sandbox.tool_review_rules import (
     high_session_risk_decision,
     review_agent_noop,
@@ -15,8 +15,6 @@ from app.sandbox.tool_review_rules import (
     review_write_file,
     unknown_tool_decision,
 )
-
-
 def _side_effect_surface(tool_name: str, args: dict[str, Any]) -> str:
     surface = str(args.get("_guardx_surface") or "").strip().lower()
     normalized = tool_name.strip().lower()
@@ -24,11 +22,9 @@ def _side_effect_surface(tool_name: str, args: dict[str, Any]) -> str:
         return surface
     if normalized == "register_tool_safe":
         return "plugin"
-    if normalized in {"read_file_safe", "write_file_safe", "http_get_safe", "db_query_safe", "shell_exec_sim"}:
+    if normalized in {"read_file_safe", "enterprise_search_safe", "create_review_ticket_safe", "write_file_safe", "http_get_safe", "db_query_safe", "shell_exec_sim"}:
         return "agent"
     return "tool_observation"
-
-
 def _side_effect_context(tool_name: str, args: dict[str, Any]) -> tuple[dict[str, Any], str]:
     normalized = tool_name.strip().lower()
     surface = _side_effect_surface(tool_name, args)
@@ -103,6 +99,10 @@ def review_tool_call(tool_name: str, args: dict, session_risk: float) -> ToolDec
         return side_effect_decision
     if normalized == "read_file_safe":
         return review_read_file(args, policy)
+    if normalized == "enterprise_search_safe":
+        return review_enterprise_search(args)
+    if normalized == "create_review_ticket_safe":
+        return review_create_review_ticket(args)
     if normalized == "write_file_safe":
         return review_write_file(args, policy)
     if normalized == "http_get_safe":

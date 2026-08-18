@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 from app.middleware.security import configure_middlewares
-from app.routes import action_guard, admin, baseline, executor_integration, guarded, portal_final, proxy, runtime_actions
+from app.routes import action_guard, admin, baseline, demo_assets, executor_integration, guarded, portal_final, proxy, runtime_actions
 from app.services.admin_runtime import set_app
 
 
@@ -11,6 +11,7 @@ def create_app() -> FastAPI:
     configure_middlewares(app)
     app.include_router(admin.router)
     app.include_router(guarded.router)
+    app.include_router(demo_assets.router)
     app.include_router(baseline.router)
     app.include_router(proxy.router)
     app.include_router(action_guard.router)

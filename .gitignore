@@ -4,6 +4,7 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 .playwright-cli/
+node_modules/
 
 .venv/
 .venv*/
@@ -47,6 +48,5 @@ attack_cases/restricted_raw/
 attack_cases/external_jailbreak_benchmarks/raw/
 attack_cases/public_benchmark_metadata_mirror/
 
-# Local image-generation drafts; the selected production lockup is tracked.
-reviewer_console/assets/brand/guardx-lockup.png
+# Local image-generation drafts; production light/dark lockups are tracked.
 reviewer_console/assets/brand/guardx-mark.png

@@ -2,7 +2,7 @@ models:
   mock-safe-model:
     type: mock
     description: local deterministic adapter for prototype testing
-    capabilities: [chat, rag_answer, agent_planner]
+    capabilities: [chat, rag_answer]
   deepseek-openai-compatible:
     type: openai_compatible
     description: DeepSeek-compatible chat model
@@ -11,7 +11,7 @@ models:
     api_key_env: DEEPSEEK_API_KEY
     upstream_model: deepseek-chat
     max_tokens: 2048
-    capabilities: [chat, rag_answer, agent_planner]
+    capabilities: [chat, rag_answer]
   deepseek-official-reasoner:
     type: openai_compatible
     description: DeepSeek-compatible reasoning model
@@ -20,7 +20,7 @@ models:
     api_key_env: DEEPSEEK_API_KEY
     upstream_model: deepseek-reasoner
     max_tokens: 2048
-    capabilities: [chat, rag_answer, agent_planner]
+    capabilities: [chat, rag_answer]
   dashscope-qwen-plus:
     type: openai_compatible
     description: DashScope-compatible Qwen text model
@@ -45,7 +45,7 @@ models:
     upstream_model: kimi-k2.5
     temperature: 1.0
     max_tokens: 2048
-    capabilities: [chat, rag_answer, agent_planner]
+    capabilities: [chat, rag_answer]
   zhipu-glm-5_2:
     type: openai_compatible
     description: Zhipu GLM OpenAI-compatible model
@@ -53,13 +53,13 @@ models:
     api_key_env: ZHIPU_API_KEY
     upstream_model: glm-5.2
     max_tokens: 1024
-    capabilities: [chat, rag_answer, agent_planner]
+    capabilities: [chat, rag_answer]
   local-ollama:
     type: ollama
     description: local Ollama runtime on port 11434
     base_url: http://127.0.0.1:11434
     upstream_model: deepseek-r1:1.5b
-    capabilities: [chat, rag_answer, agent_planner]
+    capabilities: [chat, rag_answer]
     think: false
     temperature: 0.2
     num_predict: 512
@@ -74,7 +74,7 @@ models:
     description: local Ollama Qwen2.5-Coder text/code model
     base_url: http://127.0.0.1:11434
     upstream_model: qwen2.5-coder:1.5b
-    capabilities: [chat, rag_answer, agent_planner]
+    capabilities: [chat, rag_answer]
     temperature: 0.2
     num_predict: 96
     timeout_seconds: 45
@@ -96,7 +96,7 @@ models:
     description: local DeepSeek-R1 7B reasoning model on the defense machine
     base_url: http://127.0.0.1:11434
     upstream_model: deepseek-r1:7b
-    capabilities: [chat, rag_answer, agent_planner]
+    capabilities: [chat, rag_answer]
     think: false
     temperature: 0.2
     num_predict: 1024

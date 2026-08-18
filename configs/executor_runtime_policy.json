@@ -15,6 +15,20 @@
       "rollback_on_failure": false,
       "rollback_timeout_ms": 1000
     },
+    "enterprise_search_safe": {
+      "execution_timeout_ms": 3000,
+      "max_retries": 0,
+      "retry_backoff_ms": 0,
+      "rollback_on_failure": false,
+      "rollback_timeout_ms": 1000
+    },
+    "create_review_ticket_safe": {
+      "execution_timeout_ms": 3000,
+      "max_retries": 0,
+      "retry_backoff_ms": 0,
+      "rollback_on_failure": true,
+      "rollback_timeout_ms": 3000
+    },
     "write_file_safe": {
       "execution_timeout_ms": 3000,
       "max_retries": 0,

@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Callable
 
 from app.contracts import ExecutorCapability
+from app.executor.agent_runners import ControlledReviewTicketRunner, EnterpriseKnowledgeSearchRunner
 from app.executor.runners import LocalReadOnlySandboxRunner, SimulatedSafeToolRunner
 from app.executor.runtime_models import ToolRunner
 
@@ -12,6 +13,8 @@ RunnerFactory = Callable[[], ToolRunner]
 RUNNER_FACTORIES: dict[str, RunnerFactory] = {
     "local_readonly_sandbox": LocalReadOnlySandboxRunner,
     "simulated_safe_tool": SimulatedSafeToolRunner,
+    "enterprise_knowledge_search": EnterpriseKnowledgeSearchRunner,
+    "controlled_review_ticket": ControlledReviewTicketRunner,
 }
 
 

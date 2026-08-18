@@ -11,6 +11,8 @@ from uuid import NAMESPACE_URL, uuid5
 
 import httpx
 
+from app.services.rag_reranker import RERANKER_MODEL, release_reranker, rerank_bge
+
 
 OLLAMA_BASE_URL = os.environ.get("GUARDX_OLLAMA_BASE_URL", "http://127.0.0.1:11434").rstrip("/")
 QDRANT_BASE_URL = os.environ.get("GUARDX_QDRANT_BASE_URL", "http://127.0.0.1:6333").rstrip("/")
@@ -61,6 +63,19 @@ def _installed_ollama_models(client: httpx.Client) -> set[str]:
     }
 
 
+def _unload_other_ollama_models(client: httpx.Client) -> None:
+    if os.environ.get("GUARDX_SERIAL_MODEL_RUNTIME", "1").strip().lower() in {"0", "false", "no", "off"}:
+        return
+    response = client.get(f"{OLLAMA_BASE_URL}/api/ps")
+    if response.status_code != 200:
+        return
+    for item in response.json().get("models") or []:
+        model = str(item.get("name") or item.get("model") or "")
+        if model and model not in {BGE_MODEL, f"{BGE_MODEL}:latest"}:
+            unloaded = client.post(f"{OLLAMA_BASE_URL}/api/generate", json={"model": model, "keep_alive": 0})
+            unloaded.raise_for_status()
+
+
 def probe_vector_rag() -> dict[str, Any]:
     qdrant_connected = False
     embedding_configured = False
@@ -89,6 +104,8 @@ def probe_vector_rag() -> dict[str, Any]:
         "embedding_model": BGE_MODEL,
         "embedding_configured": embedding_configured,
         "collection": QDRANT_COLLECTION,
+        "reranker_provider": "FlagEmbedding",
+        "reranker_model": RERANKER_MODEL,
         "errors": errors,
     }
 
@@ -96,7 +113,7 @@ def probe_vector_rag() -> dict[str, Any]:
 def _embed_texts(client: httpx.Client, texts: list[str]) -> list[list[float]]:
     response = client.post(
         f"{OLLAMA_BASE_URL}/api/embed",
-        json={"model": BGE_MODEL, "input": texts, "truncate": True},
+        json={"model": BGE_MODEL, "input": texts, "truncate": True, "keep_alive": 0},
         timeout=120.0,
     )
     response.raise_for_status()
@@ -129,7 +146,13 @@ def _workspace_id(query: str, documents: list[dict[str, str]]) -> str:
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
-def retrieve_qdrant_bge(query: str, documents: list[dict[str, str]], top_k: int = 4) -> dict[str, Any]:
+def retrieve_qdrant_bge(
+    query: str,
+    documents: list[dict[str, str]],
+    top_k: int = 4,
+    *,
+    reranker=rerank_bge,
+) -> dict[str, Any]:
     chunks = chunk_documents(documents)
     if not chunks:
         raise ValueError("at least one non-empty RAG document is required")
@@ -137,7 +160,9 @@ def retrieve_qdrant_bge(query: str, documents: list[dict[str, str]], top_k: int 
         raise ValueError("RAG query does not contain searchable text")
 
     workspace_id = _workspace_id(query, documents)
+    release_reranker()
     with httpx.Client(timeout=30.0) as client:
+        _unload_other_ollama_models(client)
         vectors = _embed_texts(client, [chunk["text"] for chunk in chunks] + [query])
         document_vectors, query_vector = vectors[:-1], vectors[-1]
         _ensure_collection(client, len(query_vector))
@@ -158,7 +183,7 @@ def retrieve_qdrant_bge(query: str, documents: list[dict[str, str]], top_k: int 
             timeout=60.0,
         )
         upsert.raise_for_status()
-        limit = max(1, min(int(top_k), 8, len(chunks)))
+        limit = max(1, min(max(int(top_k) * 3, 8), 24, len(chunks)))
         filter_payload = {"must": [{"key": "workspace_id", "match": {"value": workspace_id}}]}
         searched = client.post(
             f"{QDRANT_BASE_URL}/collections/{QDRANT_COLLECTION}/points/query",
@@ -188,14 +213,21 @@ def retrieve_qdrant_bge(query: str, documents: list[dict[str, str]], top_k: int 
         )
     if not selected:
         raise RuntimeError("Qdrant returned no chunks for the indexed workspace")
+    candidate_chunks = list(selected)
+    reranked = reranker(query, candidate_chunks, top_k)
+    selected = reranked["chunks"]
     return {
-        "engine": "qdrant-vector-v1",
+        "engine": "qdrant-bge-m3-rerank-v2",
         "provider_mode": "real-local-vector-retrieval",
         "vector_store": "qdrant",
         "embedding_model": BGE_MODEL,
+        "reranker_provider": reranked["provider"],
+        "reranker_model": reranked["model"],
         "collection": QDRANT_COLLECTION,
         "document_count": len(documents),
         "chunk_count": len(chunks),
+        "candidate_count": len(hits),
+        "candidate_chunks": candidate_chunks,
         "top_k": len(selected),
         "chunks": selected,
     }

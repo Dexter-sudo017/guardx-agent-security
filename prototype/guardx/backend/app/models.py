@@ -35,6 +35,19 @@ class GuardedRagDemoRequest(BaseModel):
     top_k: int = Field(default=4, ge=1, le=8)
 
 
+class RagFilePayload(BaseModel):
+    filename: str = Field(min_length=1, max_length=240)
+    content_base64: str = Field(min_length=1)
+
+
+class GuardedRagFileRequest(BaseModel):
+    session_id: str = Field(default="default-rag-file-session")
+    model: str = Field(default="local-ollama-qwen2_5-7b")
+    message: str = Field(min_length=1, max_length=6000)
+    files: list[RagFilePayload] = Field(min_length=1, max_length=12)
+    top_k: int = Field(default=4, ge=1, le=8)
+
+
 class GuardedVlmOcrRequest(GuardedChatRequest):
     image_id: str = Field(default="local-image")
     ocr_text: str = ""
@@ -74,9 +87,9 @@ class AgentGuardedDemoRequest(BaseModel):
     model: str
     user_goal: str = Field(min_length=1, max_length=6000)
     untrusted_observation: str = Field(default="", max_length=10000)
-    surface: str = Field(default="tool")
+    surface: str = Field(default="agent_tool")
     action: dict[str, Any] = Field(default_factory=dict)
-    risk_hint: float | None = None
+    approval_scope: dict[str, Any] = Field(default_factory=dict)
 
 
 class ActionGuardResponse(BaseModel):

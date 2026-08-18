@@ -114,5 +114,7 @@
     "register_tool_safe",
     "shell_exec_sim",
     "agent_noop_safe"
+    ,"enterprise_search_safe"
+    ,"create_review_ticket_safe"
   ]
 }

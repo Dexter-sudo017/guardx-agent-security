@@ -1,0 +1,4 @@
+-r requirements.txt
+docling==2.120.2
+qwen-agent==0.0.34
+soundfile==0.14.0

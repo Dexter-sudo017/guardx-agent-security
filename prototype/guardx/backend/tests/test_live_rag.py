@@ -80,12 +80,24 @@ def test_live_rag_requires_documents_and_query_tokens():
 
 def test_qdrant_bge_retrieval_reports_real_vector_provenance(monkeypatch):
     monkeypatch.setattr(live_rag.httpx, "Client", _FakeVectorClient)
-    result = retrieve_qdrant_bge("安全要求", [{"source": "policy.md", "text": "安全规则"}], top_k=1)
-    assert result["engine"] == "qdrant-vector-v1"
+    fake_reranker = lambda _query, chunks, _top_k: {
+        "provider": "test-reranker",
+        "model": "test-bge-reranker",
+        "chunks": [{**chunks[0], "vector_score": chunks[0]["score"], "rerank_score": 0.99, "score": 0.99}],
+    }
+    result = retrieve_qdrant_bge(
+        "安全要求",
+        [{"source": "policy.md", "text": "安全规则"}],
+        top_k=1,
+        reranker=fake_reranker,
+    )
+    assert result["engine"] == "qdrant-bge-m3-rerank-v2"
     assert result["vector_store"] == "qdrant"
     assert result["embedding_model"] == "bge-m3"
+    assert result["reranker_model"] == "test-bge-reranker"
     assert result["provider_mode"] == "real-local-vector-retrieval"
-    assert result["chunks"][0]["score"] == 0.91
+    assert result["chunks"][0]["vector_score"] == 0.91
+    assert result["chunks"][0]["rerank_score"] == 0.99
 
 
 def test_vector_probe_accepts_ollama_latest_tag(monkeypatch):

@@ -1,14 +1,14 @@
 <!doctype html>
-<html lang="zh-CN" data-mode="replay">
+<html lang="zh-CN" data-mode="replay" data-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#050a12">
+  <meta name="theme-color" content="#f4f7fb">
   <meta name="description" content="GuardX 全国总决赛评审控制台：真实能力、冻结证据与可回放安全链。">
   <meta name="guardx-runtime" content="local-backend">
   <title>GuardX · Agent Security Control Plane</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="assets/guardx.css">
+  <link rel="stylesheet" href="assets/guardx.css?v=20260818-2">
 </head>
 <body data-experience="showcase">
   <a class="skip-link" href="#main">跳到主要内容</a>
@@ -49,6 +49,7 @@
           <button type="button" class="mode-button active" id="replayModeButton" aria-pressed="true">REPLAY</button>
         </div>
         <button type="button" class="nav-portal" id="presenterToggle" aria-pressed="false">PRESENTER</button>
+        <button type="button" class="nav-portal theme-toggle" id="themeToggle" aria-pressed="false">深色</button>
       </div>
     </nav>
     <div class="health-strip" id="healthStrip" aria-label="实时能力状态" hidden>
@@ -131,7 +132,7 @@
           </div>
           <div class="deployment-grid" data-showcase-panel="local">
             <article><span>LLM</span><strong>Qwen2.5 3B / 7B</strong><small>任务关系裁判与受保护生成</small></article>
-            <article><span>RAG</span><strong>Qdrant + BGE-M3</strong><small>真实向量检索与分段来源追踪</small></article>
+            <article><span>RAG</span><strong>Docling + Qdrant + BGE</strong><small>真实文件解析、向量检索、重排与分段安全扫描</small></article>
             <article><span>VLM / OCR</span><strong>Qwen2.5-VL 7B</strong><small>忠实转写、视觉事实与指令分离</small></article>
             <article><span>AGENT</span><strong>Action Guard</strong><small>Execution Permit 与受限 Runner</small></article>
           </div>
@@ -228,6 +229,12 @@
         </div>
         <div class="story-rail reveal" aria-label="四类演示路径">
           <span><b>01</b> LLM 任务劫持</span><i>→</i><span><b>02</b> RAG 间接注入</span><i>→</i><span><b>03</b> VLM 多模态</span><i>→</i><span><b>04</b> Agent 执行边界</span>
+        </div>
+        <div class="validation-metrics reveal" aria-label="本地验证结果">
+          <div><small>真实文件</small><strong>8 / 8</strong><span>PDF · DOCX · XLSX · TXT</span></div>
+          <div><small>攻击召回</small><strong>100%</strong><span>4 / 4</span></div>
+          <div><small>良性误报</small><strong>0%</strong><span>0 / 4</span></div>
+          <div><small>Agent 边界</small><strong>PASS</strong><span>Runner 与副作用</span></div>
         </div>
         <div class="scenario-layout reveal">
           <div class="scenario-list" id="scenarioList" role="tablist" aria-label="评审场景"></div>
@@ -337,12 +344,15 @@
               <textarea id="customMessage" rows="6" maxlength="6000" readonly placeholder="请先从第 1 部分选择案例。" required></textarea>
             </label>
             <div class="custom-context-wrap" id="customContextWrap" hidden>
-              <span class="field-label">本地知识库文档 / 真实检索输入</span>
+              <span class="field-label">企业知识库文件 / Docling 真实解析</span>
               <span class="rag-sample-actions" aria-label="RAG 真实演示样例" hidden>
                 <button type="button" id="loadRagBenignSample">载入良性知识库</button>
                 <button type="button" id="loadRagAttackSample">载入多文档分段投毒</button>
               </span>
-              <textarea id="customContext" rows="5" maxlength="10000" readonly placeholder="RAG 文档片段会从第 1 部分原样载入。"></textarea>
+              <label class="rag-file-picker">选择或替换文件
+                <input id="customRagFiles" type="file" accept=".pdf,.docx,.xlsx,.txt" multiple>
+              </label>
+              <div class="rag-file-list" id="customRagFileList">从第 1 部分载入案例后，这里显示实际文件。</div>
             </div>
             <div class="custom-image-wrap" id="customImageWrap" hidden>
               <span class="field-label">本地图片 / 真实 VLM 输入</span>
@@ -363,25 +373,21 @@
               <span class="agent-sample-actions" aria-label="Agent 真实演示样例" hidden>
                 <button type="button" id="loadAgentBenignSample">允许只读动作</button>
                 <button type="button" id="loadAgentCapabilitySample">伪造 Capability</button>
-                <button type="button" id="loadAgentApprovalSample">审批范围替换</button>
-                <button type="button" id="loadAgentCrossLayerSample">RAG → Agent 跨层攻击</button>
+                <button type="button" id="loadAgentApprovalSample">审批后创建工单</button>
+                <button type="button" id="loadAgentCrossLayerSample">网页 → Agent 跨层注入</button>
               </span>
               <div class="agent-control-row">
                 <label>动作表面
                   <select id="customAgentSurface" disabled>
-                    <option value="file_read">File read</option>
-                    <option value="file_write">File write</option>
-                    <option value="network">Network</option>
-                    <option value="command">Command</option>
-                    <option value="plugin">Plugin / MCP</option>
+                    <option value="agent_tool">Qwen-Agent tool plan</option>
                   </select>
                 </label>
-                <label>风险提示
-                  <input id="customAgentRisk" type="number" min="0" max="1" step="0.01" value="0.18" readonly>
+                <label>审批范围 / JSON
+                  <input id="customAgentApproval" type="text" value='{"allowed_tools":["read_enterprise_document"]}' readonly>
                 </label>
               </div>
               <label>Agent 拟议动作 / JSON
-                <textarea id="customAgentAction" rows="7" maxlength="10000" readonly spellcheck="false">{"name":"read","path":"sandbox/demo/quarterly-summary.txt"}</textarea>
+                <textarea id="customAgentAction" rows="7" maxlength="10000" readonly spellcheck="false">{"name":"mcp_tool_call","tool_name":"read_enterprise_document","arguments":{"path":"sandbox/demo/quarterly-summary.txt"}}</textarea>
               </label>
               <p>所选模型只负责生成只读规划说明，不持有工具。候选 JSON 随后提交给 Action Guard；只有取得 Execution Permit 才能进入受限 Runner。</p>
             </div>
@@ -428,7 +434,7 @@
         </div>
         <details class="model-boundary reveal">
           <summary>四类运行栈</summary>
-          <p>LLM：输入关系裁判 → 文本模型；RAG：BGE-M3 → Qdrant → Chunk Guard → 回答模型；VLM/OCR：视觉模型 → 任务关系裁判 → 安全续答模型；Agent：规划模型 → Action Guard → Execution Permit → 受限 Runner。</p>
+          <p>LLM：输入关系裁判 → 文本模型；RAG：Docling → BGE-M3 → Qdrant → BGE Reranker → Chunk Guard → 回答模型；VLM/OCR：视觉模型 → 任务关系裁判 → 安全续答模型；Agent：Qwen-Agent → Action Guard → Execution Permit → 受限 Runner。</p>
         </details>
       </div>
     </section>
@@ -458,11 +464,11 @@
             <div class="model-connection" id="freeModelState" data-state="loading">MODEL REGISTRY / LOADING</div>
             <label>用户目标<textarea id="freeGoal" rows="3" maxlength="4000" placeholder="明确说明你希望系统完成的任务。"></textarea></label>
             <label>现场输入 / Prompt<textarea id="freeMessage" rows="7" maxlength="6000" required placeholder="输入需要由 GuardX 保护并交给模型处理的内容。"></textarea></label>
-            <div id="freeContextWrap" hidden><label>知识库文档<textarea id="freeContext" rows="8" maxlength="20000" placeholder="多个文档使用 ---DOC--- 分隔。"></textarea></label></div>
+            <div id="freeContextWrap" hidden><label>企业知识库文件<input id="freeRagFiles" type="file" accept=".pdf,.docx,.xlsx,.txt" multiple></label><div class="rag-file-list" id="freeRagFileList">支持 PDF、DOCX、XLSX、TXT，最多 12 个文件。</div></div>
             <div id="freeImageWrap" hidden><label>图片<input id="freeImage" type="file" accept="image/png,image/jpeg,image/webp"></label><img id="freeImagePreview" alt="自主输入图片预览" hidden></div>
             <div id="freeAgentWrap" hidden>
-              <div class="agent-control-row"><label>动作表面<select id="freeAgentSurface"><option value="file_read">File read</option><option value="file_write">File write</option><option value="network">Network</option><option value="command">Command</option><option value="plugin">Plugin / MCP</option></select></label><label>风险提示<input id="freeAgentRisk" type="number" min="0" max="1" step="0.01" value="0.50"></label></div>
-              <label>Agent 候选动作 / JSON<textarea id="freeAgentAction" rows="7" maxlength="10000" spellcheck="false">{"name":"read","path":"sandbox/demo/quarterly-summary.txt"}</textarea></label>
+              <div class="agent-control-row"><label>动作表面<select id="freeAgentSurface"><option value="agent_tool">Qwen-Agent tool plan</option></select></label><label>审批范围 / JSON<input id="freeAgentApproval" type="text" value='{"allowed_tools":["read_enterprise_document"]}'></label></div>
+              <label>Agent 候选动作 / JSON<textarea id="freeAgentAction" rows="7" maxlength="10000" spellcheck="false">{"name":"mcp_tool_call","tool_name":"read_enterprise_document","arguments":{"path":"sandbox/demo/quarterly-summary.txt"}}</textarea></label>
             </div>
             <div class="custom-live-actions"><button class="run-button" id="runFreeGuarded" type="submit">提交现场输入 →</button><span>浏览器不保存 API 密钥，也不直接执行系统命令。</span></div>
           </form>
@@ -587,7 +593,7 @@
 
   <div id="xssSink" hidden aria-hidden="true"></div>
   <noscript><div class="fatal-banner">JavaScript 不可用：请启用本地脚本以读取冻结 evidence snapshot。</div></noscript>
-  <script src="assets/runtime-config.js"></script>
-  <script src="assets/guardx.js" defer></script>
+  <script src="assets/runtime-config.js?v=20260818-1"></script>
+  <script src="assets/guardx.js?v=20260818-2" defer></script>
 </body>
 </html>

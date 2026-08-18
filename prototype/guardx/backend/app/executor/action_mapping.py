@@ -102,6 +102,15 @@ def normalize_action_to_tool(surface: str, action: dict[str, Any]) -> tuple[str,
         mapped_args.update({key: val for key, val in combined_args.items() if key not in mapped_args})
         return "db_query_safe", mapped_args
     if surface_lower in {"mcp", "plugin", "tool", "tool_call"} or action_name in {"mcptoolcallaction", "mcp_tool_call", "toolcallaction"}:
+        if tool_name == "read_enterprise_document":
+            mapped_args = {"path": str(combined_args.get("path") or value), "tool_name": tool_name_raw}
+            return "read_file_safe", mapped_args
+        if tool_name == "search_enterprise_knowledge":
+            mapped_args = {"query": str(combined_args.get("query") or value), "top_k": combined_args.get("top_k", 3), "tool_name": tool_name_raw}
+            return "enterprise_search_safe", mapped_args
+        if tool_name == "create_review_ticket":
+            mapped_args = {**combined_args, "tool_name": tool_name_raw}
+            return "create_review_ticket_safe", mapped_args
         if tool_name in {"fetch", "http_get", "browser", "browse", "web_fetch"}:
             raw_target = str(combined_args.get("domain") or combined_args.get("url") or combined_args.get("uri") or value)
             parsed = urlparse(raw_target if "://" in raw_target else f"https://{raw_target}")
